@@ -1,10 +1,10 @@
 import styles from "../css/AccountForm.module.css";
 import { useState } from "react";
-import { createAccount } from "../utils";
+import { login } from "../utils";
 import { useNavigate } from "react-router-dom";
 
-// Form to create a new user account
-const SignupForm = () => {
+// Form to log in to an existing account
+const LoginForm = () => {
     const navigate = useNavigate();
 
     // data entered in signup form
@@ -13,18 +13,18 @@ const SignupForm = () => {
         password: "",
     });
 
-    // on submit, attempt to create account
+    // on submit, attempt to log user in
     const handleCreateAccount = async (event: React.MouseEvent) => {
         event.preventDefault();
 
-        const [created, message] = await createAccount(formData);
+        const [created, message] = await login(formData);
 
         if (!created) {
             // tell user why account creation failed
             console.log(message);
         } else {
-            // after successful creation, redirect user
-            navigate("/");
+            // after successful login, redirect user
+            navigate("/dashboard");
         }
     };
 
@@ -40,7 +40,7 @@ const SignupForm = () => {
 
     return (
         <>
-            <h1 className={styles.title}>Signup</h1>
+            <h1 className={styles.title}>Login</h1>
             <form className={styles.form}>
                 <input
                     className={styles.input}
@@ -60,18 +60,18 @@ const SignupForm = () => {
                     className={styles.button}
                     type="submit"
                     onClick={handleCreateAccount}>
-                    Create Account
+                    Login
                 </button>
                 <hr className={styles.bar}></hr>
                 <button
                     className={styles.button}
                     type="button"
-                    onClick={() => navigate("/")}>
-                    Login to existing account
+                    onClick={() => navigate("/signup")}>
+                    Create new account
                 </button>
             </form>
         </>
     );
 };
 
-export default SignupForm;
+export default LoginForm;

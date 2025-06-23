@@ -2,7 +2,7 @@
     text-align: center;
 }
 
-.signupForm {
+.form {
     display: flex;
     flex-flow: column nowrap;
     width: 50vw;
@@ -10,14 +10,18 @@
     gap: 1rem;
 }
 
-.signupInput {
+.input {
     font-family: inherit;
     color: inherit;
     padding: 0.75rem;
 }
 
-.signupButton {
+.button {
     background-color: transparent;
     border: none;
     padding: 1rem;
+}
+
+.bar {
+    width: 100%;
 }
