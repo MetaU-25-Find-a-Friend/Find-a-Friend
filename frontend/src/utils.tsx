@@ -45,3 +45,17 @@ export const login = async (enteredData: {
 
     return [response.ok, message];
 };
+
+/**
+ *
+ * @returns true if logout was successful, false otherwise
+ */
+export const logout = async () => {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/logout`, {
+        method: "post",
+        mode: "cors",
+        credentials: "include",
+    });
+
+    return response.ok;
+};

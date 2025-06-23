@@ -66,7 +66,7 @@ const SignupForm = () => {
                 <button
                     className={styles.button}
                     type="button"
-                    onClick={() => navigate("/")}>
+                    onClick={() => navigate("/login")}>
                     Login to existing account
                 </button>
             </form>

@@ -145,3 +145,14 @@ app.post("/me", async (req, res) => {
         email: user.email,
     });
 });
+
+// log out user and destroy session
+app.post("/logout", (req, res) => {
+    req.session.destroy((error) => {
+        if (error) {
+            res.status(500).send("Failed to log out");
+        }
+        res.clearCookie("connect.sid");
+        res.send("Successfully logged out");
+    });
+});

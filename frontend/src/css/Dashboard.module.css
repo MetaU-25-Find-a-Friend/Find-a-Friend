@@ -1,0 +1,17 @@
+.loggedOutPage {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.loggedOutMessage {
+    text-align: center;
+}
+
+.loginButton {
+    background-color: transparent;
+    border: none;
+    font-family: inherit;
+    color: inherit;
+}
