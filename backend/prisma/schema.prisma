@@ -23,7 +23,8 @@ model User {
   pronouns String?
   age Int?
   major String?
-  interests String?
+  interests Int[]
+  bio String
   allowsLocation Boolean
   blockedUsers Int[]
   friends Int[]
