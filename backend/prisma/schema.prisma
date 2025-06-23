@@ -16,7 +16,7 @@ datasource db {
 
 model User {
   id Int @id @default(autoincrement())
-  email String
+  email String @unique
   password String
   firstName String
   lastName String
@@ -24,10 +24,10 @@ model User {
   age Int?
   major String?
   interests Int[]
-  bio String
+  bio String?
   allowsLocation Boolean
   blockedUsers Int[]
   friends Int[]
-  latitude Decimal
-  longitude Decimal
+  latitude Decimal?
+  longitude Decimal?
 }

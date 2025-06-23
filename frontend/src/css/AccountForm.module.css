@@ -1,0 +1,27 @@
+.title {
+    text-align: center;
+}
+
+.form {
+    display: flex;
+    flex-flow: column nowrap;
+    width: 50vw;
+    margin: auto;
+    gap: 1rem;
+}
+
+.input {
+    font-family: inherit;
+    color: inherit;
+    padding: 0.75rem;
+}
+
+.button {
+    background-color: transparent;
+    border: none;
+    padding: 1rem;
+}
+
+.bar {
+    width: 100%;
+}
