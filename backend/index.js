@@ -18,6 +18,13 @@ const loginLimiter = rateLimit({
     }
 })
 
+const session = require("express-session");
+app.use(session({
+    secret: process.env.VITE_SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+}));
+
 const port = 3000;
 app.listen(port, () => {
     console.log(`Server is running on ${port}`)
@@ -90,5 +97,32 @@ app.post("/login", loginLimiter, async (req, res) => {
         return res.status(400).send("Invalid username or password");
     }
 
+    // record user session
+    req.session.userId = user.id;
+
     res.send("Login successful");
+})
+
+// check whether a user is logged in
+app.post("/me", async (req, res) => {
+
+    // if no id is saved in the session, send error message
+    if (!req.session.userId) {
+        res.status(401).send("User is not logged in");
+    }
+
+    // get and send logged-in user info
+    const user = await prisma.user.findUnique({
+        where: {
+            id: req.session.userId
+        },
+        select: {
+            email: true
+        }
+    })
+
+    res.json({
+        id: user.id,
+        email: user.email
+    })
 })
