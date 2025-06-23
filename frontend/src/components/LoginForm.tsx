@@ -2,9 +2,12 @@ import styles from "../css/AccountForm.module.css";
 import { useState } from "react";
 import { login } from "../utils";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
 
 // Form to log in to an existing account
 const LoginForm = () => {
+    const { setUser } = useUser();
+
     const navigate = useNavigate();
 
     // data entered in signup form
@@ -17,12 +20,14 @@ const LoginForm = () => {
     const handleCreateAccount = async (event: React.MouseEvent) => {
         event.preventDefault();
 
-        const [created, message] = await login(formData);
+        const [created, data] = await login(formData);
 
         if (!created) {
             // tell user why account creation failed
-            console.log(message);
+            console.log(data.error);
         } else {
+            // save user data in context
+            setUser(data);
             // after successful login, redirect user
             navigate("/dashboard");
         }

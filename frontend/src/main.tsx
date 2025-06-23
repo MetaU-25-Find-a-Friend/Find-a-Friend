@@ -5,21 +5,24 @@ import "./index.css";
 import LoginForm from "./components/LoginForm";
 import SignupForm from "./components/SignupForm";
 import Dashboard from "./components/Dashboard";
+import UserProvider from "./contexts/UserContext";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
-        <BrowserRouter>
-            <Routes>
-                <Route
-                    path="/"
-                    element={<LoginForm></LoginForm>}></Route>
-                <Route
-                    path="/signup"
-                    element={<SignupForm></SignupForm>}></Route>
-                <Route
-                    path="/dashboard"
-                    element={<Dashboard></Dashboard>}></Route>
-            </Routes>
-        </BrowserRouter>
+        <UserProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route
+                        path="/"
+                        element={<LoginForm></LoginForm>}></Route>
+                    <Route
+                        path="/signup"
+                        element={<SignupForm></SignupForm>}></Route>
+                    <Route
+                        path="/dashboard"
+                        element={<Dashboard></Dashboard>}></Route>
+                </Routes>
+            </BrowserRouter>
+        </UserProvider>
     </StrictMode>,
 );

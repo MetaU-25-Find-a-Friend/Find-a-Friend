@@ -3,7 +3,12 @@ const cors = require("cors");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(
+    cors({
+        origin: "http://localhost:5173",
+        credentials: true,
+    }),
+);
 
 const { PrismaClient } = require("./generated/prisma");
 const prisma = new PrismaClient();
@@ -86,7 +91,9 @@ app.post("/login", loginLimiter, async (req, res) => {
 
     // validate username and password input
     if (!email || !password) {
-        return res.status(400).send("Username and password are required");
+        return res
+            .status(400)
+            .json({ error: "Username and password are required" });
     }
 
     // attempt to find existing user
@@ -97,27 +104,30 @@ app.post("/login", loginLimiter, async (req, res) => {
     });
 
     if (!user) {
-        return res.status(400).send("Invalid username or password");
+        return res.status(400).json({ error: "Invalid username or password" });
     }
 
     // check that entered password is correct for this user
     const isValidPassword = await bcrypt.compare(password, user.password);
 
     if (!isValidPassword) {
-        return res.status(400).send("Invalid username or password");
+        return res.status(400).json({ error: "Invalid username or password" });
     }
 
     // record user session
     req.session.userId = user.id;
 
-    res.send("Login successful");
+    res.json({
+        id: user.id,
+        email: user.email,
+    });
 });
 
 // check whether a user is logged in
 app.post("/me", async (req, res) => {
     // if no id is saved in the session, send error message
     if (!req.session.userId) {
-        res.status(401).send("User is not logged in");
+        return res.status(401).send("User is not logged in");
     }
 
     // get and send logged-in user info

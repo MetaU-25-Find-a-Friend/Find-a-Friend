@@ -13,6 +13,7 @@ export const createAccount = async (accountData: {
         headers: {
             "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(accountData),
     });
 
@@ -36,10 +37,11 @@ export const login = async (enteredData: {
         headers: {
             "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify(enteredData),
     });
 
-    const message = await response.text();
+    const message = await response.json();
 
     return [response.ok, message];
 };
