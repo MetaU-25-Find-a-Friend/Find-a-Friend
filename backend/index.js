@@ -14,21 +14,31 @@ const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 5,
     message: {
-        error: "Too many failed login attempts. Please try again later."
-    }
-})
+        error: "Too many failed login attempts. Please try again later.",
+    },
+});
 
 const session = require("express-session");
-app.use(session({
-    secret: process.env.VITE_SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-}));
+app.use(
+    session({
+        secret: process.env.VITE_SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+    }),
+);
 
 const port = 3000;
 app.listen(port, () => {
-    console.log(`Server is running on ${port}`)
-})
+    console.log(`Server is running on ${port}`);
+});
+
+// middleware to authenticate user before allowing certain actions
+const authenticate = (req, res, next) => {
+    if (!req.session.userId) {
+        return res.status(401).send("User is not logged in");
+    }
+    next();
+};
 
 // create a new user with the given username and password
 app.post("/signup", async (req, res) => {
@@ -63,7 +73,7 @@ app.post("/signup", async (req, res) => {
             password: hashedPassword,
             firstName: "",
             lastName: "",
-            allowsLocation: false
+            allowsLocation: false,
         },
     });
 
@@ -82,9 +92,9 @@ app.post("/login", loginLimiter, async (req, res) => {
     // attempt to find existing user
     const user = await prisma.user.findUnique({
         where: {
-            email: email
-        }
-    })
+            email: email,
+        },
+    });
 
     if (!user) {
         return res.status(400).send("Invalid username or password");
@@ -101,11 +111,10 @@ app.post("/login", loginLimiter, async (req, res) => {
     req.session.userId = user.id;
 
     res.send("Login successful");
-})
+});
 
 // check whether a user is logged in
 app.post("/me", async (req, res) => {
-
     // if no id is saved in the session, send error message
     if (!req.session.userId) {
         res.status(401).send("User is not logged in");
@@ -114,15 +123,15 @@ app.post("/me", async (req, res) => {
     // get and send logged-in user info
     const user = await prisma.user.findUnique({
         where: {
-            id: req.session.userId
+            id: req.session.userId,
         },
         select: {
-            email: true
-        }
-    })
+            email: true,
+        },
+    });
 
     res.json({
         id: user.id,
-        email: user.email
-    })
-})
+        email: user.email,
+    });
+});
