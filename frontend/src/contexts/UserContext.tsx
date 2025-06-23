@@ -24,7 +24,7 @@ const UserProvider = ({ children }) => {
                 }
             })
             .then((json) => setUser(json))
-            .catch((error) => console.log(error));
+            .catch((error) => console.error(error));
     }, []);
 
     return (

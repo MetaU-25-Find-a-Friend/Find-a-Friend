@@ -14,13 +14,13 @@ createRoot(document.getElementById("root")!).render(
                 <Routes>
                     <Route
                         path="/"
-                        element={<LoginForm></LoginForm>}></Route>
+                        element={<Dashboard></Dashboard>}></Route>
                     <Route
                         path="/signup"
                         element={<SignupForm></SignupForm>}></Route>
                     <Route
-                        path="/dashboard"
-                        element={<Dashboard></Dashboard>}></Route>
+                        path="/login"
+                        element={<LoginForm></LoginForm>}></Route>
                 </Routes>
             </BrowserRouter>
         </UserProvider>

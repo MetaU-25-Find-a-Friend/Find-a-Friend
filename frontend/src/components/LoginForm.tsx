@@ -28,8 +28,8 @@ const LoginForm = () => {
         } else {
             // save user data in context
             setUser(data);
-            // after successful login, redirect user
-            navigate("/dashboard");
+            // after successful login, redirect user to dashboard
+            navigate("/");
         }
     };
 
