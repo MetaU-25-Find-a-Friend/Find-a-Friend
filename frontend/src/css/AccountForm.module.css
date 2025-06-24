@@ -20,6 +20,8 @@
     background-color: transparent;
     border: none;
     padding: 1rem;
+    font-family: inherit;
+    color: inherit;
 }
 
 .bar {

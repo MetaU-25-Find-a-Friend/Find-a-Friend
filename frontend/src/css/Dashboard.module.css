@@ -21,11 +21,47 @@
     grid-template-columns: 2fr 1fr 1fr;
 }
 
-.title {
+.titleContainer {
     grid-column-start: 3;
     grid-column-end: 4;
-    text-align: right;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
     margin: 1rem;
+    position: relative;
+}
+
+.userMenuButton {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.5rem;
+}
+
+.userMenu {
+    position: absolute;
+    top: 100%;
+    background-color: var(--tan-background);
+    padding: 1rem;
+    width: 50%;
+    border-radius: 2rem;
+}
+
+.visible {
+    display: block;
+}
+
+.invisible {
+    display: none;
+}
+
+.userMenuItem {
+    background-color: transparent;
+    border: none;
+    font-family: inherit;
+    color: inherit;
+    font-size: 16px;
 }
 
 .button {
