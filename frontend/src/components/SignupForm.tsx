@@ -40,7 +40,7 @@ const SignupForm = () => {
 
     return (
         <>
-            <h1 className={styles.title}>Signup</h1>
+            <h1 className={styles.title}>Find a Friend</h1>
             <form className={styles.form}>
                 <input
                     className={styles.input}

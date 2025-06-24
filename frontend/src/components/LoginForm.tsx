@@ -45,7 +45,7 @@ const LoginForm = () => {
 
     return (
         <>
-            <h1 className={styles.title}>Login</h1>
+            <h1 className={styles.title}>Find a Friend</h1>
             <form className={styles.form}>
                 <input
                     className={styles.input}
