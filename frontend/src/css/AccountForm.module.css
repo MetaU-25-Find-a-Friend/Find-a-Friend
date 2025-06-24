@@ -1,5 +1,6 @@
 .title {
     text-align: center;
+    font-size: 36px;
 }
 
 .form {
@@ -7,21 +8,41 @@
     flex-flow: column nowrap;
     width: 50vw;
     margin: auto;
-    gap: 1rem;
+    gap: 2rem;
+    align-items: center;
+    background-color: var(--tan-background);
+    padding: 2rem 4rem;
+    box-sizing: border-box;
+    border-radius: 2rem;
+    font-size: 18px;
 }
 
 .input {
     font-family: inherit;
     color: inherit;
-    padding: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    border: var(--teal-accent) 2px solid;
+    border-radius: 2rem;
+    font-size: inherit;
+    width: 100%;
+}
+
+.input:focus-visible {
+    outline: none;
 }
 
 .button {
     background-color: transparent;
-    border: none;
-    padding: 1rem;
+    border: var(--teal-accent) 2px solid;
+    padding: 0.75rem 2rem;
+    font-family: inherit;
+    color: var(--teal-accent);
+    font-size: inherit;
+    width: fit-content;
+    border-radius: 2rem;
 }
 
 .bar {
     width: 100%;
+    border: var(--teal-accent) 0.5px inset;
 }

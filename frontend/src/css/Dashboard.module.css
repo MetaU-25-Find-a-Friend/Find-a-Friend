@@ -3,15 +3,72 @@
     flex-flow: column nowrap;
     justify-content: flex-start;
     align-items: center;
+    font-size: 24px;
 }
 
 .loggedOutMessage {
     text-align: center;
+    font-size: inherit;
 }
 
-.loginButton {
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.titleContainer {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem;
+    position: relative;
+}
+
+.title {
+    font-size: 36px;
+}
+
+.userMenuButton {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.5rem;
+}
+
+.userMenu {
+    position: absolute;
+    top: 100%;
+    background-color: var(--tan-background);
+    padding: 1rem;
+    width: 50%;
+    border-radius: 2rem;
+}
+
+.visible {
+    display: block;
+}
+
+.invisible {
+    display: none;
+}
+
+.userMenuItem {
     background-color: transparent;
     border: none;
     font-family: inherit;
     color: inherit;
+    font-size: 16px;
+}
+
+.button {
+    background-color: var(--tan-background);
+    border: none;
+    font-family: inherit;
+    font-size: 24px;
+    padding: 1rem 2rem;
+    border-radius: 2rem;
+    color: var(--teal-accent);
 }
