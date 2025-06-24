@@ -13,12 +13,12 @@
 
 .grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
 }
 
 .titleContainer {
-    grid-column-start: 3;
-    grid-column-end: 4;
+    grid-column-start: 2;
+    grid-column-end: 3;
     display: flex;
     flex-flow: row wrap;
     justify-content: flex-end;
@@ -26,6 +26,10 @@
     gap: 1rem;
     margin: 1rem;
     position: relative;
+}
+
+.title {
+    font-size: 36px;
 }
 
 .userMenuButton {
