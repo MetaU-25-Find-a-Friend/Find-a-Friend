@@ -16,7 +16,7 @@ const Dashboard = () => {
 
     if (user === null) {
         return (
-            <div className={styles.loggedOutPage}>
+            <main className={styles.loggedOutPage}>
                 <p className={styles.loggedOutMessage}>
                     You are not logged in.
                 </p>
@@ -25,18 +25,18 @@ const Dashboard = () => {
                     onClick={() => navigate("/login")}>
                     To Login Page
                 </button>
-            </div>
+            </main>
         );
     } else {
         return (
-            <>
+            <main className={styles.grid}>
                 <h1 className={styles.title}>Find a Friend</h1>
                 <button
                     className={styles.button}
                     onClick={handleLogout}>
                     Logout
                 </button>
-            </>
+            </main>
         );
     }
 };
