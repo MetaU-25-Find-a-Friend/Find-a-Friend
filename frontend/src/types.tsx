@@ -2,13 +2,13 @@
  * Represents displayed/editable user profile data
  */
 export interface UserProfile {
-    firstName: String;
-    lastName: String;
-    pronouns?: String;
+    firstName: string;
+    lastName: string;
+    pronouns?: string;
     age?: number;
-    major?: String;
+    major?: string;
     interests: [number];
-    bio?: String;
+    bio?: string;
 }
 
 /**
@@ -16,7 +16,7 @@ export interface UserProfile {
  */
 export interface SavedUser {
     id: number;
-    email: String;
+    email: string;
 }
 
 /**

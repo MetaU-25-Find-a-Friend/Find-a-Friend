@@ -52,3 +52,17 @@
 textarea.input {
     resize: vertical;
 }
+
+.button {
+    font-family: inherit;
+    color: var(--teal-accent);
+    border: var(--teal-accent) 2px solid;
+    font-size: 20px;
+    background-color: transparent;
+    padding: 1rem 3rem;
+    border-radius: 2rem;
+    width: fit-content;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    margin: auto;
+}

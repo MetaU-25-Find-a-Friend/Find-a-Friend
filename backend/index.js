@@ -136,6 +136,7 @@ app.post("/me", async (req, res) => {
             id: req.session.userId,
         },
         select: {
+            id: true,
             email: true,
         },
     });
@@ -150,9 +151,50 @@ app.post("/me", async (req, res) => {
 app.post("/logout", (req, res) => {
     req.session.destroy((error) => {
         if (error) {
-            res.status(500).send("Failed to log out");
+            return res.status(500).send("Failed to log out");
         }
         res.clearCookie("connect.sid");
         res.send("Successfully logged out");
     });
+});
+
+// get a user's profile
+app.get("/user/:id", async (req, res) => {
+    const userId = parseInt(req.params.id);
+
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId,
+        },
+        select: {
+            firstName: true,
+            lastName: true,
+            pronouns: true,
+            age: true,
+            major: true,
+            interests: true,
+            bio: true,
+        },
+    });
+
+    if (!user) {
+        return res.status(404).send("User not found");
+    }
+
+    res.json(user);
+});
+
+app.post("/user/:id", async (req, res) => {
+    const userId = parseInt(req.params.id);
+
+    const user = await prisma.user.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            ...req.body,
+        },
+    });
+
+    res.json(user);
 });

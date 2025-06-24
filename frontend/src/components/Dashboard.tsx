@@ -9,6 +9,7 @@ import {
     faArrowRightLong,
 } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
+import LoggedOut from "./LoggedOut";
 
 // Landing page; allows navigating to profile, map, etc.
 const Dashboard = () => {
@@ -24,19 +25,7 @@ const Dashboard = () => {
     };
 
     if (user === null) {
-        return (
-            <main className={styles.loggedOutPage}>
-                <p className={styles.loggedOutMessage}>
-                    You are not logged in.
-                </p>
-                <button
-                    className={styles.button}
-                    onClick={() => navigate("/login")}>
-                    To Login Page{" "}
-                    <FontAwesomeIcon icon={faArrowRightLong}></FontAwesomeIcon>
-                </button>
-            </main>
-        );
+        return <LoggedOut></LoggedOut>;
     } else {
         return (
             <main className={styles.grid}>

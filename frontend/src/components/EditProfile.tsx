@@ -1,13 +1,19 @@
 import styles from "../css/EditProfile.module.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { UserProfile } from "../types";
+import { useUser } from "../contexts/UserContext";
+import { getProfile, updateProfile } from "../utils";
+import LoggedOut from "./LoggedOut";
 
 const EditProfile = () => {
+    // current user if logged in
+    const { user } = useUser();
+
     // data entered in profile form
     const [formData, setFormData] = useState<UserProfile>({
         firstName: "",
         lastName: "",
-        interests: Array().fill(0, 0, -49) as [number]
+        interests: Array().fill(0, 0, -49) as [number],
     });
 
     // update form data when value of any field changes
@@ -16,72 +22,111 @@ const EditProfile = () => {
     ) => {
         const { name, value } = event.target;
 
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
+        if (name === "age") {
+            setFormData({
+                ...formData,
+                [name]: parseInt(value),
+            });
+        } else {
+            setFormData({
+                ...formData,
+                [name]: value,
+            });
+        }
     };
 
-    return (
-        <>
-            <form className={styles.form}>
-                <h2 className={styles.formTitle}>Edit Profile</h2>
-                <label className={`${styles.label} ${styles.firstHalf}`}>
-                    First name
-                    <input
-                        className={styles.input}
-                        name="firstName"
-                        type="text"
-                        placeholder="Jane"
-                        onChange={handleInputChange}></input>
-                </label>
-                <label className={`${styles.label} ${styles.lastHalf}`}>
-                    Last name
-                    <input
-                        className={styles.input}
-                        name="lastName"
-                        type="text"
-                        placeholder="Doe"
-                        onChange={handleInputChange}></input>
-                </label>
-                <label className={`${styles.label} ${styles.firstHalf}`}>
-                    Pronouns
-                    <input
-                        className={styles.input}
-                        name="pronouns"
-                        type="text"
-                        placeholder="she/her, they/them, etc."
-                        onChange={handleInputChange}></input>
-                </label>
-                <label className={`${styles.label} ${styles.lastHalf}`}>
-                    Age
-                    <input
-                        className={styles.input}
-                        name="age"
-                        type="number"
-                        placeholder="18"
-                        onChange={handleInputChange}></input>
-                </label>
-                <label className={styles.label}>
-                    Major
-                    <input
-                        className={styles.input}
-                        name="major"
-                        type="text"
-                        placeholder="English"
-                        onChange={handleInputChange}></input>
-                </label>
-                <label className={styles.label}>
-                    Bio
-                    <textarea
-                        className={styles.input}
-                        name="bio"
-                        placeholder="About me..."
-                        onChange={handleInputChange}></textarea>
-                </label>
-            </form>
-        </>
-    );
+    const handleSubmit = (event: React.MouseEvent) => {
+        event.preventDefault();
+
+        updateProfile(user!.id, formData);
+    };
+
+    useEffect(() => {
+        if (user) {
+            getProfile(user.id).then((profile) => {
+                if (profile) {
+                    setFormData(profile);
+                }
+            });
+        }
+    }, [user]);
+
+    if (!user) {
+        return <LoggedOut></LoggedOut>;
+    } else {
+        return (
+            <>
+                <form className={styles.form}>
+                    <h2 className={styles.formTitle}>Edit Profile</h2>
+                    <label className={`${styles.label} ${styles.firstHalf}`}>
+                        First name
+                        <input
+                            className={styles.input}
+                            name="firstName"
+                            type="text"
+                            placeholder="Jane"
+                            defaultValue={formData.firstName}
+                            onChange={handleInputChange}></input>
+                    </label>
+                    <label className={`${styles.label} ${styles.lastHalf}`}>
+                        Last name
+                        <input
+                            className={styles.input}
+                            name="lastName"
+                            type="text"
+                            placeholder="Doe"
+                            defaultValue={formData.lastName}
+                            onChange={handleInputChange}></input>
+                    </label>
+                    <label className={`${styles.label} ${styles.firstHalf}`}>
+                        Pronouns
+                        <input
+                            className={styles.input}
+                            name="pronouns"
+                            type="text"
+                            placeholder="she/her, they/them, etc."
+                            defaultValue={formData.pronouns}
+                            onChange={handleInputChange}></input>
+                    </label>
+                    <label className={`${styles.label} ${styles.lastHalf}`}>
+                        Age
+                        <input
+                            className={styles.input}
+                            name="age"
+                            type="number"
+                            placeholder="18"
+                            defaultValue={formData.age}
+                            onChange={handleInputChange}></input>
+                    </label>
+                    <label className={styles.label}>
+                        Major
+                        <input
+                            className={styles.input}
+                            name="major"
+                            type="text"
+                            placeholder="English"
+                            defaultValue={formData.major}
+                            onChange={handleInputChange}></input>
+                    </label>
+                    <label className={styles.label}>
+                        Bio
+                        <textarea
+                            className={styles.input}
+                            name="bio"
+                            placeholder="About me..."
+                            defaultValue={formData.bio}
+                            onChange={handleInputChange}></textarea>
+                    </label>
+                    <button
+                        className={styles.button}
+                        type="submit"
+                        onClick={handleSubmit}>
+                        Save
+                    </button>
+                </form>
+            </>
+        );
+    }
 };
 
 export default EditProfile;

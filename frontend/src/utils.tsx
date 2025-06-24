@@ -1,11 +1,13 @@
+import type { UserProfile } from "./types";
+
 /**
  *
  * @param accountData email and password for new account
  * @returns true and success message if account was created; false and reason for error if validation failed
  */
 export const createAccount = async (accountData: {
-    email: String;
-    password: String;
+    email: string;
+    password: string;
 }) => {
     const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/signup`, {
         method: "post",
@@ -28,8 +30,8 @@ export const createAccount = async (accountData: {
  * @returns true and success message if login succeeded; false and error message if validation failed
  */
 export const login = async (enteredData: {
-    email: String;
-    password: String;
+    email: string;
+    password: string;
 }) => {
     const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/login`, {
         method: "post",
@@ -58,4 +60,40 @@ export const logout = async () => {
     });
 
     return response.ok;
+};
+
+/**
+ *
+ * @param id id of the user whose profile to fetch
+ * @returns UserProfile object representing user's profile, or null if user was not found
+ */
+export const getProfile = async (id: number) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/user/${id}`,
+    );
+
+    if (!response.ok) {
+        return null;
+    } else {
+        const json = await response.json();
+        return json as UserProfile;
+    }
+};
+
+export const updateProfile = async (id: number, data: UserProfile) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/user/${id}`,
+        {
+            method: "post",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify(data),
+        },
+    );
+
+    const json = await response.json();
+    return json as UserProfile;
 };
