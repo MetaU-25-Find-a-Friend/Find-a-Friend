@@ -5,11 +5,18 @@ import { useUser } from "../contexts/UserContext";
 import { getProfile, updateProfile, getInterestName } from "../utils";
 import LoggedOut from "./LoggedOut";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+    faPlus,
+    faCheckCircle,
+    faArrowLeftLong,
+} from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 const EditProfile = () => {
     // current user if logged in
     const { user } = useUser();
+
+    const navigate = useNavigate();
 
     // data entered in profile form
     const [formData, setFormData] = useState<UserProfile>({
@@ -37,12 +44,14 @@ const EditProfile = () => {
         }
     };
 
+    // save entered data to database
     const handleSubmit = (event: React.MouseEvent) => {
         event.preventDefault();
 
         updateProfile(user!.id, formData);
     };
 
+    // once user is authorized in UserContext, populate their profile information in the form
     useEffect(() => {
         if (user) {
             getProfile(user.id).then((profile) => {
@@ -58,6 +67,12 @@ const EditProfile = () => {
     } else {
         return (
             <>
+                <button
+                    className={styles.navButton}
+                    onClick={() => navigate("/")}>
+                    <FontAwesomeIcon icon={faArrowLeftLong}></FontAwesomeIcon>{" "}
+                    Back to Dashboard
+                </button>
                 <form className={styles.form}>
                     <h2 className={styles.formTitle}>Edit Profile</h2>
                     <label className={`${styles.label} ${styles.firstHalf}`}>
@@ -113,29 +128,32 @@ const EditProfile = () => {
                     <label className={styles.label}>
                         Interests
                         <section className={styles.interestsContainer}>
-                        {formData.interests.map((value, index, array) => (
-                            <div
-                                className={styles.interest}
-                                onClick={() => {
-                                    // toggle whether a 0 or 1 is associated with this interest's index
-                                    setFormData({
-                                        ...formData,
-                                        interests: array.map((v, i) => {
-                                            if (i === index) {
-                                                return value === 1 ? 0 : 1;
-                                            } else {
-                                                return v;
-                                            }
-                                        }),
-                                    });
-                                }}>
-                                    <FontAwesomeIcon icon={value === 1 ? faCheckCircle : faPlus}></FontAwesomeIcon>
+                            {formData.interests.map((value, index, array) => (
+                                <div
+                                    className={styles.interest}
+                                    onClick={() => {
+                                        // toggle whether a 0 or 1 is associated with this interest's index
+                                        setFormData({
+                                            ...formData,
+                                            interests: array.map((v, i) => {
+                                                if (i === index) {
+                                                    return value === 1 ? 0 : 1;
+                                                } else {
+                                                    return v;
+                                                }
+                                            }),
+                                        });
+                                    }}>
+                                    <FontAwesomeIcon
+                                        icon={
+                                            value === 1 ? faCheckCircle : faPlus
+                                        }></FontAwesomeIcon>
                                     {getInterestName(index)}
                                 </div>
-                        ))}
-                    </section>
+                            ))}
+                        </section>
                     </label>
-                    
+
                     <label className={styles.label}>
                         Bio
                         <textarea

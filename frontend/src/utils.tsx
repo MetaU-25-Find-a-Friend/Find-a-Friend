@@ -114,5 +114,5 @@ const interests = [
 ];
 
 export const getInterestName = (id: number) => {
-    return interests[id];   
-}
+    return interests[id];
+};

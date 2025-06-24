@@ -1,8 +1,19 @@
+.navButton {
+    font-family: inherit;
+    font-size: 24px;
+    background-color: var(--tan-background);
+    color: var(--teal-accent);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 2rem;
+    margin: 2rem 5vw;
+}
+
 .form {
     background-color: var(--tan-background);
     border-radius: 2rem;
     width: 90vw;
-    margin: 5rem 5vw;
+    margin: 1rem 5vw;
     padding: 2rem 4rem;
     box-sizing: border-box;
     display: grid;
