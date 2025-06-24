@@ -6,6 +6,7 @@ import LoginForm from "./components/LoginForm";
 import SignupForm from "./components/SignupForm";
 import Dashboard from "./components/Dashboard";
 import UserProvider from "./contexts/UserContext";
+import EditProfile from "./components/EditProfile";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
@@ -21,6 +22,9 @@ createRoot(document.getElementById("root")!).render(
                     <Route
                         path="/login"
                         element={<LoginForm></LoginForm>}></Route>
+                    <Route
+                        path="/editprofile"
+                        element={<EditProfile></EditProfile>}></Route>
                 </Routes>
             </BrowserRouter>
         </UserProvider>
