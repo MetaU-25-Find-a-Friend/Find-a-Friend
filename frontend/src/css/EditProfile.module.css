@@ -1,0 +1,103 @@
+.navButton {
+    font-family: inherit;
+    font-size: 24px;
+    background-color: var(--tan-background);
+    color: var(--teal-accent);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 2rem;
+    margin: 2rem 5vw;
+}
+
+.form {
+    background-color: var(--tan-background);
+    border-radius: 2rem;
+    width: 90vw;
+    margin: 1rem 5vw;
+    padding: 2rem 4rem;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 2rem;
+    row-gap: 1.5rem;
+}
+
+.formTitle {
+    font-size: 32px;
+}
+
+.label {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 0.5rem;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    font-size: 20px;
+}
+
+.firstHalf {
+    grid-column-start: 1;
+    grid-column-end: 2;
+}
+
+.lastHalf {
+    grid-column-start: 2;
+    grid-column-end: 3;
+}
+
+.input {
+    font-family: inherit;
+    color: inherit;
+    padding: 0.75rem 1.25rem;
+    border: var(--teal-accent) 2px solid;
+    border-radius: 2rem;
+    font-size: inherit;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.input:focus-visible {
+    outline: none;
+}
+
+textarea.input {
+    resize: vertical;
+}
+
+.interestsContainer {
+    padding: 0.75rem 1.25rem;
+    background-color: white;
+    border: var(--teal-accent) 2px solid;
+    border-radius: 2rem;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-flow: row wrap;
+    gap: 1rem;
+}
+
+.interest {
+    background-color: var(--tan-background);
+    color: var(--teal-accent);
+    padding: 0.5rem 1rem;
+    box-sizing: border-box;
+    border-radius: 2rem;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.button {
+    font-family: inherit;
+    color: var(--teal-accent);
+    border: var(--teal-accent) 2px solid;
+    font-size: 20px;
+    background-color: transparent;
+    padding: 1rem 3rem;
+    border-radius: 2rem;
+    width: fit-content;
+    grid-column-start: 1;
+    grid-column-end: 3;
+    margin: auto;
+}

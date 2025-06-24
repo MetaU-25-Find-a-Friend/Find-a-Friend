@@ -1,0 +1,22 @@
+.loggedOutPage {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: 24px;
+}
+
+.loggedOutMessage {
+    text-align: center;
+    font-size: inherit;
+}
+
+.button {
+    background-color: var(--tan-background);
+    border: none;
+    font-family: inherit;
+    font-size: 24px;
+    padding: 1rem 2rem;
+    border-radius: 2rem;
+    color: var(--teal-accent);
+}

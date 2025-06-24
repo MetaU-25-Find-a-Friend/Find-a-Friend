@@ -25,6 +25,7 @@
     border-radius: 2rem;
     font-size: inherit;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .input:focus-visible {

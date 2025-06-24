@@ -1,16 +1,3 @@
-.loggedOutPage {
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: flex-start;
-    align-items: center;
-    font-size: 24px;
-}
-
-.loggedOutMessage {
-    text-align: center;
-    font-size: inherit;
-}
-
 .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -45,10 +32,17 @@
     padding: 1rem;
     width: 50%;
     border-radius: 2rem;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 2rem 1rem;
+    box-sizing: border-box;
 }
 
 .visible {
-    display: block;
+    display: flex;
 }
 
 .invisible {
@@ -59,8 +53,8 @@
     background-color: transparent;
     border: none;
     font-family: inherit;
-    color: inherit;
-    font-size: 16px;
+    color: var(--teal-accent);
+    font-size: 24px;
 }
 
 .button {

@@ -6,9 +6,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faUser,
     faChevronDown,
-    faArrowRight,
+    faArrowRightLong,
 } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
+import LoggedOut from "./LoggedOut";
 
 // Landing page; allows navigating to profile, map, etc.
 const Dashboard = () => {
@@ -24,19 +25,7 @@ const Dashboard = () => {
     };
 
     if (user === null) {
-        return (
-            <main className={styles.loggedOutPage}>
-                <p className={styles.loggedOutMessage}>
-                    You are not logged in.
-                </p>
-                <button
-                    className={styles.button}
-                    onClick={() => navigate("/login")}>
-                    To Login Page{" "}
-                    <FontAwesomeIcon icon={faArrowRight}></FontAwesomeIcon>
-                </button>
-            </main>
-        );
+        return <LoggedOut></LoggedOut>;
     } else {
         return (
             <main className={styles.grid}>
@@ -58,6 +47,13 @@ const Dashboard = () => {
                     </div>
                     <div
                         className={`${styles.userMenu} ${showingMenu ? styles.visible : styles.invisible}`}>
+                        <button
+                            className={styles.userMenuItem}
+                            onClick={() => navigate("/editprofile")}>
+                            Edit profile{" "}
+                            <FontAwesomeIcon
+                                icon={faArrowRightLong}></FontAwesomeIcon>
+                        </button>
                         <button
                             className={styles.userMenuItem}
                             onClick={handleLogout}>

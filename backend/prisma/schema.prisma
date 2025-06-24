@@ -25,7 +25,6 @@ model User {
   major String?
   interests Int[]
   bio String?
-  allowsLocation Boolean
   blockedUsers Int[]
   friends Int[]
   latitude Decimal?
