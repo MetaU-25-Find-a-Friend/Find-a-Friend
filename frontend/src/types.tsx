@@ -7,7 +7,7 @@ export interface UserProfile {
     pronouns?: string;
     age?: number;
     major?: string;
-    interests: [number];
+    interests: number[];
     bio?: string;
 }
 

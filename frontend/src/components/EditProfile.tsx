@@ -2,8 +2,10 @@ import styles from "../css/EditProfile.module.css";
 import { useState, useEffect } from "react";
 import type { UserProfile } from "../types";
 import { useUser } from "../contexts/UserContext";
-import { getProfile, updateProfile } from "../utils";
+import { getProfile, updateProfile, getInterestName } from "../utils";
 import LoggedOut from "./LoggedOut";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 
 const EditProfile = () => {
     // current user if logged in
@@ -13,7 +15,7 @@ const EditProfile = () => {
     const [formData, setFormData] = useState<UserProfile>({
         firstName: "",
         lastName: "",
-        interests: Array().fill(0, 0, -49) as [number],
+        interests: Array() as number[],
     });
 
     // update form data when value of any field changes
@@ -108,6 +110,32 @@ const EditProfile = () => {
                             defaultValue={formData.major}
                             onChange={handleInputChange}></input>
                     </label>
+                    <label className={styles.label}>
+                        Interests
+                        <section className={styles.interestsContainer}>
+                        {formData.interests.map((value, index, array) => (
+                            <div
+                                className={styles.interest}
+                                onClick={() => {
+                                    // toggle whether a 0 or 1 is associated with this interest's index
+                                    setFormData({
+                                        ...formData,
+                                        interests: array.map((v, i) => {
+                                            if (i === index) {
+                                                return value === 1 ? 0 : 1;
+                                            } else {
+                                                return v;
+                                            }
+                                        }),
+                                    });
+                                }}>
+                                    <FontAwesomeIcon icon={value === 1 ? faCheckCircle : faPlus}></FontAwesomeIcon>
+                                    {getInterestName(index)}
+                                </div>
+                        ))}
+                    </section>
+                    </label>
+                    
                     <label className={styles.label}>
                         Bio
                         <textarea

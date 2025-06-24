@@ -80,6 +80,12 @@ export const getProfile = async (id: number) => {
     }
 };
 
+/**
+ *
+ * @param id id of the user whose profile to update
+ * @param data UserProfile representing new data
+ * @returns updated UserProfile
+ */
 export const updateProfile = async (id: number, data: UserProfile) => {
     const response = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/user/${id}`,
@@ -97,3 +103,16 @@ export const updateProfile = async (id: number, data: UserProfile) => {
     const json = await response.json();
     return json as UserProfile;
 };
+
+const interests = [
+    "Reading",
+    "Cooking",
+    "Drawing",
+    "Painting",
+    "Swimming",
+    "Hiking",
+];
+
+export const getInterestName = (id: number) => {
+    return interests[id];   
+}

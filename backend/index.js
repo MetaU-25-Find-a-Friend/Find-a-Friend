@@ -78,7 +78,7 @@ app.post("/signup", async (req, res) => {
             password: hashedPassword,
             firstName: "",
             lastName: "",
-            allowsLocation: false,
+            interests: Array(6)
         },
     });
 
