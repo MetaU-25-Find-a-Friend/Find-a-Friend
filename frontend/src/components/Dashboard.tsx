@@ -3,7 +3,7 @@ import { useUser } from "../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faChevronDown, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 
 // Landing page; allows navigating to profile, map, etc.
@@ -26,9 +26,9 @@ const Dashboard = () => {
                     You are not logged in.
                 </p>
                 <button
-                    className={styles.loginButton}
+                    className={styles.button}
                     onClick={() => navigate("/login")}>
-                    To Login Page
+                    To Login Page <FontAwesomeIcon icon={faArrowRight}></FontAwesomeIcon>
                 </button>
             </main>
         );

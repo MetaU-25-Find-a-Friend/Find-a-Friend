@@ -24,7 +24,7 @@ const SignupForm = () => {
             console.log(message);
         } else {
             // after successful creation, redirect user
-            navigate("/");
+            navigate("/login");
         }
     };
 

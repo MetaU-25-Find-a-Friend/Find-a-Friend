@@ -3,17 +3,12 @@
     flex-flow: column nowrap;
     justify-content: flex-start;
     align-items: center;
+    font-size: 24px;
 }
 
 .loggedOutMessage {
     text-align: center;
-}
-
-.loginButton {
-    background-color: transparent;
-    border: none;
-    font-family: inherit;
-    color: inherit;
+    font-size: inherit;
 }
 
 .grid {
