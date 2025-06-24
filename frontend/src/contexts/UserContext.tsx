@@ -1,13 +1,17 @@
 import { createContext, useState, useContext, useEffect } from "react";
+import type { SavedUser, SavedUserContext } from "../types";
 
 // current user and function to update available to all components
-const UserContext = createContext({ user: null, setUser: (_: any) => {} });
+const UserContext = createContext<SavedUserContext>({
+    user: null,
+    setUser: (_: any) => {},
+});
 
 // Handles checking whether user is logged in and providing context to components
 // @ts-ignore
 const UserProvider = ({ children }) => {
     // current user
-    const [user, setUser] = useState<any>(null);
+    const [user, setUser] = useState<SavedUser | null>(null);
 
     // check whether a session is active
     useEffect(() => {

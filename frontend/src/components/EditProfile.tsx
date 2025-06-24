@@ -1,16 +1,13 @@
 import styles from "../css/EditProfile.module.css";
 import { useState } from "react";
+import type { UserProfile } from "../types";
 
 const EditProfile = () => {
     // data entered in profile form
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<UserProfile>({
         firstName: "",
         lastName: "",
-        pronouns: null,
-        age: null,
-        major: null,
-        interests: [],
-        bio: null,
+        interests: Array().fill(0, 0, -49) as [number]
     });
 
     // update form data when value of any field changes
