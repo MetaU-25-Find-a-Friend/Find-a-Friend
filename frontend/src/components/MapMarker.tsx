@@ -8,13 +8,13 @@ import { getInterestName, getProfile } from "../utils";
 
 interface MapMarkerProps {
     id: number;
-    location?: google.maps.LatLngLiteral;
+    location: google.maps.LatLngLiteral;
 }
 
 /**
  *
  * @param id id of the user whom this marker represents (used to fetch profile)
- * @param location optional; pass in if known (i.e. if this marker represents the current user) to provide most up-to-date info
+ * @param location location of the user
  * @returns a marker at the user's location with profile information in a popup on hover
  */
 const MapMarker = ({ id, location }: MapMarkerProps) => {
@@ -34,44 +34,40 @@ const MapMarker = ({ id, location }: MapMarkerProps) => {
         });
     }, []);
 
-    if (location) {
-        return (
-            <AdvancedMarker position={location}>
-                <div className={styles.marker}>
-                    <FontAwesomeIcon
-                        className={styles.markerIcon}
-                        icon={faUser}></FontAwesomeIcon>
-                    <div className={styles.profilePopup}>
-                        <h3 className={styles.profileTitle}>
-                            {userData.firstName} {userData.lastName}{" "}
-                            <span className={styles.profilePronouns}>
-                                {userData.pronouns}
-                            </span>
-                        </h3>
-                        <p className={styles.profileMajor}>
-                            {userData.major ?? "(No major)"}
-                        </p>
-                        <div className={styles.interestsContainer}>
-                            {userData.interests.map((value, index) => {
-                                if (value === 1) {
-                                    return (
-                                        <p className={styles.profileInterest}>
-                                            {getInterestName(index)}
-                                        </p>
-                                    );
-                                } else {
-                                    return <></>;
-                                }
-                            })}
-                        </div>
-                        <p className={styles.profileBio}>{userData.bio}</p>
+    return (
+        <AdvancedMarker position={location}>
+            <div className={styles.marker}>
+                <FontAwesomeIcon
+                    className={styles.markerIcon}
+                    icon={faUser}></FontAwesomeIcon>
+                <div className={styles.profilePopup}>
+                    <h3 className={styles.profileTitle}>
+                        {userData.firstName} {userData.lastName}{" "}
+                        <span className={styles.profilePronouns}>
+                            {userData.pronouns}
+                        </span>
+                    </h3>
+                    <p className={styles.profileMajor}>
+                        {userData.major ?? "(No major)"}
+                    </p>
+                    <div className={styles.interestsContainer}>
+                        {userData.interests.map((value, index) => {
+                            if (value === 1) {
+                                return (
+                                    <p className={styles.profileInterest}>
+                                        {getInterestName(index)}
+                                    </p>
+                                );
+                            } else {
+                                return <></>;
+                            }
+                        })}
                     </div>
+                    <p className={styles.profileBio}>{userData.bio}</p>
                 </div>
-            </AdvancedMarker>
-        );
-    } else {
-        return <></>;
-    }
+            </div>
+        </AdvancedMarker>
+    );
 };
 
 export default MapMarker;

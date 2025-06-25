@@ -234,3 +234,18 @@ app.delete("/user/location/:userId", async (req, res) => {
 
     res.send("Successfully deleted");
 });
+
+// gets ids and locations of active users other than the specified id
+app.get("/users/otherLocations/:userId", async (req, res) => {
+    const userId = parseInt(req.params.userId);
+
+    const locations = await prisma.userLocation.findMany({
+        where: {
+            NOT: {
+                userId: userId,
+            },
+        },
+    });
+
+    res.json(locations);
+});

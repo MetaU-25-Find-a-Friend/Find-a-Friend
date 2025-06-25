@@ -3,7 +3,11 @@ import { useUser } from "../contexts/UserContext";
 import { useState, useEffect } from "react";
 import { APIProvider, Map } from "@vis.gl/react-google-maps";
 import LoggedOut from "./LoggedOut";
-import { deleteLocation, updateLocation } from "../utils";
+import {
+    deleteLocation,
+    getOtherUserLocations,
+    updateLocation,
+} from "../utils";
 import MapMarker from "./MapMarker";
 import { DEFAULT_MAP_ZOOM } from "../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,6 +22,8 @@ const MapPage = () => {
 
     // logged-in user
     const { user } = useUser();
+
+    const [otherUsers, setOtherUsers] = useState(Array());
 
     // location of the current user
     const [myLocation, setMyLocation] =
@@ -42,10 +48,14 @@ const MapPage = () => {
             });
 
             if (user) {
-                console.log("user");
                 updateLocation(user.id, {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude,
+                });
+
+                getOtherUserLocations(user.id).then((users) => {
+                    console.log(users);
+                    setOtherUsers(users);
                 });
             }
         });
@@ -73,6 +83,17 @@ const MapPage = () => {
                         <MapMarker
                             id={user.id}
                             location={myLocation}></MapMarker>
+                        {otherUsers.map((user) => {
+                            console.log(user);
+                            return (
+                                <MapMarker
+                                    id={user.userId}
+                                    location={{
+                                        lat: Number(user.latitude),
+                                        lng: Number(user.longitude),
+                                    }}></MapMarker>
+                            );
+                        })}
                     </Map>
                 </APIProvider>
             </>

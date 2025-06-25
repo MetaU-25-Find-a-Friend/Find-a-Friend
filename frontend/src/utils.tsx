@@ -152,3 +152,13 @@ const interests = [
 export const getInterestName = (id: number) => {
     return interests[id];
 };
+
+export const getOtherUserLocations = async (id: number) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/users/otherLocations/${id}`,
+    );
+
+    const otherUsers = await response.json();
+
+    return otherUsers;
+};
