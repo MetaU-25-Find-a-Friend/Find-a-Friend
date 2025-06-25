@@ -1,0 +1,29 @@
+.marker {
+    background-color: var(--teal-accent);
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 100%;
+    outline: var(--teal-accent) 0.2rem solid;
+    outline-offset: 0.2rem;
+}
+
+.profilePopup {
+    display: none;
+    transform: translate(15%, -100%);
+    width: 16rem;
+    height: 16rem;
+    background-color: var(--tan-background);
+    border-radius: 2rem;
+    padding: 1rem 2rem;
+    box-sizing: border-box;
+    font-family: Sen, sans-serif;
+}
+
+.profileTitle {
+    font-family: inherit;
+    font-size: 24px;
+}
+
+.marker:hover .profilePopup {
+    display: block;
+}

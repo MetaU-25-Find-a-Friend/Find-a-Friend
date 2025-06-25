@@ -7,6 +7,7 @@ import SignupForm from "./components/SignupForm";
 import Dashboard from "./components/Dashboard";
 import UserProvider from "./contexts/UserContext";
 import EditProfile from "./components/EditProfile";
+import MapPage from "./components/MapPage";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
@@ -25,6 +26,9 @@ createRoot(document.getElementById("root")!).render(
                     <Route
                         path="/editprofile"
                         element={<EditProfile></EditProfile>}></Route>
+                    <Route
+                        path="/map"
+                        element={<MapPage></MapPage>}></Route>
                 </Routes>
             </BrowserRouter>
         </UserProvider>
