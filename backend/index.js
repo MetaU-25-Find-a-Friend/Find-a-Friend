@@ -184,6 +184,7 @@ app.get("/user/:id", async (req, res) => {
     res.json(user);
 });
 
+// update a user's profile
 app.post("/user/:id", async (req, res) => {
     const userId = parseInt(req.params.id);
 
@@ -197,4 +198,26 @@ app.post("/user/:id", async (req, res) => {
     });
 
     res.json(user);
+});
+
+// update a user's location
+app.post("/user/location/:userId", async (req, res) => {
+    const userId = parseInt(req.params.userId);
+
+    await prisma.userLocation.upsert({
+        create: {
+            userId: userId,
+            latitude: req.body.lat,
+            longitude: req.body.lng,
+        },
+        update: {
+            latitude: req.body.lat,
+            longitude: req.body.lng,
+        },
+        where: {
+            userId: userId,
+        },
+    });
+
+    res.send("Successfully updated");
 });

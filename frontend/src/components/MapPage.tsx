@@ -28,13 +28,14 @@ const MapPage = () => {
             });
 
             if (user) {
+                console.log("user");
                 updateLocation(user.id, {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude,
                 });
             }
         });
-    }, []);
+    }, [user]);
 
     if (!user) {
         return <LoggedOut></LoggedOut>;

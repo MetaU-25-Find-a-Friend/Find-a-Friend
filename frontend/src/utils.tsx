@@ -113,17 +113,14 @@ export const updateLocation = async (
     id: number,
     data: google.maps.LatLngLiteral,
 ) => {
-    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/${id}`, {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/location/${id}`, {
         method: "post",
         mode: "cors",
         headers: {
             "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({
-            latitude: data.lat,
-            longitude: data.lng,
-        }),
+        body: JSON.stringify(data),
     });
 };
 
