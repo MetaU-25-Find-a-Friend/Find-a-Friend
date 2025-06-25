@@ -61,6 +61,12 @@ const Dashboard = () => {
                         </button>
                     </div>
                 </div>
+                <button
+                    className={styles.mapButton}
+                    onClick={() => navigate("/map")}>
+                    To Map{" "}
+                    <FontAwesomeIcon icon={faArrowRightLong}></FontAwesomeIcon>
+                </button>
             </main>
         );
     }
