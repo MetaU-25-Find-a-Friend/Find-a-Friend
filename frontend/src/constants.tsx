@@ -16,3 +16,8 @@ export const NEARBY_RADIUS = 1000;
  * (this is because if equator-pole, or 90deg, is 10m meters, 10^-6deg is about 1/9 meter: https://gis.stackexchange.com/questions/8650/measuring-accuracy-of-latitude-and-longitude)
  */
 export const POS_DELTA = 10 ^ -6;
+
+/**
+ * Interval in milliseconds at which user's browser location is updated and 
+ */
+export const FETCH_INTERVAL = 5000;

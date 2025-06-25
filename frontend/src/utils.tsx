@@ -153,6 +153,11 @@ export const getInterestName = (id: number) => {
     return interests[id];
 };
 
+/**
+ *
+ * @param id id of the current user
+ * @returns array of UserLocations representing all other active users on the map
+ */
 export const getOtherUserLocations = async (id: number) => {
     const response = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/users/otherLocations/${id}`,

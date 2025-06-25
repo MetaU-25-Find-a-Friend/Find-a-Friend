@@ -9,7 +9,7 @@ import {
     updateLocation,
 } from "../utils";
 import MapMarker from "./MapMarker";
-import { DEFAULT_MAP_ZOOM, NEARBY_RADIUS } from "../constants";
+import { DEFAULT_MAP_ZOOM, FETCH_INTERVAL, NEARBY_RADIUS } from "../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeftLong } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
@@ -40,24 +40,27 @@ const MapPage = () => {
         navigate("/");
     };
 
-    // library for spherical geometry functions such as distance
-    const geometry = useMapsLibrary("geometry");
-
-    // fetch current location and save to database
-    useEffect(() => {
+    // load own location, save this to the database, and get locations of other active users
+    const loadUserLocations = () => {
+        // get browser location
         const geo = navigator.geolocation;
         geo.getCurrentPosition((position) => {
+
+            // on success, set location state variable
             setMyLocation({
                 lat: position.coords.latitude,
                 lng: position.coords.longitude,
             });
+            
 
             if (user) {
+                // update location in database
                 updateLocation(user.id, {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude,
                 });
 
+                // get locations of all other users online
                 getOtherUserLocations(user.id).then((users) => {
                     setOtherUsers(
                         users.map((user: UserLocation) => {
@@ -72,6 +75,22 @@ const MapPage = () => {
                 });
             }
         });
+    };
+
+    // library for spherical geometry functions such as distance
+    const geometry = useMapsLibrary("geometry");
+
+    // at each interval, reload location data
+    useEffect(() => {
+
+        // initial load
+        loadUserLocations();
+
+        const locationInterval = setInterval(loadUserLocations, FETCH_INTERVAL);
+
+        return () => {
+            clearInterval(locationInterval);
+        }
     }, [user]);
 
     if (!user) {
@@ -98,6 +117,7 @@ const MapPage = () => {
 
                     {otherUsers
                         .filter((userLoc) => {
+                            // only show users within a circle of NEARBY_RADIUS
                             return (
                                 geometry.spherical.computeDistanceBetween(
                                     myLocation,
@@ -109,7 +129,6 @@ const MapPage = () => {
                             );
                         })
                         .map((user) => {
-                            console.log(user);
                             return (
                                 <MapMarker
                                     id={user.userId}
