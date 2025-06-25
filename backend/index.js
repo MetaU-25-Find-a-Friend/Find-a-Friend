@@ -221,3 +221,16 @@ app.post("/user/location/:userId", async (req, res) => {
 
     res.send("Successfully updated");
 });
+
+// remove a user's location data from the database
+app.delete("/user/location/:userId", async (req, res) => {
+    const userId = parseInt(req.params.userId);
+
+    await prisma.userLocation.delete({
+        where: {
+            userId: userId,
+        },
+    });
+
+    res.send("Successfully deleted");
+});

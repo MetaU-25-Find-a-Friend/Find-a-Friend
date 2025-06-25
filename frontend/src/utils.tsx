@@ -124,6 +124,17 @@ export const updateLocation = async (
     });
 };
 
+/**
+ *
+ * @param id id of the user who is leaving the map page or hiding their location
+ */
+export const deleteLocation = async (id: number) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/location/${id}`, {
+        method: "delete",
+        credentials: "include",
+    });
+};
+
 const interests = [
     "Reading",
     "Cooking",

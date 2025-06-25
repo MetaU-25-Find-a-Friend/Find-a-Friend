@@ -2,3 +2,16 @@
     width: 100vw;
     height: 100vh;
 }
+
+.navButton {
+    font-family: inherit;
+    font-size: 24px;
+    background-color: var(--tan-background);
+    color: var(--teal-accent);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 2rem;
+    margin: 2rem;
+    position: fixed;
+    z-index: 5;
+}
