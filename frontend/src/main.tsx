@@ -8,6 +8,7 @@ import Dashboard from "./components/Dashboard";
 import UserProvider from "./contexts/UserContext";
 import EditProfile from "./components/EditProfile";
 import MapPage from "./components/MapPage";
+import { APIProvider } from "@vis.gl/react-google-maps";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>
@@ -28,7 +29,14 @@ createRoot(document.getElementById("root")!).render(
                         element={<EditProfile></EditProfile>}></Route>
                     <Route
                         path="/map"
-                        element={<MapPage></MapPage>}></Route>
+                        element={
+                            <APIProvider
+                                apiKey={
+                                    import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+                                }>
+                                <MapPage></MapPage>
+                            </APIProvider>
+                        }></Route>
                 </Routes>
             </BrowserRouter>
         </UserProvider>

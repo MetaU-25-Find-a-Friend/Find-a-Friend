@@ -1,7 +1,7 @@
 import styles from "../css/MapPage.module.css";
 import { useUser } from "../contexts/UserContext";
 import { useState, useEffect } from "react";
-import { APIProvider, Map } from "@vis.gl/react-google-maps";
+import { Map, useMapsLibrary } from "@vis.gl/react-google-maps";
 import LoggedOut from "./LoggedOut";
 import {
     deleteLocation,
@@ -9,10 +9,11 @@ import {
     updateLocation,
 } from "../utils";
 import MapMarker from "./MapMarker";
-import { DEFAULT_MAP_ZOOM } from "../constants";
+import { DEFAULT_MAP_ZOOM, NEARBY_RADIUS } from "../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeftLong } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
+import type { UserLocation } from "../types";
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API
 // https://developers.google.com/codelabs/maps-platform/maps-platform-101-react-js#1
@@ -23,7 +24,8 @@ const MapPage = () => {
     // logged-in user
     const { user } = useUser();
 
-    const [otherUsers, setOtherUsers] = useState(Array());
+    // array of other users
+    const [otherUsers, setOtherUsers] = useState(Array() as UserLocation[]);
 
     // location of the current user
     const [myLocation, setMyLocation] =
@@ -37,6 +39,9 @@ const MapPage = () => {
 
         navigate("/");
     };
+
+    // library for spherical geometry functions such as distance
+    const geometry = useMapsLibrary("geometry");
 
     // fetch current location and save to database
     useEffect(() => {
@@ -54,8 +59,16 @@ const MapPage = () => {
                 });
 
                 getOtherUserLocations(user.id).then((users) => {
-                    console.log(users);
-                    setOtherUsers(users);
+                    setOtherUsers(
+                        users.map((user: UserLocation) => {
+                            return {
+                                id: user.id,
+                                userId: user.userId,
+                                latitude: Number(user.latitude),
+                                longitude: Number(user.longitude),
+                            };
+                        }),
+                    );
                 });
             }
         });
@@ -63,7 +76,7 @@ const MapPage = () => {
 
     if (!user) {
         return <LoggedOut></LoggedOut>;
-    } else if (myLocation) {
+    } else if (myLocation && geometry) {
         return (
             <>
                 <button
@@ -72,30 +85,41 @@ const MapPage = () => {
                     <FontAwesomeIcon icon={faArrowLeftLong}></FontAwesomeIcon>{" "}
                     Back to Dashboard
                 </button>
-                <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
-                    <Map
-                        className={styles.map}
-                        defaultCenter={myLocation}
-                        mapId={"Users Map"}
-                        defaultZoom={DEFAULT_MAP_ZOOM}
-                        gestureHandling={"greedy"}
-                        disableDefaultUI={true}>
-                        <MapMarker
-                            id={user.id}
-                            location={myLocation}></MapMarker>
-                        {otherUsers.map((user) => {
+                <Map
+                    className={styles.map}
+                    defaultCenter={myLocation}
+                    mapId={"Users Map"}
+                    defaultZoom={DEFAULT_MAP_ZOOM}
+                    gestureHandling={"greedy"}
+                    disableDefaultUI={true}>
+                    <MapMarker
+                        id={user.id}
+                        location={myLocation}></MapMarker>
+
+                    {otherUsers
+                        .filter((userLoc) => {
+                            return (
+                                geometry.spherical.computeDistanceBetween(
+                                    myLocation,
+                                    {
+                                        lat: userLoc.latitude,
+                                        lng: userLoc.longitude,
+                                    },
+                                ) < NEARBY_RADIUS
+                            );
+                        })
+                        .map((user) => {
                             console.log(user);
                             return (
                                 <MapMarker
                                     id={user.userId}
                                     location={{
-                                        lat: Number(user.latitude),
-                                        lng: Number(user.longitude),
+                                        lat: user.latitude,
+                                        lng: user.longitude,
                                     }}></MapMarker>
                             );
                         })}
-                    </Map>
-                </APIProvider>
+                </Map>
             </>
         );
     } else {
