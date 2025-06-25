@@ -27,6 +27,11 @@ model User {
   bio String?
   blockedUsers Int[]
   friends Int[]
-  latitude Decimal?
-  longitude Decimal?
+}
+
+model UserLocation {
+  id Int @id @default(autoincrement())
+  userId Int @unique
+  latitude Decimal
+  longitude Decimal
 }

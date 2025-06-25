@@ -104,6 +104,37 @@ export const updateProfile = async (id: number, data: UserProfile) => {
     return json as UserProfile;
 };
 
+/**
+ *
+ * @param id id of the user whose location to update
+ * @param data lat and long of the user
+ */
+export const updateLocation = async (
+    id: number,
+    data: google.maps.LatLngLiteral,
+) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/location/${id}`, {
+        method: "post",
+        mode: "cors",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(data),
+    });
+};
+
+/**
+ *
+ * @param id id of the user who is leaving the map page or hiding their location
+ */
+export const deleteLocation = async (id: number) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/location/${id}`, {
+        method: "delete",
+        credentials: "include",
+    });
+};
+
 const interests = [
     "Reading",
     "Cooking",
@@ -113,6 +144,11 @@ const interests = [
     "Hiking",
 ];
 
+/**
+ *
+ * @param id index of the interest to retrieve
+ * @returns string name of the specified interest
+ */
 export const getInterestName = (id: number) => {
     return interests[id];
 };
