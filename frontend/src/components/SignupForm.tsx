@@ -2,10 +2,13 @@ import styles from "../css/AccountForm.module.css";
 import { useState } from "react";
 import { createAccount } from "../utils";
 import { useNavigate } from "react-router-dom";
+import Alert from "./Alert";
 
 // Form to create a new user account
 const SignupForm = () => {
     const navigate = useNavigate();
+
+    const [alertText, setAlertText] = useState<string | null>(null);
 
     // data entered in signup form
     const [formData, setFormData] = useState({
@@ -20,8 +23,9 @@ const SignupForm = () => {
     const handleCreateAccount = async (event: React.MouseEvent) => {
         event.preventDefault();
 
+        // check password and confirm password match
         if (formData.password !== formData.confirmPassword) {
-            console.log("Passwords must match");
+            setAlertText("Passwords must match");
             return;
         }
 
@@ -29,7 +33,7 @@ const SignupForm = () => {
 
         if (!created) {
             // tell user why account creation failed
-            console.log(message);
+            setAlertText(message as string);
         } else {
             // after successful creation, redirect user
             navigate("/login");
@@ -48,6 +52,9 @@ const SignupForm = () => {
 
     return (
         <>
+            <Alert
+                alertText={alertText}
+                setAlertText={setAlertText}></Alert>
             <h1 className={styles.title}>Find a Friend</h1>
             <form className={styles.form}>
                 <input

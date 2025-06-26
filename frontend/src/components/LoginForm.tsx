@@ -3,12 +3,16 @@ import { useState } from "react";
 import { login } from "../utils";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
+import Alert from "./Alert";
 
 // Form to log in to an existing account
 const LoginForm = () => {
+    // function to set the logged-in user
     const { setUser } = useUser();
 
     const navigate = useNavigate();
+
+    const [alertText, setAlertText] = useState<string | null>(null);
 
     // data entered in signup form
     const [formData, setFormData] = useState({
@@ -24,7 +28,7 @@ const LoginForm = () => {
 
         if (!created) {
             // tell user why account creation failed
-            console.log(data.error);
+            setAlertText(data.error);
         } else {
             // save user data in context
             setUser(data);
@@ -45,6 +49,9 @@ const LoginForm = () => {
 
     return (
         <>
+            <Alert
+                alertText={alertText}
+                setAlertText={setAlertText}></Alert>
             <h1 className={styles.title}>Find a Friend</h1>
             <form className={styles.form}>
                 <input

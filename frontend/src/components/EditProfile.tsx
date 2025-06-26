@@ -12,7 +12,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import Alert from "./Alert";
-import { ALERT_DURATION } from "../constants";
 
 const EditProfile = () => {
     // current user if logged in
@@ -59,9 +58,6 @@ const EditProfile = () => {
             } else {
                 setAlertText("Something went wrong.");
             }
-            setTimeout(() => {
-                setAlertText(null);
-            }, ALERT_DURATION);
         });
     };
 
@@ -81,7 +77,9 @@ const EditProfile = () => {
     } else {
         return (
             <>
-                <Alert alertText={alertText}></Alert>
+                <Alert
+                    alertText={alertText}
+                    setAlertText={setAlertText}></Alert>
                 <button
                     className={styles.navButton}
                     onClick={() => navigate("/")}>
