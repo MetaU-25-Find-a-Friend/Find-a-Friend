@@ -146,21 +146,25 @@ app.post("/me", async (req, res) => {
         return res.status(401).send("User is not logged in");
     }
 
-    // get and send logged-in user info
-    const user = await prisma.user.findUnique({
-        where: {
-            id: req.session.userId,
-        },
-        select: {
-            id: true,
-            email: true,
-        },
-    });
+    try {
+        // get and send logged-in user info
+        const user = await prisma.user.findUnique({
+            where: {
+                id: req.session.userId,
+            },
+            select: {
+                id: true,
+                email: true,
+            },
+        });
 
-    res.json({
-        id: user.id,
-        email: user.email,
-    });
+        res.json({
+            id: user.id,
+            email: user.email,
+        });
+    } catch (error) {
+        res.status(404).send("User not found");
+    }
 });
 
 // log out user and destroy session
@@ -204,16 +208,20 @@ app.get("/user/:id", authenticate, async (req, res) => {
 app.post("/user", authenticate, async (req, res) => {
     const userId = req.session.userId;
 
-    const user = await prisma.user.update({
-        where: {
-            id: userId,
-        },
-        data: {
-            ...req.body,
-        },
-    });
+    try {
+        const user = await prisma.user.update({
+            where: {
+                id: userId,
+            },
+            data: {
+                ...req.body,
+            },
+        });
 
-    res.json(user);
+        res.json(user);
+    } catch (error) {
+        res.status(404).send("User not found");
+    }
 });
 
 // update the logged-in user's location
@@ -241,24 +249,17 @@ app.post("/user/location", authenticate, async (req, res) => {
 // remove the logged-in user's location data from the database
 app.delete("/user/location", authenticate, async (req, res) => {
     const userId = req.session.userId;
-
-    const recordExists =
-        (await prisma.userLocation.count({
+    try {
+        await prisma.userLocation.delete({
             where: {
                 userId: userId,
             },
-        })) > 0;
+        });
 
-    if (!recordExists) {
-        res.status(404).send("No record to delete");
+        res.send("Successfully deleted");
+    } catch (error) {
+        res.status(404).send("User location not found");
     }
-    await prisma.userLocation.delete({
-        where: {
-            userId: userId,
-        },
-    });
-
-    res.send("Successfully deleted");
 });
 
 // gets ids and locations of active users other than the logged-in user
