@@ -16,7 +16,11 @@ const prisma = new PrismaClient();
 const bcrypt = require("bcrypt");
 const rateLimit = require("express-rate-limit");
 
-const { RATE_LIMIT_INTERVAL, MAX_LOGIN_ATTEMPTS } = require("./constants");
+const {
+    RATE_LIMIT_INTERVAL,
+    MAX_LOGIN_ATTEMPTS,
+    SESSION_TIMEOUT,
+} = require("./constants");
 
 const loginLimiter = rateLimit({
     windowMs: RATE_LIMIT_INTERVAL,
@@ -32,6 +36,9 @@ app.use(
         secret: process.env.VITE_SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
+        cookie: {
+            maxAge: SESSION_TIMEOUT,
+        },
     }),
 );
 
@@ -54,7 +61,9 @@ app.post("/signup", async (req, res) => {
 
     // validate username and password
     if (!firstName || !lastName || !email || !password) {
-        return res.status(400).send("Name, username, and password are required");
+        return res
+            .status(400)
+            .send("Name, username, and password are required");
     }
 
     if (password.length < 12) {
