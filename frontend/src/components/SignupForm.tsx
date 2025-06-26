@@ -13,7 +13,7 @@ const SignupForm = () => {
         lastName: "",
         email: "",
         password: "",
-        confirmPassword: ""
+        confirmPassword: "",
     });
 
     // on submit, attempt to create account
@@ -21,7 +21,7 @@ const SignupForm = () => {
         event.preventDefault();
 
         if (formData.password !== formData.confirmPassword) {
-            console.log("Passwords must match")
+            console.log("Passwords must match");
             return;
         }
 
@@ -57,7 +57,7 @@ const SignupForm = () => {
                     type="text"
                     onChange={handleInputChange}
                     required></input>
-                    <input
+                <input
                     className={styles.input}
                     name="lastName"
                     placeholder="Last name"

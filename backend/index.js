@@ -1,3 +1,4 @@
+// initialize server
 const express = require("express");
 const cors = require("cors");
 
@@ -10,9 +11,11 @@ app.use(
     }),
 );
 
+// initialize prisma
 const { PrismaClient } = require("./generated/prisma");
 const prisma = new PrismaClient();
 
+// setup login middleware
 const bcrypt = require("bcrypt");
 const rateLimit = require("express-rate-limit");
 
@@ -30,6 +33,7 @@ const loginLimiter = rateLimit({
     },
 });
 
+// setup session middleware and cookie settings
 const session = require("express-session");
 app.use(
     session({
@@ -160,7 +164,7 @@ app.post("/me", async (req, res) => {
 });
 
 // log out user and destroy session
-app.post("/logout", (req, res) => {
+app.post("/logout", authenticate, (req, res) => {
     req.session.destroy((error) => {
         if (error) {
             return res.status(500).send("Failed to log out");
@@ -171,7 +175,7 @@ app.post("/logout", (req, res) => {
 });
 
 // get a user's profile
-app.get("/user/:id", async (req, res) => {
+app.get("/user/:id", authenticate, async (req, res) => {
     const userId = parseInt(req.params.id);
 
     const user = await prisma.user.findUnique({
@@ -196,9 +200,9 @@ app.get("/user/:id", async (req, res) => {
     res.json(user);
 });
 
-// update a user's profile
-app.post("/user/:id", async (req, res) => {
-    const userId = parseInt(req.params.id);
+// update the logged-in user's profile
+app.post("/user", authenticate, async (req, res) => {
+    const userId = req.session.userId;
 
     const user = await prisma.user.update({
         where: {
@@ -212,9 +216,9 @@ app.post("/user/:id", async (req, res) => {
     res.json(user);
 });
 
-// update a user's location
-app.post("/user/location/:userId", async (req, res) => {
-    const userId = parseInt(req.params.userId);
+// update the logged-in user's location
+app.post("/user/location", authenticate, async (req, res) => {
+    const userId = req.session.userId;
 
     await prisma.userLocation.upsert({
         create: {
@@ -234,9 +238,9 @@ app.post("/user/location/:userId", async (req, res) => {
     res.send("Successfully updated");
 });
 
-// remove a user's location data from the database
-app.delete("/user/location/:userId", async (req, res) => {
-    const userId = parseInt(req.params.userId);
+// remove the logged-in user's location data from the database
+app.delete("/user/location", authenticate, async (req, res) => {
+    const userId = req.session.userId;
 
     const recordExists =
         (await prisma.userLocation.count({
@@ -257,9 +261,9 @@ app.delete("/user/location/:userId", async (req, res) => {
     res.send("Successfully deleted");
 });
 
-// gets ids and locations of active users other than the specified id
-app.get("/users/otherLocations/:userId", async (req, res) => {
-    const userId = parseInt(req.params.userId);
+// gets ids and locations of active users other than the logged-in user
+app.get("/users/otherLocations", authenticate, async (req, res) => {
+    const userId = req.session.userId;
 
     const locations = await prisma.userLocation.findMany({
         where: {

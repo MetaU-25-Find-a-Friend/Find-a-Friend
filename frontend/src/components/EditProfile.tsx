@@ -48,7 +48,7 @@ const EditProfile = () => {
     const handleSubmit = (event: React.MouseEvent) => {
         event.preventDefault();
 
-        updateProfile(user!.id, formData);
+        updateProfile(formData);
     };
 
     // once user is authorized in UserContext, populate their profile information in the form

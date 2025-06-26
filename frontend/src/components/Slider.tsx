@@ -11,11 +11,10 @@ interface SliderProps {
  * @param value state variable to control
  * @param setValue state function that updates value
  * @param options array of actual possible options for value
- * @param optionsDisplay array of strings, elements, etc. to display in slider for each option (indices must align with options) 
+ * @param optionsDisplay array of strings, elements, etc. to display in slider for each option (indices must align with options)
  * @returns A slider picker that allows for updating value to any of the given options
  */
-const Slider = ({value, setValue, options, optionsDisplay}: SliderProps) => {
-
+const Slider = ({ value, setValue, options, optionsDisplay }: SliderProps) => {
     // get offset of bordered slider as percentage of its width
     const getSliderOffset = () => {
         return options.indexOf(value) * 100 + "%";

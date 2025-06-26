@@ -17,7 +17,7 @@ import type { UserLocation } from "../types";
 import Slider from "./Slider";
 
 /**
- * 
+ *
  * @returns A Google Map that can display the locations of all active users as markers (wrap in an APIProvider!)
  */
 const MapPage = () => {
@@ -39,7 +39,7 @@ const MapPage = () => {
     // when Back button is clicked, remove user's location from active table and navigate to dashboard
     const handleBack = () => {
         if (user) {
-            deleteLocation(user.id);
+            deleteLocation();
         }
 
         navigate("/");
@@ -48,7 +48,7 @@ const MapPage = () => {
     // before window unloads, remove user's location from active table (handles navigation not using Back button)
     useBeforeUnload((_) => {
         if (user) {
-            deleteLocation(user.id);
+            deleteLocation();
         }
     });
 
@@ -66,17 +66,17 @@ const MapPage = () => {
             if (user) {
                 if (hideLocation) {
                     // delete location from database so no other users can see it
-                    deleteLocation(user.id);
+                    deleteLocation();
                 } else {
                     // update location in database
-                    updateLocation(user.id, {
+                    updateLocation({
                         lat: position.coords.latitude,
                         lng: position.coords.longitude,
                     });
                 }
 
                 // get locations of all other users online
-                getOtherUserLocations(user.id).then((users) => {
+                getOtherUserLocations().then((users) => {
                     setOtherUsers(
                         users.map((user: UserLocation) => {
                             return {
