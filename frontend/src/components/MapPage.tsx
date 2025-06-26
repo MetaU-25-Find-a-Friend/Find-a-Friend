@@ -7,7 +7,7 @@ import {
     deleteGeohash,
     geoHashToLatLng,
     getOtherUserGeohashes,
-    isGeoHashWithin3Mi,
+    isGeoHashWithinMi,
     updateGeohash,
 } from "../utils";
 import MapMarker from "./MapMarker";
@@ -37,6 +37,9 @@ const MapPage = () => {
 
     // whether or not user's location is hidden from others
     const [hideLocation, setHideLocation] = useState(false);
+
+    // radius in which to show other users
+    const [radius, setRadius] = useState<0.5 | 3 | 20>(0.5);
 
     // when Back button is clicked, remove user's location from active table and navigate to dashboard
     const handleBack = () => {
@@ -107,7 +110,7 @@ const MapPage = () => {
                     <FontAwesomeIcon icon={faArrowLeftLong}></FontAwesomeIcon>{" "}
                     Back to Dashboard
                 </button>
-                <div className={styles.sliderSection}>
+                <div className={styles.hideLocationContainer}>
                     <div className={styles.sliderLabel}>
                         <h6 className={styles.sliderTitle}>Hide location?</h6>
                         <p className={styles.sliderLabelText}>
@@ -121,6 +124,22 @@ const MapPage = () => {
                             setValue={setHideLocation}
                             options={[false, true]}
                             optionsDisplay={["Show", "Hide"]}></Slider>
+                    </div>
+                </div>
+                <div className={styles.radiusContainer}>
+                    <div className={styles.sliderContainer}>
+                        <Slider
+                            value={radius}
+                            setValue={setRadius}
+                            options={[0.5, 3, 20]}
+                            optionsDisplay={["0.5mi", "3mi", "20mi"]}></Slider>
+                    </div>
+                    <div className={styles.sliderLabel}>
+                        <h6 className={styles.sliderTitle}>Nearby radius</h6>
+                        <p className={styles.sliderLabelText}>
+                            Choose a radius around you in which to show other
+                            users.
+                        </p>
                     </div>
                 </div>
 
@@ -137,10 +156,10 @@ const MapPage = () => {
 
                     {otherUsers
                         .filter((userLoc) => {
-                            // only show users within a 3mi circle
-                            return isGeoHashWithin3Mi(
+                            return isGeoHashWithinMi(
                                 myLocation,
                                 userLoc.geohash,
+                                radius,
                             );
                         })
                         .map((user) => {

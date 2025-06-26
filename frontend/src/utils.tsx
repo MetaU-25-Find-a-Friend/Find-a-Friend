@@ -1,6 +1,10 @@
 import { decodeBase32 } from "geohashing";
 import type { UserProfile } from "./types";
-import { GEOHASH_3MI_RES } from "./constants";
+import {
+    GEOHASH_20MI_RES,
+    GEOHASH_3MI_RES,
+    GEOHASH_HALFMI_RES,
+} from "./constants";
 
 /**
  *
@@ -192,12 +196,24 @@ export const geoHashToLatLng = (hash: string) => {
 
 /**
  *
- * @param center a geohash (the center of a 3mi circle)
+ * @param center a geohash (the center of a circle of radius miles)
  * @param hash another geohash
- * @returns true if hash is within at least 3mi of center (assuming 30deg lat)
+ * @param radius either 0.5, 3, or 20 (these values correspond to certain hash length precision)
+ * @returns true if hash is within at least radius of center (assuming 30deg lat)
  */
-export const isGeoHashWithin3Mi = (center: string, hash: string) => {
-    return center.slice(0, GEOHASH_3MI_RES) === hash.slice(0, GEOHASH_3MI_RES);
+export const isGeoHashWithinMi = (
+    center: string,
+    hash: string,
+    radius: 0.5 | 3 | 20,
+) => {
+    const res =
+        radius === 0.5
+            ? GEOHASH_HALFMI_RES
+            : radius === 3
+              ? GEOHASH_3MI_RES
+              : GEOHASH_20MI_RES;
+
+    return center.slice(0, res) === hash.slice(0, res);
 };
 
 // LAT/LONG METHOD
