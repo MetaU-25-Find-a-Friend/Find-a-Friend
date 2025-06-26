@@ -35,3 +35,9 @@ model UserLocation {
   latitude Decimal
   longitude Decimal
 }
+
+model UserGeohashes {
+  id Int @id @default(autoincrement())
+  userId Int @unique
+  geohash String
+}
