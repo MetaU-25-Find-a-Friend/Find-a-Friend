@@ -13,3 +13,8 @@ export const NEARBY_RADIUS = 1000;
  * Interval in milliseconds at which user's browser location is updated and other users' locations are re-fetched
  */
 export const FETCH_INTERVAL = 5000;
+
+/**
+ * Time in ms when an alert is animating and on the screen
+ */
+export const ALERT_DURATION = 3000;

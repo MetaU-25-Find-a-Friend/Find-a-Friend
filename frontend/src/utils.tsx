@@ -88,7 +88,7 @@ export const getProfile = async (id: number) => {
 /**
  *
  * @param data UserProfile representing new data
- * @returns updated UserProfile of logged-in user
+ * @returns true if profile was updated; false if user was not found
  */
 export const updateProfile = async (data: UserProfile) => {
     const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/user`, {
@@ -101,8 +101,7 @@ export const updateProfile = async (data: UserProfile) => {
         body: JSON.stringify(data),
     });
 
-    const json = await response.json();
-    return json as UserProfile;
+    return response.ok;
 };
 
 /**

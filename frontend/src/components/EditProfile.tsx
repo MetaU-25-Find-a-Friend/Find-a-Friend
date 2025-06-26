@@ -11,12 +11,17 @@ import {
     faArrowLeftLong,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
+import Alert from "./Alert";
+import { ALERT_DURATION } from "../constants";
 
 const EditProfile = () => {
     // current user if logged in
     const { user } = useUser();
 
     const navigate = useNavigate();
+
+    // text showing in alert
+    const [alertText, setAlertText] = useState<string | null>(null);
 
     // data entered in profile form
     const [formData, setFormData] = useState<UserProfile>({
@@ -48,7 +53,16 @@ const EditProfile = () => {
     const handleSubmit = (event: React.MouseEvent) => {
         event.preventDefault();
 
-        updateProfile(formData);
+        updateProfile(formData).then((success) => {
+            if (success) {
+                setAlertText("Successfully updated profile.");
+            } else {
+                setAlertText("Something went wrong.");
+            }
+            setTimeout(() => {
+                setAlertText(null);
+            }, ALERT_DURATION);
+        });
     };
 
     // once user is authorized in UserContext, populate their profile information in the form
@@ -67,6 +81,7 @@ const EditProfile = () => {
     } else {
         return (
             <>
+                <Alert alertText={alertText}></Alert>
                 <button
                     className={styles.navButton}
                     onClick={() => navigate("/")}>

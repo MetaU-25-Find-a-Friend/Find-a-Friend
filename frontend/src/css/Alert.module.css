@@ -1,0 +1,38 @@
+@keyframes alert-slide {
+    0% {
+        opacity: 0;
+        transform: translateY(calc(-100% - 5vh));
+    }
+    25% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    75% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(calc(-100% - 5vh));
+    }
+}
+
+.alert {
+    position: fixed;
+    top: 5vh;
+    width: 60vw;
+    left: 20vw;
+    padding: 1rem;
+    background-color: var(--teal-accent);
+    border-radius: 2rem;
+    animation-name: alert-slide;
+    animation-timing-function: ease;
+    animation-fill-mode: both;
+}
+
+.alertText {
+    color: white;
+    font-size: 20px;
+    text-align: center;
+    margin: 0;
+}
