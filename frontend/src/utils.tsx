@@ -2,10 +2,12 @@ import type { UserProfile } from "./types";
 
 /**
  *
- * @param accountData email and password for new account
+ * @param accountData name, email, and password for new account
  * @returns true and success message if account was created; false and reason for error if validation failed
  */
 export const createAccount = async (accountData: {
+    firstName: string;
+    lastName: string;
     email: string;
     password: string;
 }) => {
@@ -70,6 +72,9 @@ export const logout = async () => {
 export const getProfile = async (id: number) => {
     const response = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/user/${id}`,
+        {
+            credentials: "include",
+        },
     );
 
     if (!response.ok) {
@@ -82,38 +87,29 @@ export const getProfile = async (id: number) => {
 
 /**
  *
- * @param id id of the user whose profile to update
  * @param data UserProfile representing new data
- * @returns updated UserProfile
+ * @returns true if profile was updated; false if user was not found
  */
-export const updateProfile = async (id: number, data: UserProfile) => {
-    const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/user/${id}`,
-        {
-            method: "post",
-            mode: "cors",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify(data),
+export const updateProfile = async (data: UserProfile) => {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/user`, {
+        method: "post",
+        mode: "cors",
+        headers: {
+            "Content-Type": "application/json",
         },
-    );
+        credentials: "include",
+        body: JSON.stringify(data),
+    });
 
-    const json = await response.json();
-    return json as UserProfile;
+    return response.ok;
 };
 
 /**
  *
- * @param id id of the user whose location to update
- * @param data lat and long of the user
+ * @param data lat and long of the logged-in user
  */
-export const updateLocation = async (
-    id: number,
-    data: google.maps.LatLngLiteral,
-) => {
-    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/location/${id}`, {
+export const updateLocation = async (data: google.maps.LatLngLiteral) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/location`, {
         method: "post",
         mode: "cors",
         headers: {
@@ -129,9 +125,9 @@ export const updateLocation = async (
  * @param id id of the user who is leaving the map page or hiding their location
  * @returns true if record was found and deleted; false if not found
  */
-export const deleteLocation = async (id: number) => {
+export const deleteLocation = async () => {
     const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/user/location/${id}`,
+        `${import.meta.env.VITE_SERVER_URL}/user/location`,
         {
             method: "delete",
             credentials: "include",
@@ -161,12 +157,14 @@ export const getInterestName = (id: number) => {
 
 /**
  *
- * @param id id of the current user
  * @returns array of UserLocations representing all other active users on the map
  */
-export const getOtherUserLocations = async (id: number) => {
+export const getOtherUserLocations = async () => {
     const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/users/otherLocations/${id}`,
+        `${import.meta.env.VITE_SERVER_URL}/users/otherLocations`,
+        {
+            credentials: "include",
+        },
     );
 
     const otherUsers = await response.json();

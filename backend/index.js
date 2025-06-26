@@ -1,3 +1,4 @@
+// initialize server
 const express = require("express");
 const cors = require("cors");
 
@@ -10,25 +11,38 @@ app.use(
     }),
 );
 
+// initialize prisma
 const { PrismaClient } = require("./generated/prisma");
 const prisma = new PrismaClient();
 
+// setup login middleware
 const bcrypt = require("bcrypt");
 const rateLimit = require("express-rate-limit");
+
+const {
+    RATE_LIMIT_INTERVAL,
+    MAX_LOGIN_ATTEMPTS,
+    SESSION_TIMEOUT,
+} = require("./constants");
+
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 5,
+    windowMs: RATE_LIMIT_INTERVAL,
+    max: MAX_LOGIN_ATTEMPTS,
     message: {
         error: "Too many failed login attempts. Please try again later.",
     },
 });
 
+// setup session middleware and cookie settings
 const session = require("express-session");
 app.use(
     session({
         secret: process.env.VITE_SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
+        cookie: {
+            maxAge: SESSION_TIMEOUT,
+        },
     }),
 );
 
@@ -47,11 +61,13 @@ const authenticate = (req, res, next) => {
 
 // create a new user with the given username and password
 app.post("/signup", async (req, res) => {
-    const { email, password } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
     // validate username and password
-    if (!email || !password) {
-        return res.status(400).send("Username and password are required");
+    if (!firstName || !lastName || !email || !password) {
+        return res
+            .status(400)
+            .send("Name, username, and password are required");
     }
 
     if (password.length < 12) {
@@ -76,9 +92,9 @@ app.post("/signup", async (req, res) => {
         data: {
             email: email,
             password: hashedPassword,
-            firstName: "",
-            lastName: "",
-            interests: Array(6),
+            firstName: firstName,
+            lastName: lastName,
+            interests: Array(6).fill(0, 0, 6),
         },
     });
 
@@ -130,25 +146,29 @@ app.post("/me", async (req, res) => {
         return res.status(401).send("User is not logged in");
     }
 
-    // get and send logged-in user info
-    const user = await prisma.user.findUnique({
-        where: {
-            id: req.session.userId,
-        },
-        select: {
-            id: true,
-            email: true,
-        },
-    });
+    try {
+        // get and send logged-in user info
+        const user = await prisma.user.findUnique({
+            where: {
+                id: req.session.userId,
+            },
+            select: {
+                id: true,
+                email: true,
+            },
+        });
 
-    res.json({
-        id: user.id,
-        email: user.email,
-    });
+        res.json({
+            id: user.id,
+            email: user.email,
+        });
+    } catch (error) {
+        res.status(404).send("User not found");
+    }
 });
 
 // log out user and destroy session
-app.post("/logout", (req, res) => {
+app.post("/logout", authenticate, (req, res) => {
     req.session.destroy((error) => {
         if (error) {
             return res.status(500).send("Failed to log out");
@@ -159,7 +179,7 @@ app.post("/logout", (req, res) => {
 });
 
 // get a user's profile
-app.get("/user/:id", async (req, res) => {
+app.get("/user/:id", authenticate, async (req, res) => {
     const userId = parseInt(req.params.id);
 
     const user = await prisma.user.findUnique({
@@ -184,25 +204,29 @@ app.get("/user/:id", async (req, res) => {
     res.json(user);
 });
 
-// update a user's profile
-app.post("/user/:id", async (req, res) => {
-    const userId = parseInt(req.params.id);
+// update the logged-in user's profile
+app.post("/user", authenticate, async (req, res) => {
+    const userId = req.session.userId;
 
-    const user = await prisma.user.update({
-        where: {
-            id: userId,
-        },
-        data: {
-            ...req.body,
-        },
-    });
+    try {
+        const user = await prisma.user.update({
+            where: {
+                id: userId,
+            },
+            data: {
+                ...req.body,
+            },
+        });
 
-    res.json(user);
+        res.json(user);
+    } catch (error) {
+        res.status(404).send("User not found");
+    }
 });
 
-// update a user's location
-app.post("/user/location/:userId", async (req, res) => {
-    const userId = parseInt(req.params.userId);
+// update the logged-in user's location
+app.post("/user/location", authenticate, async (req, res) => {
+    const userId = req.session.userId;
 
     await prisma.userLocation.upsert({
         create: {
@@ -222,32 +246,25 @@ app.post("/user/location/:userId", async (req, res) => {
     res.send("Successfully updated");
 });
 
-// remove a user's location data from the database
-app.delete("/user/location/:userId", async (req, res) => {
-    const userId = parseInt(req.params.userId);
-
-    const recordExists =
-        (await prisma.userLocation.count({
+// remove the logged-in user's location data from the database
+app.delete("/user/location", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+    try {
+        await prisma.userLocation.delete({
             where: {
                 userId: userId,
             },
-        })) > 0;
+        });
 
-    if (!recordExists) {
-        res.status(404).send("No record to delete");
+        res.send("Successfully deleted");
+    } catch (error) {
+        res.status(404).send("User location not found");
     }
-    await prisma.userLocation.delete({
-        where: {
-            userId: userId,
-        },
-    });
-
-    res.send("Successfully deleted");
 });
 
-// gets ids and locations of active users other than the specified id
-app.get("/users/otherLocations/:userId", async (req, res) => {
-    const userId = parseInt(req.params.userId);
+// gets ids and locations of active users other than the logged-in user
+app.get("/users/otherLocations", authenticate, async (req, res) => {
+    const userId = req.session.userId;
 
     const locations = await prisma.userLocation.findMany({
         where: {
