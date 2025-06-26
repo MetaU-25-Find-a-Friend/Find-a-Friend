@@ -1,0 +1,33 @@
+.sliderContainer {
+    width: 100%;
+    height: 100%;
+    background-color: var(--tan-background);
+    border-radius: 2rem;
+    position: relative;
+}
+
+.slider {
+    z-index: 6;
+    height: 100%;
+    border-radius: 2rem;
+    border: var(--teal-accent) 3px solid;
+    box-sizing: border-box;
+    position: absolute;
+    transition: transform 0.25s ease;
+}
+
+.sliderOptions {
+    z-index: 7;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    align-items: center;
+    position: absolute;
+}
+
+.option {
+    font-size: 20px;
+    margin: 0;
+}

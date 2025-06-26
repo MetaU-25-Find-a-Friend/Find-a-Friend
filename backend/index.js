@@ -226,6 +226,16 @@ app.post("/user/location/:userId", async (req, res) => {
 app.delete("/user/location/:userId", async (req, res) => {
     const userId = parseInt(req.params.userId);
 
+    const recordExists =
+        (await prisma.userLocation.count({
+            where: {
+                userId: userId,
+            },
+        })) > 0;
+
+    if (!recordExists) {
+        res.status(404).send("No record to delete");
+    }
     await prisma.userLocation.delete({
         where: {
             userId: userId,

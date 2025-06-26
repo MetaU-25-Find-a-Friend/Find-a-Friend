@@ -12,8 +12,9 @@ import MapMarker from "./MapMarker";
 import { DEFAULT_MAP_ZOOM, FETCH_INTERVAL, NEARBY_RADIUS } from "../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeftLong } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate } from "react-router-dom";
+import { useBeforeUnload, useNavigate } from "react-router-dom";
 import type { UserLocation } from "../types";
+import Slider from "./Slider";
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API
 // https://developers.google.com/codelabs/maps-platform/maps-platform-101-react-js#1
@@ -31,7 +32,9 @@ const MapPage = () => {
     const [myLocation, setMyLocation] =
         useState<google.maps.LatLngLiteral | null>(null);
 
-    // when back button is clicked, remove user's location from active table and navigate to dashboard
+    const [hideLocation, setHideLocation] = useState(false);
+
+    // when Back button is clicked, remove user's location from active table and navigate to dashboard
     const handleBack = () => {
         if (user) {
             deleteLocation(user.id);
@@ -40,25 +43,35 @@ const MapPage = () => {
         navigate("/");
     };
 
+    // before window unloads, remove user's location from active table (handles navigation not using Back button)
+    useBeforeUnload((_) => {
+        if (user) {
+            deleteLocation(user.id)
+        }
+    })
+
     // load own location, save this to the database, and get locations of other active users
     const loadUserLocations = () => {
         // get browser location
         const geo = navigator.geolocation;
         geo.getCurrentPosition((position) => {
-
             // on success, set location state variable
             setMyLocation({
                 lat: position.coords.latitude,
                 lng: position.coords.longitude,
             });
-            
 
             if (user) {
-                // update location in database
-                updateLocation(user.id, {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude,
-                });
+                if (hideLocation) {
+                    // delete location from database so no other users can see it
+                    deleteLocation(user.id);
+                } else {
+                    // update location in database
+                    updateLocation(user.id, {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    });
+                }
 
                 // get locations of all other users online
                 getOtherUserLocations(user.id).then((users) => {
@@ -82,7 +95,6 @@ const MapPage = () => {
 
     // at each interval, reload location data
     useEffect(() => {
-
         // initial load
         loadUserLocations();
 
@@ -90,8 +102,9 @@ const MapPage = () => {
 
         return () => {
             clearInterval(locationInterval);
-        }
-    }, [user]);
+        };
+    }, [user, hideLocation]);
+
 
     if (!user) {
         return <LoggedOut></LoggedOut>;
@@ -104,6 +117,23 @@ const MapPage = () => {
                     <FontAwesomeIcon icon={faArrowLeftLong}></FontAwesomeIcon>{" "}
                     Back to Dashboard
                 </button>
+                <div className={styles.sliderSection}>
+                    <div className={styles.sliderLabel}>
+                        <h6 className={styles.sliderTitle}>Hide location?</h6>
+                        <p className={styles.sliderLabelText}>
+                            This will prevent any other users from seeing your
+                            location on the map.
+                        </p>
+                    </div>
+                    <div className={styles.sliderContainer}>
+                        <Slider
+                            value={hideLocation}
+                            setValue={setHideLocation}
+                            options={[false, true]}
+                            optionsDisplay={["Show", "Hide"]}></Slider>
+                    </div>
+                </div>
+
                 <Map
                     className={styles.map}
                     defaultCenter={myLocation}
