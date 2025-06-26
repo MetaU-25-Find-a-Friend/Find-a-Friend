@@ -10,6 +10,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 import LoggedOut from "./LoggedOut";
+import { APP_TITLE } from "../constants";
 
 // Landing page; allows navigating to profile, map, etc.
 const Dashboard = () => {
@@ -30,7 +31,7 @@ const Dashboard = () => {
         return (
             <main className={styles.grid}>
                 <div className={styles.titleContainer}>
-                    <h1 className={styles.title}>Find a Friend</h1>
+                    <h1 className={styles.title}>{APP_TITLE}</h1>
                     <div
                         className={styles.userMenuButton}
                         onClick={() => {

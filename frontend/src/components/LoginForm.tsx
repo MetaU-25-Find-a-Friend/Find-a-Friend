@@ -4,6 +4,7 @@ import { login } from "../utils";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import Alert from "./Alert";
+import { APP_TITLE } from "../constants";
 
 // Form to log in to an existing account
 const LoginForm = () => {
@@ -52,7 +53,7 @@ const LoginForm = () => {
             <Alert
                 alertText={alertText}
                 setAlertText={setAlertText}></Alert>
-            <h1 className={styles.title}>Find a Friend</h1>
+            <h1 className={styles.title}>{APP_TITLE}</h1>
             <form className={styles.form}>
                 <input
                     className={styles.input}

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { createAccount } from "../utils";
 import { useNavigate } from "react-router-dom";
 import Alert from "./Alert";
+import { APP_TITLE } from "../constants";
 
 // Form to create a new user account
 const SignupForm = () => {
@@ -55,7 +56,7 @@ const SignupForm = () => {
             <Alert
                 alertText={alertText}
                 setAlertText={setAlertText}></Alert>
-            <h1 className={styles.title}>Find a Friend</h1>
+            <h1 className={styles.title}>{APP_TITLE}</h1>
             <form className={styles.form}>
                 <input
                     className={styles.input}

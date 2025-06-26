@@ -18,3 +18,8 @@ export const FETCH_INTERVAL = 5000;
  * Time in ms when an alert is animating and on the screen
  */
 export const ALERT_DURATION = 3000;
+
+/**
+ * Title of the app to use as page header
+ */
+export const APP_TITLE = "Find a Friend";
