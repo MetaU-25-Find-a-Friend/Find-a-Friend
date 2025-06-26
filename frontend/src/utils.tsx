@@ -1,5 +1,6 @@
 import { decodeBase32 } from "geohashing";
 import type { UserProfile } from "./types";
+import { GEOHASH_3MI_RES } from "./constants";
 
 /**
  *
@@ -125,6 +126,10 @@ export const getInterestName = (id: number) => {
 
 // GEOHASHING METHOD
 
+/**
+ *
+ * @param hash the geohash of the logged-in user's new location
+ */
 export const updateGeohash = async (hash: string) => {
     await fetch(`${import.meta.env.VITE_SERVER_URL}/user/geolocation`, {
         method: "post",
@@ -139,6 +144,10 @@ export const updateGeohash = async (hash: string) => {
     });
 };
 
+/**
+ *
+ * @returns true if logged-in user's hash record was found and deleted, false otherwise
+ */
 export const deleteGeohash = async () => {
     const response = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/user/geolocation`,
@@ -151,6 +160,10 @@ export const deleteGeohash = async () => {
     return response.ok;
 };
 
+/**
+ *
+ * @returns UserGeohash array representing locations of all active users other than the logged-in user
+ */
 export const getOtherUserGeohashes = async () => {
     const response = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/users/otherGeolocations`,
@@ -164,12 +177,27 @@ export const getOtherUserGeohashes = async () => {
     return otherUsers;
 };
 
+/**
+ *
+ * @param hash the base32 geohash
+ * @returns a LatLngLiteral contained within the geohash rectangle
+ */
 export const geoHashToLatLng = (hash: string) => {
     const { lat, lng } = decodeBase32(hash);
     return {
         lat: lat,
         lng: lng,
     };
+};
+
+/**
+ *
+ * @param center a geohash (the center of a 3mi circle)
+ * @param hash another geohash
+ * @returns true if hash is within at least 3mi of center (assuming 30deg lat)
+ */
+export const isGeoHashWithin3Mi = (center: string, hash: string) => {
+    return center.slice(0, GEOHASH_3MI_RES) === hash.slice(0, GEOHASH_3MI_RES);
 };
 
 // LAT/LONG METHOD

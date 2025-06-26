@@ -10,6 +10,24 @@ export const DEFAULT_MAP_ZOOM = 16;
 export const NEARBY_RADIUS = 1000;
 
 /**
+ * If two geohashes' first 4 characters are not identical,
+ * we can rule them out of being within 20 miles of each other (at 30deg lat) [ref](https://bhaugen.com/blog/geohash-sizes/)
+ */
+export const GEOHASH_20MI_RES = 4;
+
+/**
+ * If two geohashes' first 5 characters are not identical,
+ * we can rule them out of being within 3 miles of each other (at 30deg lat) [ref](https://bhaugen.com/blog/geohash-sizes/)
+ */
+export const GEOHASH_3MI_RES = 5;
+
+/**
+ * If two geohashes' first 6 characters are not identical,
+ * we can rule them out of being within 0.5 miles of each other (at 30deg lat) [ref](https://bhaugen.com/blog/geohash-sizes/)
+ */
+export const GEOHASH_HALFMI_RES = 6;
+
+/**
  * Interval in milliseconds at which user's browser location is updated and other users' locations are re-fetched
  */
 export const FETCH_INTERVAL = 5000;
