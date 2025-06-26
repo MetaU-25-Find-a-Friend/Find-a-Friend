@@ -29,13 +29,6 @@ model User {
   friends Int[]
 }
 
-model UserLocation {
-  id Int @id @default(autoincrement())
-  userId Int @unique
-  latitude Decimal
-  longitude Decimal
-}
-
 model UserGeohashes {
   id Int @id @default(autoincrement())
   userId Int @unique
