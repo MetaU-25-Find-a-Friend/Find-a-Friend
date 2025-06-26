@@ -50,11 +50,11 @@ const authenticate = (req, res, next) => {
 
 // create a new user with the given username and password
 app.post("/signup", async (req, res) => {
-    const { email, password } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
     // validate username and password
-    if (!email || !password) {
-        return res.status(400).send("Username and password are required");
+    if (!firstName || !lastName || !email || !password) {
+        return res.status(400).send("Name, username, and password are required");
     }
 
     if (password.length < 12) {
@@ -79,9 +79,9 @@ app.post("/signup", async (req, res) => {
         data: {
             email: email,
             password: hashedPassword,
-            firstName: "",
-            lastName: "",
-            interests: Array(6),
+            firstName: firstName,
+            lastName: lastName,
+            interests: Array(6).fill(0, 0, 6),
         },
     });
 

@@ -9,13 +9,21 @@ const SignupForm = () => {
 
     // data entered in signup form
     const [formData, setFormData] = useState({
+        firstName: "",
+        lastName: "",
         email: "",
         password: "",
+        confirmPassword: ""
     });
 
     // on submit, attempt to create account
     const handleCreateAccount = async (event: React.MouseEvent) => {
         event.preventDefault();
+
+        if (formData.password !== formData.confirmPassword) {
+            console.log("Passwords must match")
+            return;
+        }
 
         const [created, message] = await createAccount(formData);
 
@@ -44,6 +52,20 @@ const SignupForm = () => {
             <form className={styles.form}>
                 <input
                     className={styles.input}
+                    name="firstName"
+                    placeholder="First name"
+                    type="text"
+                    onChange={handleInputChange}
+                    required></input>
+                    <input
+                    className={styles.input}
+                    name="lastName"
+                    placeholder="Last name"
+                    type="text"
+                    onChange={handleInputChange}
+                    required></input>
+                <input
+                    className={styles.input}
                     name="email"
                     placeholder="Email"
                     type="email"
@@ -53,6 +75,13 @@ const SignupForm = () => {
                     className={styles.input}
                     name="password"
                     placeholder="Password"
+                    type="password"
+                    onChange={handleInputChange}
+                    required></input>
+                <input
+                    className={styles.input}
+                    name="confirmPassword"
+                    placeholder="Confirm password"
                     type="password"
                     onChange={handleInputChange}
                     required></input>

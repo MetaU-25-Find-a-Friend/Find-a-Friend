@@ -2,10 +2,12 @@ import type { UserProfile } from "./types";
 
 /**
  *
- * @param accountData email and password for new account
+ * @param accountData name, email, and password for new account
  * @returns true and success message if account was created; false and reason for error if validation failed
  */
 export const createAccount = async (accountData: {
+    firstName: string;
+    lastName: string;
     email: string;
     password: string;
 }) => {
