@@ -15,9 +15,12 @@ const prisma = new PrismaClient();
 
 const bcrypt = require("bcrypt");
 const rateLimit = require("express-rate-limit");
+
+const { RATE_LIMIT_INTERVAL, MAX_LOGIN_ATTEMPTS } = require("./constants");
+
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 5,
+    windowMs: RATE_LIMIT_INTERVAL,
+    max: MAX_LOGIN_ATTEMPTS,
     message: {
         error: "Too many failed login attempts. Please try again later.",
     },
