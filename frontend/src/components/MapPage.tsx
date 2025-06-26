@@ -11,7 +11,7 @@ import {
     updateGeohash,
 } from "../utils";
 import MapMarker from "./MapMarker";
-import { DEFAULT_MAP_ZOOM, FETCH_INTERVAL } from "../constants";
+import { DEFAULT_MAP_ZOOM, FETCH_INTERVAL, GEOHASH_RADII } from "../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeftLong } from "@fortawesome/free-solid-svg-icons";
 import { useBeforeUnload, useNavigate } from "react-router-dom";
@@ -39,7 +39,7 @@ const MapPage = () => {
     const [hideLocation, setHideLocation] = useState(false);
 
     // radius in which to show other users
-    const [radius, setRadius] = useState<0.5 | 3 | 20>(0.5);
+    const [radius, setRadius] = useState(GEOHASH_RADII[0].radius);
 
     // when Back button is clicked, remove user's location from active table and navigate to dashboard
     const handleBack = () => {
@@ -131,8 +131,12 @@ const MapPage = () => {
                         <Slider
                             value={radius}
                             setValue={setRadius}
-                            options={[0.5, 3, 20]}
-                            optionsDisplay={["0.5mi", "3mi", "20mi"]}></Slider>
+                            options={GEOHASH_RADII.map(
+                                (element) => element.radius,
+                            )}
+                            optionsDisplay={GEOHASH_RADII.map(
+                                (element) => element.radius + "mi",
+                            )}></Slider>
                     </div>
                     <div className={styles.sliderLabel}>
                         <h6 className={styles.sliderTitle}>Nearby radius</h6>

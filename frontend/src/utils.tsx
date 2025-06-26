@@ -1,10 +1,6 @@
 import { decodeBase32 } from "geohashing";
 import type { UserProfile } from "./types";
-import {
-    GEOHASH_20MI_RES,
-    GEOHASH_3MI_RES,
-    GEOHASH_HALFMI_RES,
-} from "./constants";
+import { GEOHASH_RADII } from "./constants";
 
 /**
  *
@@ -128,8 +124,6 @@ export const getInterestName = (id: number) => {
     return interests[id];
 };
 
-// GEOHASHING METHOD
-
 /**
  *
  * @param hash the geohash of the logged-in user's new location
@@ -198,72 +192,22 @@ export const geoHashToLatLng = (hash: string) => {
  *
  * @param center a geohash (the center of a circle of radius miles)
  * @param hash another geohash
- * @param radius either 0.5, 3, or 20 (these values correspond to certain hash length precision)
- * @returns true if hash is within at least radius of center (assuming 30deg lat)
+ * @param radius a radius contained in GEOHASH_RADII
+ * @returns true if hash is within at least radius of center (assuming 30deg lat); false otherwise; or null if radius is invalid
  */
 export const isGeoHashWithinMi = (
     center: string,
     hash: string,
-    radius: 0.5 | 3 | 20,
+    radius: number,
 ) => {
-    const res =
-        radius === 0.5
-            ? GEOHASH_HALFMI_RES
-            : radius === 3
-              ? GEOHASH_3MI_RES
-              : GEOHASH_20MI_RES;
+    // find known resolution for radius
+    const res = GEOHASH_RADII.find((element) => {
+        return element.radius === radius;
+    })?.res;
 
-    return center.slice(0, res) === hash.slice(0, res);
-};
-
-// LAT/LONG METHOD
-
-/**
- *
- * @param data lat and long of the logged-in user
- */
-export const updateLocation = async (data: google.maps.LatLngLiteral) => {
-    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/location`, {
-        method: "post",
-        mode: "cors",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(data),
-    });
-};
-
-/**
- *
- * @param id id of the user who is leaving the map page or hiding their location
- * @returns true if record was found and deleted; false if not found
- */
-export const deleteLocation = async () => {
-    const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/user/location`,
-        {
-            method: "delete",
-            credentials: "include",
-        },
-    );
-
-    return response.ok;
-};
-
-/**
- *
- * @returns array of UserLocations representing all other active users on the map
- */
-export const getOtherUserLocations = async () => {
-    const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/users/otherLocations`,
-        {
-            credentials: "include",
-        },
-    );
-
-    const otherUsers = await response.json();
-
-    return otherUsers;
+    if (!res) {
+        return null;
+    } else {
+        return center.slice(0, res) === hash.slice(0, res);
+    }
 };
