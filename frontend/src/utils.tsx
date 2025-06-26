@@ -1,3 +1,4 @@
+import { decodeBase32 } from "geohashing";
 import type { UserProfile } from "./types";
 
 /**
@@ -104,6 +105,75 @@ export const updateProfile = async (data: UserProfile) => {
     return response.ok;
 };
 
+const interests = [
+    "Reading",
+    "Cooking",
+    "Drawing",
+    "Painting",
+    "Swimming",
+    "Hiking",
+];
+
+/**
+ *
+ * @param id index of the interest to retrieve
+ * @returns string name of the specified interest
+ */
+export const getInterestName = (id: number) => {
+    return interests[id];
+};
+
+// GEOHASHING METHOD
+
+export const updateGeohash = async (hash: string) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/geolocation`, {
+        method: "post",
+        mode: "cors",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+            geohash: hash,
+        }),
+    });
+};
+
+export const deleteGeohash = async () => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/user/geolocation`,
+        {
+            method: "delete",
+            credentials: "include",
+        },
+    );
+
+    return response.ok;
+};
+
+export const getOtherUserGeohashes = async () => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/users/otherGeolocations`,
+        {
+            credentials: "include",
+        },
+    );
+
+    const otherUsers = await response.json();
+
+    return otherUsers;
+};
+
+export const geoHashToLatLng = (hash: string) => {
+    const { lat, lng } = decodeBase32(hash);
+    return {
+        lat: lat,
+        lng: lng,
+    };
+};
+
+// LAT/LONG METHOD
+
 /**
  *
  * @param data lat and long of the logged-in user
@@ -135,24 +205,6 @@ export const deleteLocation = async () => {
     );
 
     return response.ok;
-};
-
-const interests = [
-    "Reading",
-    "Cooking",
-    "Drawing",
-    "Painting",
-    "Swimming",
-    "Hiking",
-];
-
-/**
- *
- * @param id index of the interest to retrieve
- * @returns string name of the specified interest
- */
-export const getInterestName = (id: number) => {
-    return interests[id];
 };
 
 /**

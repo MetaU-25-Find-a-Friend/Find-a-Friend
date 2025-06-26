@@ -224,6 +224,61 @@ app.post("/user", authenticate, async (req, res) => {
     }
 });
 
+// GEOHASHING METHOD
+
+// update the logged-in user's location
+app.post("/user/geolocation", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    await prisma.userGeohashes.upsert({
+        create: {
+            userId: userId,
+            geohash: req.body.geohash,
+        },
+        update: {
+            geohash: req.body.geohash,
+        },
+        where: {
+            userId: userId,
+        },
+    });
+
+    res.send("Location updated");
+});
+
+// remove the logged-in user's location data from the database
+app.delete("/user/geolocation", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+    try {
+        await prisma.userGeohashes.delete({
+            where: {
+                userId: userId,
+            },
+        });
+
+        res.send("Successfully deleted");
+    } catch (error) {
+        res.status(404).send("Geohash record not found");
+    }
+});
+
+// gets ids and locations of active users other than the logged-in user
+app.get("/users/otherGeolocations", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    const locations = await prisma.userGeohashes.findMany({
+        where: {
+            NOT: {
+                userId: userId,
+            },
+        },
+    });
+
+    res.json(locations);
+});
+
+// LAT/LONG METHOD
+
 // update the logged-in user's location
 app.post("/user/location", authenticate, async (req, res) => {
     const userId = req.session.userId;
