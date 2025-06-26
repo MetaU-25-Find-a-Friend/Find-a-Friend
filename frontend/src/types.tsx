@@ -26,3 +26,10 @@ export interface SavedUserContext {
     user: SavedUser | null;
     setUser: (value: SavedUser) => void;
 }
+
+export interface UserLocation {
+    id: number;
+    userId: number;
+    latitude: number;
+    longitude: number;
+}

@@ -127,12 +127,18 @@ export const updateLocation = async (
 /**
  *
  * @param id id of the user who is leaving the map page or hiding their location
+ * @returns true if record was found and deleted; false if not found
  */
 export const deleteLocation = async (id: number) => {
-    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/location/${id}`, {
-        method: "delete",
-        credentials: "include",
-    });
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/user/location/${id}`,
+        {
+            method: "delete",
+            credentials: "include",
+        },
+    );
+
+    return response.ok;
 };
 
 const interests = [
@@ -151,4 +157,19 @@ const interests = [
  */
 export const getInterestName = (id: number) => {
     return interests[id];
+};
+
+/**
+ *
+ * @param id id of the current user
+ * @returns array of UserLocations representing all other active users on the map
+ */
+export const getOtherUserLocations = async (id: number) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/users/otherLocations/${id}`,
+    );
+
+    const otherUsers = await response.json();
+
+    return otherUsers;
 };
