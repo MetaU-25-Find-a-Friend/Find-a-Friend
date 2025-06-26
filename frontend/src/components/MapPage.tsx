@@ -16,9 +16,10 @@ import { useBeforeUnload, useNavigate } from "react-router-dom";
 import type { UserLocation } from "../types";
 import Slider from "./Slider";
 
-// https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API
-// https://developers.google.com/codelabs/maps-platform/maps-platform-101-react-js#1
-// https://visgl.github.io/react-google-maps/docs/api-reference/components/map
+/**
+ * 
+ * @returns A Google Map that can display the locations of all active users as markers (wrap in an APIProvider!)
+ */
 const MapPage = () => {
     const navigate = useNavigate();
 
@@ -32,6 +33,7 @@ const MapPage = () => {
     const [myLocation, setMyLocation] =
         useState<google.maps.LatLngLiteral | null>(null);
 
+    // whether or not user's location is hidden from others
     const [hideLocation, setHideLocation] = useState(false);
 
     // when Back button is clicked, remove user's location from active table and navigate to dashboard
@@ -46,9 +48,9 @@ const MapPage = () => {
     // before window unloads, remove user's location from active table (handles navigation not using Back button)
     useBeforeUnload((_) => {
         if (user) {
-            deleteLocation(user.id)
+            deleteLocation(user.id);
         }
-    })
+    });
 
     // load own location, save this to the database, and get locations of other active users
     const loadUserLocations = () => {
@@ -104,7 +106,6 @@ const MapPage = () => {
             clearInterval(locationInterval);
         };
     }, [user, hideLocation]);
-
 
     if (!user) {
         return <LoggedOut></LoggedOut>;

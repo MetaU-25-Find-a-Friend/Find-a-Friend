@@ -15,7 +15,7 @@ interface MapMarkerProps {
  *
  * @param id id of the user whom this marker represents (used to fetch profile)
  * @param location location of the user
- * @returns a marker at the user's location with profile information in a popup on hover
+ * @returns A marker at the user's location with profile information in a popup on hover
  */
 const MapMarker = ({ id, location }: MapMarkerProps) => {
     // profile of the user represented by this marker

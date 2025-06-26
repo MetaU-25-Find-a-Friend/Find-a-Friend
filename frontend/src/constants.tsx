@@ -10,6 +10,6 @@ export const DEFAULT_MAP_ZOOM = 16;
 export const NEARBY_RADIUS = 1000;
 
 /**
- * Interval in milliseconds at which user's browser location is updated and
+ * Interval in milliseconds at which user's browser location is updated and other users' locations are re-fetched
  */
 export const FETCH_INTERVAL = 5000;

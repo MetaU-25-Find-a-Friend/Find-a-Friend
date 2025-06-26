@@ -7,9 +7,18 @@ interface SliderProps {
     optionsDisplay: any[];
 }
 
-const Slider = (props: SliderProps) => {
+/**
+ * @param value state variable to control
+ * @param setValue state function that updates value
+ * @param options array of actual possible options for value
+ * @param optionsDisplay array of strings, elements, etc. to display in slider for each option (indices must align with options) 
+ * @returns A slider picker that allows for updating value to any of the given options
+ */
+const Slider = ({value, setValue, options, optionsDisplay}: SliderProps) => {
+
+    // get offset of bordered slider as percentage of its width
     const getSliderOffset = () => {
-        return props.options.indexOf(props.value) * 100 + "%";
+        return options.indexOf(value) * 100 + "%";
     };
 
     return (
@@ -18,16 +27,16 @@ const Slider = (props: SliderProps) => {
                 className={styles.slider}
                 style={{
                     transform: `translateX(${getSliderOffset()})`,
-                    width: 100 / props.options.length + "%",
+                    width: 100 / options.length + "%",
                 }}></div>
             <div className={styles.sliderOptions}>
-                {props.options.map((option, index) => (
+                {options.map((option, index) => (
                     <p
                         className={styles.option}
                         onClick={() => {
-                            props.setValue(option);
+                            setValue(option);
                         }}>
-                        {props.optionsDisplay[index]}
+                        {optionsDisplay[index]}
                     </p>
                 ))}
             </div>
