@@ -33,3 +33,9 @@ export interface UserLocation {
     latitude: number;
     longitude: number;
 }
+
+export interface UserGeohash {
+    id: number;
+    userId: number;
+    geohash: string;
+}

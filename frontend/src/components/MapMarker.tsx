@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import type { UserProfile } from "../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
-import { getInterestName, getProfile } from "../utils";
+import { geoHashToLatLng, getInterestName, getProfile } from "../utils";
 
 interface MapMarkerProps {
     id: number;
-    location: google.maps.LatLngLiteral;
+    location: string;
 }
 
 /**
@@ -35,7 +35,7 @@ const MapMarker = ({ id, location }: MapMarkerProps) => {
     }, []);
 
     return (
-        <AdvancedMarker position={location}>
+        <AdvancedMarker position={geoHashToLatLng(location)}>
             <div className={styles.marker}>
                 <FontAwesomeIcon
                     className={styles.markerIcon}

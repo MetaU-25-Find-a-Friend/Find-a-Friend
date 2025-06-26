@@ -4,10 +4,23 @@
 export const DEFAULT_MAP_ZOOM = 16;
 
 /**
- * Radius in meters of the circle in which other users are shown to the user.
- * This will eventually be customizable on the user's end, but for now it is a constant here
+ * Array of objects representing known radii in miles and their corresponding geohash resolution:
+ * if two geohashes are identical up to res characters, they must be within radius miles of each other, assuming ~30deg lat
  */
-export const NEARBY_RADIUS = 1000;
+export const GEOHASH_RADII = [
+    {
+        radius: 0.5,
+        res: 6,
+    },
+    {
+        radius: 3,
+        res: 5,
+    },
+    {
+        radius: 20,
+        res: 4,
+    },
+];
 
 /**
  * Interval in milliseconds at which user's browser location is updated and other users' locations are re-fetched

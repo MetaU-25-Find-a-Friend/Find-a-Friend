@@ -1,4 +1,6 @@
+import { decodeBase32 } from "geohashing";
 import type { UserProfile } from "./types";
+import { GEOHASH_RADII } from "./constants";
 
 /**
  *
@@ -104,39 +106,6 @@ export const updateProfile = async (data: UserProfile) => {
     return response.ok;
 };
 
-/**
- *
- * @param data lat and long of the logged-in user
- */
-export const updateLocation = async (data: google.maps.LatLngLiteral) => {
-    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/location`, {
-        method: "post",
-        mode: "cors",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(data),
-    });
-};
-
-/**
- *
- * @param id id of the user who is leaving the map page or hiding their location
- * @returns true if record was found and deleted; false if not found
- */
-export const deleteLocation = async () => {
-    const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/user/location`,
-        {
-            method: "delete",
-            credentials: "include",
-        },
-    );
-
-    return response.ok;
-};
-
 const interests = [
     "Reading",
     "Cooking",
@@ -157,11 +126,45 @@ export const getInterestName = (id: number) => {
 
 /**
  *
- * @returns array of UserLocations representing all other active users on the map
+ * @param hash the geohash of the logged-in user's new location
  */
-export const getOtherUserLocations = async () => {
+export const updateGeohash = async (hash: string) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/geolocation`, {
+        method: "post",
+        mode: "cors",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+            geohash: hash,
+        }),
+    });
+};
+
+/**
+ *
+ * @returns true if logged-in user's hash record was found and deleted, false otherwise
+ */
+export const deleteGeohash = async () => {
     const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/users/otherLocations`,
+        `${import.meta.env.VITE_SERVER_URL}/user/geolocation`,
+        {
+            method: "delete",
+            credentials: "include",
+        },
+    );
+
+    return response.ok;
+};
+
+/**
+ *
+ * @returns UserGeohash array representing locations of all active users other than the logged-in user
+ */
+export const getOtherUserGeohashes = async () => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/users/otherGeolocations`,
         {
             credentials: "include",
         },
@@ -170,4 +173,41 @@ export const getOtherUserLocations = async () => {
     const otherUsers = await response.json();
 
     return otherUsers;
+};
+
+/**
+ *
+ * @param hash the base32 geohash
+ * @returns a LatLngLiteral contained within the geohash rectangle
+ */
+export const geoHashToLatLng = (hash: string) => {
+    const { lat, lng } = decodeBase32(hash);
+    return {
+        lat: lat,
+        lng: lng,
+    };
+};
+
+/**
+ *
+ * @param center a geohash (the center of a circle of radius miles)
+ * @param hash another geohash
+ * @param radius a radius contained in GEOHASH_RADII
+ * @returns true if hash is within at least radius of center (assuming 30deg lat); false otherwise; or null if radius is invalid
+ */
+export const isGeoHashWithinMi = (
+    center: string,
+    hash: string,
+    radius: number,
+) => {
+    // find known resolution for radius
+    const res = GEOHASH_RADII.find((element) => {
+        return element.radius === radius;
+    })?.res;
+
+    if (!res) {
+        return null;
+    } else {
+        return center.slice(0, res) === hash.slice(0, res);
+    }
 };

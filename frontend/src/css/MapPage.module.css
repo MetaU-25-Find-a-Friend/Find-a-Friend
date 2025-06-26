@@ -16,7 +16,7 @@
     z-index: 5;
 }
 
-.sliderSection {
+.hideLocationContainer {
     z-index: 5;
     position: fixed;
     right: 0;
@@ -27,6 +27,20 @@
     align-items: center;
     gap: 1rem;
     width: 15rem;
+}
+
+.radiusContainer {
+    z-index: 5;
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    margin: 1rem;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 25rem;
 }
 
 .sliderContainer {
