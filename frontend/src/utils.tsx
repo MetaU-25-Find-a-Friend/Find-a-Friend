@@ -1,10 +1,14 @@
 import { decodeBase32, encodeBase32 } from "geohashing";
 import type { UserProfile, Place, UserGeohash, PlaceRecData } from "./types";
 import {
+    COUNT_WEIGHT,
+    DISTANCE_WEIGHT,
+    FRIEND_COUNT_WEIGHT,
     GEOHASH_AT_PLACE_RES,
     GEOHASH_RADII,
     MAX_PLACE_RESULTS,
     NEARBY_PLACES_RADIUS,
+    SIMILARITY_WEIGHT,
 } from "./constants";
 
 /**
@@ -313,7 +317,7 @@ export const getNearbyPOIs = async (hash: string) => {
 };
 
 /**
- * 
+ *
  * @param id id of the user whose data to fetch
  * @returns an object with the friends array and interests array of the user
  */
@@ -330,7 +334,7 @@ const getFriendsAndInterests = async (id: number) => {
 };
 
 /**
- * 
+ *
  * @param v1 one interest array (all values 0 or 1)
  * @param v2 another interest array (all values 0 or 1)
  * @returns the acute angle between v1 and v2 in radians; this will be in the range [0, pi/2]
@@ -352,10 +356,10 @@ const angleBetweenInterestVectors = (v1: number[], v2: number[]) => {
 };
 
 /**
- * 
+ *
  * @param string1 a string
  * @param string2 another string
- * @returns the length of a run of identical characters in both strings starting from index 0; 
+ * @returns the length of a run of identical characters in both strings starting from index 0;
  * maximum length is the length of the shorter string
  */
 const numSameCharacters = (string1: string, string2: string) => {
@@ -374,13 +378,68 @@ const numSameCharacters = (string1: string, string2: string) => {
 
 /**
  *
+ * @param placeData1
+ * @param placeData2
+ * @returns a positive number if placeData1 should be ordered before placeData2, 0 if they are equal, and negative if opposite order
+ */
+const sortRecommendations = (
+    placeData1: PlaceRecData,
+    placeData2: PlaceRecData,
+) => {
+    // calculate average similarity of present users and number of friends present at place 1
+    let avgSimilarity1 = 0;
+    let friendCount1 = 0;
+
+    if (placeData1.userData.count !== 0) {
+        for (const user of placeData1.userData.users) {
+            avgSimilarity1 += user.interestSimilarity;
+            if (user.friend) {
+                friendCount1++;
+            }
+        }
+
+        avgSimilarity1 /= placeData1.userData.count;
+    }
+
+    // calculate average similarity of present users and number of friends present at place 2
+    let avgSimilarity2 = 0;
+    let friendCount2 = 0;
+
+    if (placeData2.userData.count !== 0) {
+        for (const user of placeData2.userData.users) {
+            avgSimilarity2 += user.interestSimilarity;
+            if (user.friend) {
+                friendCount2++;
+            }
+        }
+
+        avgSimilarity2 /= placeData2.userData.count;
+    }
+
+    // calculate final scores: the higher, the more likely it is for the user to want to go there
+    const placeScore1 =
+        friendCount1 * FRIEND_COUNT_WEIGHT +
+        placeData1.userData.count * COUNT_WEIGHT -
+        avgSimilarity1 * SIMILARITY_WEIGHT +
+        placeData1.geohashDistance * DISTANCE_WEIGHT;
+    const placeScore2 =
+        friendCount2 * FRIEND_COUNT_WEIGHT +
+        placeData2.userData.count * COUNT_WEIGHT -
+        avgSimilarity2 * SIMILARITY_WEIGHT +
+        placeData2.geohashDistance * DISTANCE_WEIGHT;
+
+    return placeScore2 - placeScore1;
+};
+
+/**
+ *
  * @param places array of places that might be recommended to user
  * @param currentUser id of the current user
  * @param currentLocation the current user's geohashed location
  * @param activeUsers array of other active users and their locations
- * @returns array of objects representing the given place data, their approximate distance from the user, and other users there
+ * @returns array of place/user data objects ordered by chance the user might go there
  */
-export const addUserDataToPlaces = async (
+export const recommendPlaces = async (
     places: Place[],
     currentUser: number,
     currentLocation: string,
@@ -422,6 +481,7 @@ export const addUserDataToPlaces = async (
         // push object to result
         result.push({
             place: place,
+            geohash: placeGeohash,
             geohashDistance: numSameCharacters(placeGeohash, currentLocation),
             userData: {
                 count: userDataAtPlace.length,
@@ -431,5 +491,5 @@ export const addUserDataToPlaces = async (
     }
 
     // sort results by rough distance of the place from the current user
-    return result.sort((a, b) => b.geohashDistance - a.geohashDistance);
+    return result.sort(sortRecommendations);
 };

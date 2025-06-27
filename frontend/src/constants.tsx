@@ -51,4 +51,24 @@ export const NEARBY_PLACES_RADIUS = 2000;
 /**
  * Maximum number of results to get from Nearby Search
  */
-export const MAX_PLACE_RESULTS = 20;
+export const MAX_PLACE_RESULTS = 10;
+
+/**
+ * Weight of average present user similarity in place recommendation algorithm
+ */
+export const SIMILARITY_WEIGHT = 2;
+
+/**
+ * Weight of present user count in place recommendation algorithm
+ */
+export const COUNT_WEIGHT = 3;
+
+/**
+ * Weight of present friend count in place recommendation algorithm
+ */
+export const FRIEND_COUNT_WEIGHT = 4;
+
+/**
+ * Weight of distance in place recommendation algorithm
+ */
+export const DISTANCE_WEIGHT = 2.5;

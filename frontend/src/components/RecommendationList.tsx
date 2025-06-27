@@ -1,5 +1,5 @@
 import styles from "../css/RecommendationList.module.css";
-import { addUserDataToPlaces, getNearbyPOIs } from "../utils";
+import { recommendPlaces, getNearbyPOIs } from "../utils";
 import { useState } from "react";
 import type { PlaceRecData, UserGeohash } from "../types";
 
@@ -10,10 +10,10 @@ interface RecommendationListProps {
 }
 
 /**
- * 
+ *
  * @param myId the id of the current user
  * @param myLocation the current user's geohashed location
- * @param otherUsers the array of other active users 
+ * @param otherUsers the array of other active users
  * @returns A list of nearby points of interest ordered by a recommendation algorithm
  */
 const RecommendationList = ({
@@ -21,7 +21,6 @@ const RecommendationList = ({
     myLocation,
     otherUsers,
 }: RecommendationListProps) => {
-
     // array of places combined with data on the number of users there and their similarity to the current user
     const [nearbyPlaces, setNearbyPlaces] = useState(Array() as PlaceRecData[]);
 
@@ -34,7 +33,7 @@ const RecommendationList = ({
                     getNearbyPOIs(myLocation)
                         .then((places) =>
                             // combine each place with data on users there
-                            addUserDataToPlaces(
+                            recommendPlaces(
                                 places,
                                 myId,
                                 myLocation,
@@ -56,6 +55,7 @@ const RecommendationList = ({
                     <p className={styles.placeAddress}>
                         {place.place.formattedAddress}
                     </p>
+                    <p className={styles.placeAddress}>{place.geohash}</p>
                     <p className={styles.userList}>
                         {place.userData.count} users are here.
                     </p>
