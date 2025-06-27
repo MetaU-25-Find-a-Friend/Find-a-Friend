@@ -1,6 +1,7 @@
-import { decodeBase32 } from "geohashing";
-import type { UserProfile } from "./types";
+import { decodeBase32, encodeBase32 } from "geohashing";
+import type { UserProfile, Place, UserGeohash, PlaceRecData } from "./types";
 import {
+    GEOHASH_AT_PLACE_RES,
     GEOHASH_RADII,
     MAX_PLACE_RESULTS,
     NEARBY_PLACES_RADIUS,
@@ -217,6 +218,30 @@ export const isGeoHashWithinMi = (
 };
 
 /**
+ *
+ * @param userHash geohash of a user's location
+ * @param placeLocation lat and long of a place of interest
+ * @returns true if the user is reasonably close to/within meters of place; false if not
+ */
+export const isUserAtPlace = (
+    userHash: string,
+    placeLocation: {
+        latitude: number;
+        longitude: number;
+    },
+) => {
+    const placeHash = encodeBase32(
+        placeLocation.latitude,
+        placeLocation.longitude,
+    );
+
+    return (
+        userHash.slice(0, GEOHASH_AT_PLACE_RES) ===
+        placeHash.slice(0, GEOHASH_AT_PLACE_RES)
+    );
+};
+
+/**
  * Perform a Google Maps Places API (New) Nearby Search for places of interest near the user
  * @param hash the geohash of the user's current location
  * @returns MAX_PLACE_RESULTS nearby points of interest
@@ -284,5 +309,127 @@ export const getNearbyPOIs = async (hash: string) => {
     );
 
     const places = await response.json();
-    return places;
+    return places.places;
+};
+
+/**
+ * 
+ * @param id id of the user whose data to fetch
+ * @returns an object with the friends array and interests array of the user
+ */
+const getFriendsAndInterests = async (id: number) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/user/friendsAndInterests/${id}`,
+        {
+            credentials: "include",
+        },
+    );
+
+    const json = await response.json();
+    return json;
+};
+
+/**
+ * 
+ * @param v1 one interest array (all values 0 or 1)
+ * @param v2 another interest array (all values 0 or 1)
+ * @returns the acute angle between v1 and v2 in radians; this will be in the range [0, pi/2]
+ */
+const angleBetweenInterestVectors = (v1: number[], v2: number[]) => {
+    let m1 = 0;
+    let m2 = 0;
+    let dotProduct = 0;
+
+    // calculate magnitude^2 for both vectors and their dot product
+    for (let i = 0; i < v1.length; i++) {
+        m1 += v1[i];
+        m2 += v2[i];
+        dotProduct += v1[i] * v2[i];
+    }
+
+    // theta = arccos((v1 . v2)/(|v1||v2|))
+    return Math.acos(dotProduct / (Math.sqrt(m1) * Math.sqrt(m2)));
+};
+
+/**
+ * 
+ * @param string1 a string
+ * @param string2 another string
+ * @returns the length of a run of identical characters in both strings starting from index 0; 
+ * maximum length is the length of the shorter string
+ */
+const numSameCharacters = (string1: string, string2: string) => {
+    let num = 0;
+
+    for (let i = 0; i < Math.min(string1.length, string2.length); i++) {
+        if (string1.charAt(i) === string2.charAt(i)) {
+            num++;
+        } else {
+            return num;
+        }
+    }
+
+    return num;
+};
+
+/**
+ *
+ * @param places array of places that might be recommended to user
+ * @param currentUser id of the current user
+ * @param currentLocation the current user's geohashed location
+ * @param activeUsers array of other active users and their locations
+ * @returns array of objects representing the given place data, their approximate distance from the user, and other users there
+ */
+export const addUserDataToPlaces = async (
+    places: Place[],
+    currentUser: number,
+    currentLocation: string,
+    activeUsers: UserGeohash[],
+) => {
+    const result = Array() as PlaceRecData[];
+
+    // iterate over all other users, determining whether they are friends and calculating the similarity of their interests
+    const allUsersData = Array();
+
+    const currentUserData = await getFriendsAndInterests(currentUser);
+
+    for (const user of activeUsers) {
+        // get other user's interests and compare to current user
+        const userData = await getFriendsAndInterests(user.userId);
+
+        allUsersData.push({
+            id: user.userId,
+            geohash: user.geohash,
+            friend: currentUserData.friends.includes(user.userId),
+            interestSimilarity: angleBetweenInterestVectors(
+                currentUserData.interests,
+                userData.interests,
+            ),
+        });
+    }
+
+    // iterate over all nearby places, recording distance from the current user, how many other users are there, and how similar they are to the user
+    for (const place of places) {
+        const userDataAtPlace = allUsersData.filter((element) =>
+            isUserAtPlace(element.geohash, place.location),
+        );
+        // get number of identical characters in place geohash and currentlocation
+        const placeGeohash = encodeBase32(
+            place.location.latitude,
+            place.location.longitude,
+        );
+
+        // push object to result
+        result.push({
+            place: place,
+            geohashDistance: numSameCharacters(placeGeohash, currentLocation),
+            userData: {
+                count: userDataAtPlace.length,
+                users: userDataAtPlace,
+            },
+        });
+    }
+
+    // sort results by rough distance of the place from the current user
+    return result.sort((a, b) => b.geohashDistance - a.geohashDistance);
 };

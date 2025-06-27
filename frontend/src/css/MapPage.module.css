@@ -22,46 +22,6 @@
     gap: 1rem;
 }
 
-.placesContainer {
-    flex-grow: 3;
-    width: 100%;
-    background-color: var(--tan-background);
-    border-radius: 2rem;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    box-sizing: border-box;
-    overflow-y: scroll;
-}
-
-.placesButton {
-    background-color: var(--teal-accent);
-    color: white;
-    border: none;
-    font-family: inherit;
-    font-size: 18px;
-    padding: 1rem 2rem;
-    margin: auto;
-    border-radius: 2rem;
-}
-
-.place {
-    text-align: left;
-    width: 100%;
-}
-
-.placeName {
-    font-size: 18px;
-    margin: 0.5rem 0 0.25rem;
-}
-
-.placeAddress {
-    font-size: 16px;
-}
-
 .navButton {
     font-family: inherit;
     font-size: 24px;
