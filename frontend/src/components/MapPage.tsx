@@ -18,6 +18,7 @@ import { useBeforeUnload, useNavigate } from "react-router-dom";
 import type { UserGeohash } from "../types";
 import Slider from "./Slider";
 import { encodeBase32 } from "geohashing";
+import RecommendationList from "./RecommendationList";
 
 /**
  *
@@ -104,12 +105,21 @@ const MapPage = () => {
     } else if (myLocation) {
         return (
             <>
-                <button
-                    className={styles.navButton}
-                    onClick={handleBack}>
-                    <FontAwesomeIcon icon={faArrowLeftLong}></FontAwesomeIcon>{" "}
-                    Back to Dashboard
-                </button>
+                <div className={styles.leftContainer}>
+                    <button
+                        className={styles.navButton}
+                        onClick={handleBack}>
+                        <FontAwesomeIcon
+                            icon={faArrowLeftLong}></FontAwesomeIcon>{" "}
+                        Back to Dashboard
+                    </button>
+
+                    <RecommendationList
+                        myId={user.id}
+                        myLocation={myLocation}
+                        otherUsers={otherUsers}></RecommendationList>
+                </div>
+
                 <div className={styles.hideLocationContainer}>
                     <div className={styles.sliderLabel}>
                         <h6 className={styles.sliderTitle}>Hide location?</h6>
@@ -170,6 +180,7 @@ const MapPage = () => {
                             return (
                                 <MapMarker
                                     id={user.userId}
+                                    key={user.userId}
                                     location={user.geohash}></MapMarker>
                             );
                         })}

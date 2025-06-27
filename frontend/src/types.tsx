@@ -39,3 +39,41 @@ export interface UserGeohash {
     userId: number;
     geohash: string;
 }
+
+export interface Place {
+    displayName: {
+        text: string;
+        languageCode: string;
+    };
+    formattedAddress: string;
+    location: {
+        latitude: number;
+        longitude: number;
+    };
+}
+
+/**
+ * Represents data on a place and the users at that place in relation to the current user
+ *
+ * geohashDistance is the resolution up to which this place and the current user are in the same hash box:
+ * as it increases, the place is closer
+ *
+ * userData.count is the number of other users at the place
+ *
+ * for each element of userData.users, friend is true if the user is a friend of the current user;
+ * interestSimilarity is the angle between their interest vector and the current user's, so as this increases, the users are less similar
+ */
+export interface PlaceRecData {
+    place: Place;
+    geohash: string;
+    geohashDistance: number;
+    userData: {
+        count: number;
+        users: {
+            id: number;
+            geohash: string;
+            friend: boolean;
+            interestSimilarity: number;
+        }[];
+    };
+}
