@@ -47,8 +47,11 @@ const RecommendationList = ({
                                 setNearbyPlaces(placesWithUsers),
                             );
                     }}>
-                    {nearbyPlaces.length === 0 ? "Load" : "Reload"}
+                    {nearbyPlaces.length === 0 ? "Load places" : "Reload"}
                 </button>
+                <p className={styles.explanation}>
+                    You're likely to find friends at these places nearby:
+                </p>
                 {nearbyPlaces.map((place) => (
                     <div className={styles.place}>
                         <h6 className={styles.placeName}>
@@ -57,9 +60,12 @@ const RecommendationList = ({
                         <p className={styles.placeAddress}>
                             {place.place.formattedAddress}
                         </p>
-                        <p className={styles.placeAddress}>{place.geohash}</p>
                         <p className={styles.userList}>
-                            {place.userData.count} users are here.
+                            {place.userData.count}{" "}
+                            {place.userData.count === 1
+                                ? "user is"
+                                : "users are"}{" "}
+                            here.
                         </p>
                     </div>
                 ))}
