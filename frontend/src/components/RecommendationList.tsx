@@ -25,42 +25,45 @@ const RecommendationList = ({
     const [nearbyPlaces, setNearbyPlaces] = useState(Array() as PlaceRecData[]);
 
     return (
-        <div className={styles.placesContainer}>
-            <button
-                className={styles.placesButton}
-                onClick={() => {
-                    // get all places nearby
-                    getNearbyPOIs(myLocation)
-                        .then((places) =>
-                            // combine each place with data on users there
-                            recommendPlaces(
-                                places,
-                                myId,
-                                myLocation,
-                                otherUsers,
-                            ),
-                        )
-                        .then((placesWithUsers) =>
-                            // load data and display in list
-                            setNearbyPlaces(placesWithUsers),
-                        );
-                }}>
-                Load
-            </button>
-            {nearbyPlaces.map((place) => (
-                <div className={styles.place}>
-                    <h6 className={styles.placeName}>
-                        {place.place.displayName.text}
-                    </h6>
-                    <p className={styles.placeAddress}>
-                        {place.place.formattedAddress}
-                    </p>
-                    <p className={styles.placeAddress}>{place.geohash}</p>
-                    <p className={styles.userList}>
-                        {place.userData.count} users are here.
-                    </p>
-                </div>
-            ))}
+        <div className={styles.placesListContainer}>
+            <div
+                className={`${styles.placesList} ${nearbyPlaces.length === 0 ? styles.closed : styles.open}`}>
+                <button
+                    className={styles.placesButton}
+                    onClick={() => {
+                        // get all places nearby
+                        getNearbyPOIs(myLocation)
+                            .then((places) =>
+                                // combine each place with data on users there
+                                recommendPlaces(
+                                    places,
+                                    myId,
+                                    myLocation,
+                                    otherUsers,
+                                ),
+                            )
+                            .then((placesWithUsers) =>
+                                // load data and display in list
+                                setNearbyPlaces(placesWithUsers),
+                            );
+                    }}>
+                    {nearbyPlaces.length === 0 ? "Load" : "Reload"}
+                </button>
+                {nearbyPlaces.map((place) => (
+                    <div className={styles.place}>
+                        <h6 className={styles.placeName}>
+                            {place.place.displayName.text}
+                        </h6>
+                        <p className={styles.placeAddress}>
+                            {place.place.formattedAddress}
+                        </p>
+                        <p className={styles.placeAddress}>{place.geohash}</p>
+                        <p className={styles.userList}>
+                            {place.userData.count} users are here.
+                        </p>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 };
