@@ -1,6 +1,10 @@
 import { decodeBase32 } from "geohashing";
 import type { UserProfile } from "./types";
-import { GEOHASH_RADII } from "./constants";
+import {
+    GEOHASH_RADII,
+    MAX_PLACE_RESULTS,
+    NEARBY_PLACES_RADIUS,
+} from "./constants";
 
 /**
  *
@@ -210,4 +214,75 @@ export const isGeoHashWithinMi = (
     } else {
         return center.slice(0, res) === hash.slice(0, res);
     }
+};
+
+/**
+ * Perform a Google Maps Places API (New) Nearby Search for places of interest near the user
+ * @param hash the geohash of the user's current location
+ * @returns MAX_PLACE_RESULTS nearby points of interest
+ */
+export const getNearbyPOIs = async (hash: string) => {
+    const { lat, lng } = decodeBase32(hash);
+
+    const response = await fetch(
+        "https://places.googleapis.com/v1/places:searchNearby",
+        {
+            method: "post",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Goog-Api-Key": import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+                "X-Goog-FieldMask":
+                    "places.displayName,places.formattedAddress,places.location",
+            },
+            body: JSON.stringify({
+                includedTypes: [
+                    "museum",
+                    "performing_arts_theater",
+                    "library",
+                    "amusement_park",
+                    "aquarium",
+                    "botanical_garden",
+                    "bowling_alley",
+                    "comedy_club",
+                    "community_center",
+                    "concert_hall",
+                    "convention_center",
+                    "cultural_center",
+                    "dance_hall",
+                    "event_venue",
+                    "garden",
+                    "internet_cafe",
+                    "karaoke",
+                    "marina",
+                    "movie_theater",
+                    "national_park",
+                    "night_club",
+                    "park",
+                    "planetarium",
+                    "skateboard_park",
+                    "state_park",
+                    "tourist_attraction",
+                    "video_arcade",
+                    "water_park",
+                    "wildlife_park",
+                    "wildlife_refuge",
+                    "zoo",
+                    "restaurant",
+                ],
+                maxResultCount: MAX_PLACE_RESULTS,
+                locationRestriction: {
+                    circle: {
+                        center: {
+                            latitude: lat,
+                            longitude: lng,
+                        },
+                        radius: NEARBY_PLACES_RADIUS,
+                    },
+                },
+            }),
+        },
+    );
+
+    const places = await response.json();
+    return places;
 };

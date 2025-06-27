@@ -39,3 +39,15 @@ export interface UserGeohash {
     userId: number;
     geohash: string;
 }
+
+export interface Place {
+    displayName: {
+        text: string;
+        languageCode: string;
+    };
+    formattedAddress: string;
+    location: {
+        latitude: number;
+        longitude: number;
+    };
+}

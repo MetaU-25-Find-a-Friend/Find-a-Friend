@@ -6,6 +6,7 @@ import LoggedOut from "./LoggedOut";
 import {
     deleteGeohash,
     geoHashToLatLng,
+    getNearbyPOIs,
     getOtherUserGeohashes,
     isGeoHashWithinMi,
     updateGeohash,
@@ -15,7 +16,7 @@ import { DEFAULT_MAP_ZOOM, FETCH_INTERVAL, GEOHASH_RADII } from "../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeftLong } from "@fortawesome/free-solid-svg-icons";
 import { useBeforeUnload, useNavigate } from "react-router-dom";
-import type { UserGeohash } from "../types";
+import type { UserGeohash, Place } from "../types";
 import Slider from "./Slider";
 import { encodeBase32 } from "geohashing";
 
@@ -37,6 +38,8 @@ const MapPage = () => {
 
     // whether or not user's location is hidden from others
     const [hideLocation, setHideLocation] = useState(false);
+
+    const [nearbyPlaces, setNearbyPlaces] = useState(Array() as Place[]);
 
     // radius in which to show other users
     const [radius, setRadius] = useState(GEOHASH_RADII[0].radius);
@@ -104,12 +107,38 @@ const MapPage = () => {
     } else if (myLocation) {
         return (
             <>
-                <button
-                    className={styles.navButton}
-                    onClick={handleBack}>
-                    <FontAwesomeIcon icon={faArrowLeftLong}></FontAwesomeIcon>{" "}
-                    Back to Dashboard
-                </button>
+                <div className={styles.leftContainer}>
+                    <button
+                        className={styles.navButton}
+                        onClick={handleBack}>
+                        <FontAwesomeIcon
+                            icon={faArrowLeftLong}></FontAwesomeIcon>{" "}
+                        Back to Dashboard
+                    </button>
+
+                    <div className={styles.placesContainer}>
+                        <button
+                            className={styles.placesButton}
+                            onClick={() => {
+                                getNearbyPOIs(myLocation).then((places) => {
+                                    setNearbyPlaces(places.places);
+                                });
+                            }}>
+                            Load
+                        </button>
+                        {nearbyPlaces.map((place) => (
+                            <div className={styles.place}>
+                                <h6 className={styles.placeName}>
+                                    {place.displayName.text}
+                                </h6>
+                                <p className={styles.placeAddress}>
+                                    {place.formattedAddress}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 <div className={styles.hideLocationContainer}>
                     <div className={styles.sliderLabel}>
                         <h6 className={styles.sliderTitle}>Hide location?</h6>
@@ -170,6 +199,7 @@ const MapPage = () => {
                             return (
                                 <MapMarker
                                     id={user.userId}
+                                    key={user.userId}
                                     location={user.geohash}></MapMarker>
                             );
                         })}

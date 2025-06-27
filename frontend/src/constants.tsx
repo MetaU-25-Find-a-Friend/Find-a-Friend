@@ -36,3 +36,13 @@ export const ALERT_DURATION = 3000;
  * Title of the app to use as page header
  */
 export const APP_TITLE = "Find a Friend";
+
+/**
+ * Radius of circle used in Nearby Search to find POIs
+ */
+export const NEARBY_PLACES_RADIUS = 2000;
+
+/**
+ * Maximum number of results to get from Nearby Search
+ */
+export const MAX_PLACE_RESULTS = 20;

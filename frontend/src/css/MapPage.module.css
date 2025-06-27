@@ -1,6 +1,65 @@
 .map {
     width: 100vw;
     height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.leftContainer {
+    position: fixed;
+    z-index: 5;
+    left: 0;
+    top: 0;
+    padding: 1rem;
+    box-sizing: border-box;
+    height: 100vh;
+    width: 30vw;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 1rem;
+}
+
+.placesContainer {
+    flex-grow: 3;
+    width: 100%;
+    background-color: var(--tan-background);
+    border-radius: 2rem;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    box-sizing: border-box;
+    overflow-y: scroll;
+}
+
+.placesButton {
+    background-color: var(--teal-accent);
+    color: white;
+    border: none;
+    font-family: inherit;
+    font-size: 18px;
+    padding: 1rem 2rem;
+    margin: auto;
+    border-radius: 2rem;
+}
+
+.place {
+    text-align: left;
+    width: 100%;
+}
+
+.placeName {
+    font-size: 18px;
+    margin: 0.5rem 0 0.25rem;
+}
+
+.placeAddress {
+    font-size: 16px;
 }
 
 .navButton {
@@ -11,9 +70,6 @@
     border: none;
     padding: 1rem 2rem;
     border-radius: 2rem;
-    margin: 2rem;
-    position: fixed;
-    z-index: 5;
 }
 
 .hideLocationContainer {
