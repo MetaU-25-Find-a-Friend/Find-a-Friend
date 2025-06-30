@@ -41,3 +41,9 @@ model UserPastGeohashes {
   timestamp DateTime
   geohash String
 }
+
+model FriendRequest {
+  id Int @id @default(autoincrement())
+  fromUser Int
+  toUser Int
+}

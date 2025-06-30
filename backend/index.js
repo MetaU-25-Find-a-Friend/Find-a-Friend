@@ -372,3 +372,53 @@ app.get("/user/geolocation/history", authenticate, async (req, res) => {
 
     res.json(history);
 });
+
+// create a friend request from the logged-in user to another user
+app.post("/friend/:to", authenticate, async (req, res) => {
+    const from = req.session.userId;
+
+    const to = parseInt(req.params.to);
+
+    const duplicateExists =
+        (await prisma.friendRequest.count({
+            where: {
+                OR: [
+                    {
+                        fromUser: from,
+                        toUser: to,
+                    },
+                    {
+                        fromUser: to,
+                        toUser: from,
+                    },
+                ],
+            },
+        })) > 0;
+
+    if (duplicateExists) {
+        return res
+            .status(409)
+            .send("A friend request between these users already exists");
+    }
+
+    await prisma.friendRequest.create({
+        data: {
+            fromUser: from,
+            toUser: to,
+        },
+    });
+
+    res.status(201).send("Friend request sent");
+});
+
+app.get("/friend", async (req, res) => {
+    const userId = req.session.userId;
+
+    const requests = await prisma.friendRequest.findMany({
+        where: {
+            toUser: userId,
+        },
+    });
+
+    res.json(requests);
+});

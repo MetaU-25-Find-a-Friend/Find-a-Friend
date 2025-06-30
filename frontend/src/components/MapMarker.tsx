@@ -20,7 +20,6 @@ interface MapMarkerProps {
  * @returns A marker at the user's location with profile information in a popup on hover
  */
 const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {
-
     const { user } = useUser();
 
     // profile of the user represented by this marker
@@ -38,7 +37,6 @@ const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {
         if (userData.id !== user?.id) {
             setModalData(userData);
         }
-        
     };
 
     // fetch user's profile to populate popup

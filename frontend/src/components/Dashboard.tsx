@@ -1,14 +1,14 @@
 import styles from "../css/Dashboard.module.css";
 import { useUser } from "../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../utils";
+import { getIncomingFriendRequests, logout } from "../utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faUser,
     faChevronDown,
     faArrowRightLong,
 } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoggedOut from "./LoggedOut";
 import { APP_TITLE } from "../constants";
 
@@ -20,16 +20,31 @@ const Dashboard = () => {
 
     const [showingMenu, setShowingMenu] = useState(false);
 
+    const [friendRequests, setFriendRequests] = useState(Array());
+
     const handleLogout = () => {
         logout();
         navigate("/login");
     };
+
+    useEffect(() => {
+        getIncomingFriendRequests().then((requests) =>
+            setFriendRequests(requests),
+        );
+    }, []);
 
     if (user === null) {
         return <LoggedOut></LoggedOut>;
     } else {
         return (
             <main className={styles.grid}>
+                <div className={styles.friendContainer}>
+                    {friendRequests.map((request) => (
+                        <div className={styles.friendRequest}>
+                            <p>From {request.fromUser}</p>
+                        </div>
+                    ))}
+                </div>
                 <div className={styles.titleContainer}>
                     <h1 className={styles.title}>{APP_TITLE}</h1>
                     <div

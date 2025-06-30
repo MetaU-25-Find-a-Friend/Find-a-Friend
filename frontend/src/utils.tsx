@@ -548,3 +548,25 @@ export const recommendPlaces = async (
     // sort results
     return result.sort(sortRecommendations);
 };
+
+export const sendFriendRequest = async (to: number) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/friend/${to}`,
+        {
+            method: "post",
+            mode: "cors",
+            credentials: "include",
+        },
+    );
+
+    return response.ok;
+};
+
+export const getIncomingFriendRequests = async () => {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/friend`, {
+        credentials: "include",
+    });
+
+    const json = await response.json();
+    return json;
+};

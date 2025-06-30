@@ -1,7 +1,8 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import styles from "../css/Modal.module.css";
+import Alert from "./Alert";
 import type { AllUserData } from "../types";
-import { getInterestName } from "../utils";
+import { getInterestName, sendFriendRequest } from "../utils";
 import { useUser } from "../contexts/UserContext";
 
 interface ModalProps {
@@ -14,9 +15,23 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
 
     const { user } = useUser();
 
+    const [alertText, setAlertText] = useState<string | null>(null);
+
     const handleOverlayClick = (event: React.MouseEvent) => {
         if (event.target === overlayRef.current) {
             setUserData(null);
+        }
+    };
+
+    const handleFriendClick = () => {
+        if (userData) {
+            sendFriendRequest(userData.id).then((success) =>
+                setAlertText(
+                    success
+                        ? "Request sent."
+                        : "A friend request between you already exists.",
+                ),
+            );
         }
     };
 
@@ -26,6 +41,9 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                 ref={overlayRef}
                 onClick={handleOverlayClick}
                 className={styles.overlay}>
+                <Alert
+                    alertText={alertText}
+                    setAlertText={setAlertText}></Alert>
                 <div className={styles.modal}>
                     <h2 className={styles.title}>
                         {userData.firstName} {userData.lastName}{" "}
@@ -58,7 +76,9 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                                 className={styles.input}
                                 placeholder="New message"></input>
                         ) : (
-                            <button className={styles.friendButton}>
+                            <button
+                                className={styles.friendButton}
+                                onClick={handleFriendClick}>
                                 Send friend request
                             </button>
                         )}
