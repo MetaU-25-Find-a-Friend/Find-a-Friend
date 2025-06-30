@@ -80,6 +80,9 @@ const MapPage = () => {
 
             // set location state variable
             setMyLocation((oldLocation) => {
+                // compare old and new locations for tracking time spent; if this is not done
+                // within setState, we might get stale values of oldLocation/myLocation when this function
+                // is called in the setInterval
                 if (oldLocation) {
                     if (!areHashesClose(geohash, oldLocation)) {
                         // if the user has moved, reset tracked time

@@ -397,6 +397,10 @@ const numSameCharacters = (string1: string, string2: string) => {
     return num;
 };
 
+/**
+ *
+ * @returns array of objects representing current user's previous locations
+ */
 const getUserLocationHistory = async () => {
     const response = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/user/geolocation/history`,
