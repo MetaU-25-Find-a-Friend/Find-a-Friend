@@ -34,6 +34,11 @@ export const GEOHASH_AT_PLACE_RES = 8;
 export const FETCH_INTERVAL = 5000;
 
 /**
+ * Number of seconds for a user to remain in the same place considered significant enough to record in database
+ */
+export const SIG_TIME_AT_LOCATION = 60;
+
+/**
  * Time in ms when an alert is animating and on the screen
  */
 export const ALERT_DURATION = 3000;
@@ -71,4 +76,9 @@ export const FRIEND_COUNT_WEIGHT = 4;
 /**
  * Weight of distance in place recommendation algorithm
  */
-export const DISTANCE_WEIGHT = 2.5;
+export const DISTANCE_WEIGHT = 1;
+
+/**
+ * Weight of number of past visits to the place in place recommendation algorithm
+ */
+export const PAST_WEIGHT = 5;

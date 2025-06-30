@@ -65,7 +65,8 @@ const RecommendationList = ({
                             {place.userData.count === 1
                                 ? "user is"
                                 : "users are"}{" "}
-                            here.
+                            here. You've been here {place.numVisits}{" "}
+                            {place.numVisits === 1 ? "time" : "times"} before.
                         </p>
                     </div>
                 ))}

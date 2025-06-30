@@ -23,6 +23,7 @@ const {
     RATE_LIMIT_INTERVAL,
     MAX_LOGIN_ATTEMPTS,
     SESSION_TIMEOUT,
+    GEOHASH_DUP_RES,
 } = require("./constants");
 
 const loginLimiter = rateLimit({
@@ -294,4 +295,52 @@ app.get("/users/otherGeolocations", authenticate, async (req, res) => {
     });
 
     res.json(locations);
+});
+
+// add a new record to user's past locations if it is not a duplicate (too close to an existing past location)
+app.post("/user/geolocation/history", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    const hash = req.body.geohash;
+
+    if (!hash) {
+        return res.status(400).send("Geohash is required");
+    }
+
+    const duplicateExists =
+        (await prisma.userPastGeohashes.count({
+            where: {
+                userId: userId,
+                geohash: {
+                    startsWith: hash.slice(0, GEOHASH_DUP_RES),
+                },
+            },
+        })) > 0;
+
+    if (duplicateExists) {
+        return res.status(409).send("This location has already been recorded");
+    }
+
+    await prisma.userPastGeohashes.create({
+        data: {
+            userId: userId,
+            timestamp: new Date(),
+            geohash: hash,
+        },
+    });
+
+    res.send("Successfully recorded");
+});
+
+// get all of user's past locations
+app.get("/user/geolocation/history", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    const history = await prisma.userPastGeohashes.findMany({
+        where: {
+            userId: userId,
+        },
+    });
+
+    res.json(history);
 });

@@ -1,17 +1,24 @@
 import styles from "../css/MapPage.module.css";
 import { useUser } from "../contexts/UserContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Map } from "@vis.gl/react-google-maps";
 import LoggedOut from "./LoggedOut";
 import {
+    addPastGeohash,
     deleteGeohash,
     geoHashToLatLng,
     getOtherUserGeohashes,
+    areHashesClose,
     isGeoHashWithinMi,
     updateGeohash,
 } from "../utils";
 import MapMarker from "./MapMarker";
-import { DEFAULT_MAP_ZOOM, FETCH_INTERVAL, GEOHASH_RADII } from "../constants";
+import {
+    DEFAULT_MAP_ZOOM,
+    FETCH_INTERVAL,
+    GEOHASH_RADII,
+    SIG_TIME_AT_LOCATION,
+} from "../constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeftLong } from "@fortawesome/free-solid-svg-icons";
 import { useBeforeUnload, useNavigate } from "react-router-dom";
@@ -42,6 +49,9 @@ const MapPage = () => {
     // radius in which to show other users
     const [radius, setRadius] = useState(GEOHASH_RADII[0].radius);
 
+    // seconds spent at approximately this location
+    const timeAtLocation = useRef(0);
+
     // when Back button is clicked, remove user's location from active table and navigate to dashboard
     const handleBack = () => {
         if (user) {
@@ -68,8 +78,31 @@ const MapPage = () => {
                 position.coords.longitude,
             );
 
-            // on success, set location state variable
-            setMyLocation(geohash);
+            // set location state variable
+            setMyLocation((oldLocation) => {
+                // compare old and new locations for tracking time spent; if this is not done
+                // within setState, we might get stale values of oldLocation/myLocation when this function
+                // is called in the setInterval
+                if (oldLocation) {
+                    if (!areHashesClose(geohash, oldLocation)) {
+                        // if the user has moved, reset tracked time
+                        timeAtLocation.current = 0;
+                    } else if (timeAtLocation.current !== -1) {
+                        // otherwise, increase time by interval seconds
+                        timeAtLocation.current += FETCH_INTERVAL / 1000;
+
+                        // if this has reached a significant amount of time, record in database
+                        if (timeAtLocation.current >= SIG_TIME_AT_LOCATION) {
+                            addPastGeohash(geohash);
+
+                            // prevent this location from being added again until the user moves
+                            timeAtLocation.current = -1;
+                        }
+                    }
+                }
+
+                return geohash;
+            });
 
             if (user) {
                 if (hideLocation) {
