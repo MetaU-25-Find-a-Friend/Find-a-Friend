@@ -8,7 +8,7 @@ import {
     deleteGeohash,
     geoHashToLatLng,
     getOtherUserGeohashes,
-    hasUserMoved,
+    areHashesClose,
     isGeoHashWithinMi,
     updateGeohash,
 } from "../utils";
@@ -81,7 +81,7 @@ const MapPage = () => {
             // set location state variable
             setMyLocation((oldLocation) => {
                 if (oldLocation) {
-                    if (hasUserMoved(geohash, oldLocation)) {
+                    if (!areHashesClose(geohash, oldLocation)) {
                         // if they have moved, reset tracked time
                         timeAtLocation.current = 0;
                     } else if (timeAtLocation.current !== -1) {

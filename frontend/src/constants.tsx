@@ -76,4 +76,9 @@ export const FRIEND_COUNT_WEIGHT = 4;
 /**
  * Weight of distance in place recommendation algorithm
  */
-export const DISTANCE_WEIGHT = 2.5;
+export const DISTANCE_WEIGHT = 1;
+
+/**
+ * Weight of number of past visits to the place in place recommendation algorithm
+ */
+export const PAST_WEIGHT = 5;

@@ -52,6 +52,13 @@ export interface Place {
     };
 }
 
+export interface PlaceHistory {
+    id: number;
+    userId: number;
+    timestamp: Date;
+    geohash: string;
+}
+
 /**
  * Represents data on a place and the users at that place in relation to the current user
  *
@@ -67,6 +74,7 @@ export interface PlaceRecData {
     place: Place;
     geohash: string;
     geohashDistance: number;
+    numVisits: number;
     userData: {
         count: number;
         users: {

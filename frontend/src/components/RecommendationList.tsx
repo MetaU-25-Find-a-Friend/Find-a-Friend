@@ -60,12 +60,14 @@ const RecommendationList = ({
                         <p className={styles.placeAddress}>
                             {place.place.formattedAddress}
                         </p>
+                        <p className={styles.placeAddress}>{place.geohash}</p>
                         <p className={styles.userList}>
                             {place.userData.count}{" "}
                             {place.userData.count === 1
                                 ? "user is"
                                 : "users are"}{" "}
-                            here.
+                            here. You've been here {place.numVisits}{" "}
+                            {place.numVisits === 1 ? "time" : "times"} before.
                         </p>
                     </div>
                 ))}

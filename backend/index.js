@@ -296,6 +296,7 @@ app.get("/users/otherGeolocations", authenticate, async (req, res) => {
     res.json(locations);
 });
 
+// add a new record to user's past locations
 app.post("/user/geolocation/history", authenticate, async (req, res) => {
     const userId = req.session.userId;
 
@@ -314,4 +315,17 @@ app.post("/user/geolocation/history", authenticate, async (req, res) => {
     });
 
     res.send("Successfully recorded");
+});
+
+// get all of user's past locations
+app.get("/user/geolocation/history", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    const history = await prisma.userPastGeohashes.findMany({
+        where: {
+            userId: userId,
+        },
+    });
+
+    res.json(history);
 });
