@@ -245,19 +245,25 @@ export const areHashesClose = (hash1: string, hash2: string) => {
 /**
  *
  * @param hash the geohash of the location where the user stayed for a significant amount of time
+ * @returns true if the hash was recorded; false if the hash is very close to an existing record and was not recorded again
  */
 export const addPastGeohash = async (hash: string) => {
-    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/geolocation/history`, {
-        method: "post",
-        mode: "cors",
-        headers: {
-            "Content-Type": "application/json",
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/user/geolocation/history`,
+        {
+            method: "post",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                geohash: hash,
+            }),
         },
-        credentials: "include",
-        body: JSON.stringify({
-            geohash: hash,
-        }),
-    });
+    );
+
+    return response.ok;
 };
 
 /**

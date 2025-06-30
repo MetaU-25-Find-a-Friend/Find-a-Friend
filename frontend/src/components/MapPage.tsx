@@ -82,7 +82,7 @@ const MapPage = () => {
             setMyLocation((oldLocation) => {
                 if (oldLocation) {
                     if (!areHashesClose(geohash, oldLocation)) {
-                        // if they have moved, reset tracked time
+                        // if the user has moved, reset tracked time
                         timeAtLocation.current = 0;
                     } else if (timeAtLocation.current !== -1) {
                         // otherwise, increase time by interval seconds
