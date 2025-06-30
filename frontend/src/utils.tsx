@@ -384,17 +384,13 @@ const angleBetweenInterestVectors = (v1: number[], v2: number[]) => {
  * maximum length is the length of the shorter string
  */
 const numSameCharacters = (string1: string, string2: string) => {
-    let num = 0;
+    let i = 0;
 
-    for (let i = 0; i < Math.min(string1.length, string2.length); i++) {
-        if (string1.charAt(i) === string2.charAt(i)) {
-            num++;
-        } else {
-            return num;
-        }
+    while (string1.charAt(i) === string2.charAt(i)) {
+        i++;
     }
 
-    return num;
+    return i;
 };
 
 /**
