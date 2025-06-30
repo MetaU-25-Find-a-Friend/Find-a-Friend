@@ -77,7 +77,14 @@ export interface PlaceRecData {
     numVisits: number;
     userData: {
         count: number;
-        averageSimilarity: number;
+        avgInterestAngle: number;
         friendCount: number;
     };
+}
+
+export interface PlaceRecUserData {
+    id: number;
+    geohash: string;
+    friend: boolean;
+    interestAngle: number;
 }

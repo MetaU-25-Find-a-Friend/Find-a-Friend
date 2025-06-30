@@ -4,6 +4,7 @@ import type {
     Place,
     UserGeohash,
     PlaceRecData,
+    PlaceRecUserData,
     PlaceHistory,
 } from "./types";
 import {
@@ -407,7 +408,7 @@ const getUserLocationHistory = async () => {
  *
  * @param placeData1
  * @param placeData2
- * @returns a positive number if placeData1 should be ordered before placeData2, 0 if they are equal, and negative if opposite order
+ * @returns a negative value if placeData1 should come before placeData2, 0 if they are equal, and positive otherwise
  */
 const sortRecommendations = (
     placeData1: PlaceRecData,
@@ -418,13 +419,13 @@ const sortRecommendations = (
         placeData1.userData.friendCount * FRIEND_COUNT_WEIGHT +
         placeData1.numVisits * PAST_WEIGHT +
         placeData1.userData.count * COUNT_WEIGHT -
-        placeData1.userData.averageSimilarity * SIMILARITY_WEIGHT +
+        placeData1.userData.avgInterestAngle * SIMILARITY_WEIGHT +
         placeData1.geohashDistance * DISTANCE_WEIGHT;
     const placeScore2 =
         placeData2.userData.friendCount * FRIEND_COUNT_WEIGHT +
         placeData2.numVisits * PAST_WEIGHT +
         placeData2.userData.count * COUNT_WEIGHT -
-        placeData2.userData.averageSimilarity * SIMILARITY_WEIGHT +
+        placeData2.userData.avgInterestAngle * SIMILARITY_WEIGHT +
         placeData2.geohashDistance * DISTANCE_WEIGHT;
 
     return placeScore2 - placeScore1;
@@ -447,7 +448,7 @@ export const recommendPlaces = async (
     const result = Array() as PlaceRecData[];
 
     // iterate over all other users, determining whether they are friends and calculating the similarity of their interests
-    const allUsersData = Array();
+    const allUsersData = Array() as PlaceRecUserData[];
 
     const currentUserData = await getFriendsAndInterests(currentUser);
 
@@ -459,7 +460,7 @@ export const recommendPlaces = async (
             id: user.userId,
             geohash: user.geohash,
             friend: currentUserData.friends.includes(user.userId),
-            interestSimilarity: angleBetweenInterestVectors(
+            interestAngle: angleBetweenInterestVectors(
                 currentUserData.interests,
                 userData.interests,
             ),
@@ -483,20 +484,20 @@ export const recommendPlaces = async (
 
         // calculate average similarity of users and number of friends
         // if there are 0 other users there, set max difference in similarity (pi/2 radians)
-        let avgSimilarity = Math.PI / 2;
+        let avgInterestAngle = Math.PI / 2;
         let friendCount = 0;
 
         if (userDataAtPlace.length !== 0) {
-            avgSimilarity = 0;
+            avgInterestAngle = 0;
 
             for (const user of userDataAtPlace) {
-                avgSimilarity += user.interestSimilarity;
+                avgInterestAngle += user.interestAngle;
                 if (user.friend) {
                     friendCount++;
                 }
             }
 
-            avgSimilarity /= userDataAtPlace.length;
+            avgInterestAngle /= userDataAtPlace.length;
         }
 
         // calculate number of times the current user has been at this place
@@ -519,7 +520,7 @@ export const recommendPlaces = async (
             numVisits: numVisits,
             userData: {
                 count: userDataAtPlace.length,
-                averageSimilarity: avgSimilarity,
+                avgInterestAngle: avgInterestAngle,
                 friendCount: friendCount,
             },
         });
