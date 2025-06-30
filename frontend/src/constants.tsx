@@ -34,6 +34,11 @@ export const GEOHASH_AT_PLACE_RES = 8;
 export const FETCH_INTERVAL = 5000;
 
 /**
+ * Number of seconds for a user to remain in the same place considered significant enough to record in database
+ */
+export const SIG_TIME_AT_LOCATION = 60;
+
+/**
  * Time in ms when an alert is animating and on the screen
  */
 export const ALERT_DURATION = 3000;

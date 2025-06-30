@@ -246,6 +246,37 @@ export const isUserAtPlace = (
 };
 
 /**
+ *
+ * @param currentHash the geohash of the user's most recently updated location
+ * @param oldHash the geohash of the user's previous location
+ * @returns true if the user has significantly moved from oldHash; false if not
+ */
+export const hasUserMoved = (currentHash: string, oldHash: string) => {
+    return (
+        currentHash.slice(0, GEOHASH_AT_PLACE_RES) !==
+        oldHash.slice(0, GEOHASH_AT_PLACE_RES)
+    );
+};
+
+/**
+ *
+ * @param hash the geohash of the location where the user stayed for a significant amount of time
+ */
+export const addPastGeohash = async (hash: string) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/geolocation/history`, {
+        method: "post",
+        mode: "cors",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+            geohash: hash,
+        }),
+    });
+};
+
+/**
  * Perform a Google Maps Places API (New) Nearby Search for places of interest near the user
  * @param hash the geohash of the user's current location
  * @returns MAX_PLACE_RESULTS nearby points of interest

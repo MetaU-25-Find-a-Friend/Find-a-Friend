@@ -34,3 +34,10 @@ model UserGeohashes {
   userId Int @unique
   geohash String
 }
+
+model UserPastGeohashes {
+  id Int @id @default(autoincrement())
+  userId Int
+  timestamp DateTime
+  geohash String
+}

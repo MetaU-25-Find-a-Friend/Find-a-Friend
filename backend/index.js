@@ -295,3 +295,23 @@ app.get("/users/otherGeolocations", authenticate, async (req, res) => {
 
     res.json(locations);
 });
+
+app.post("/user/geolocation/history", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    const hash = req.body.geohash;
+
+    if (!hash) {
+        return res.status(400).send("Geohash is required");
+    }
+
+    await prisma.userPastGeohashes.create({
+        data: {
+            userId: userId,
+            timestamp: new Date(),
+            geohash: hash,
+        },
+    });
+
+    res.send("Successfully recorded");
+});
