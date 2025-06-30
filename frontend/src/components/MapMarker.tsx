@@ -1,10 +1,11 @@
 import styles from "../css/MapMarker.module.css";
 import { AdvancedMarker } from "@vis.gl/react-google-maps";
 import { useState, useEffect } from "react";
-import type { AllUserData, UserProfile } from "../types";
+import type { AllUserData } from "../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
-import { geoHashToLatLng, getInterestName, getProfile } from "../utils";
+import { geoHashToLatLng, getAllData, getInterestName } from "../utils";
+import { useUser } from "../contexts/UserContext";
 
 interface MapMarkerProps {
     id: number;
@@ -19,30 +20,31 @@ interface MapMarkerProps {
  * @returns A marker at the user's location with profile information in a popup on hover
  */
 const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {
+
+    const { user } = useUser();
+
     // profile of the user represented by this marker
-    const [userData, setUserData] = useState<UserProfile>({
+    const [userData, setUserData] = useState<AllUserData>({
+        id: id,
         firstName: "",
         lastName: "",
         interests: [],
+        friends: [],
+        blockedUsers: [],
     });
 
     const handleMarkerClick = (event: React.MouseEvent) => {
         event.stopPropagation();
-        console.log("whe");
-        setModalData({
-            id: id,
-            ...userData,
-            friends: [],
-            blockedUsers: [],
-        });
+        if (userData.id !== user?.id) {
+            setModalData(userData);
+        }
+        
     };
 
     // fetch user's profile to populate popup
     useEffect(() => {
-        getProfile(id).then((profile) => {
-            if (profile) {
-                setUserData(profile);
-            }
+        getAllData(id).then((data) => {
+            setUserData(data);
         });
     }, []);
 

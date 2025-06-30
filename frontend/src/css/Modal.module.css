@@ -8,21 +8,75 @@
     z-index: 10;
 }
 
-.invisible {
-    display: none;
-}
-
-.visible {
-    display: block;
-}
-
 .modal {
     position: fixed;
-    top: 10vh;
-    left: 10vw;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 80vw;
-    height: 80vh;
     background-color: var(--tan-background);
     z-index: 11;
+    border-radius: 2rem;
+    box-sizing: border-box;
+    padding: 2rem;
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 2rem;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.pronouns {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--teal-accent);
+    margin: 0;
+}
+
+.major {
+    font-size: 20px;
+    margin: 0;
+}
+
+.interestsContainer {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.5rem;
+    font-size: 20px;
+    color: var(--teal-accent);
+    height: fit-content;
+}
+
+.interest {
+    margin: 0;
+    border-radius: 1rem;
+    border: var(--teal-accent) 1px solid;
+    padding: 0.25rem 1rem;
+}
+
+.bio {
+    font-size: 20px;
+    margin: 0;
+}
+
+.bar {
+    width: 100%;
+    height: 0px;
+    border: var(--teal-accent) 0.5px inset;
+}
+
+.friendButton {
+    font-family: inherit;
+    background-color: transparent;
+    border: var(--teal-accent) 2px solid;
+    color: var(--teal-accent);
+    font-size: 20px;
+    width: 100%;
+    padding: 0.75rem 0;
+    box-sizing: border-box;
     border-radius: 2rem;
 }

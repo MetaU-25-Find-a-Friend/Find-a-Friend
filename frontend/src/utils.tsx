@@ -6,6 +6,7 @@ import type {
     PlaceRecData,
     PlaceRecUserData,
     PlaceHistory,
+    AllUserData,
 } from "./types";
 import {
     COUNT_WEIGHT,
@@ -139,6 +140,18 @@ const interests = [
  */
 export const getInterestName = (id: number) => {
     return interests[id];
+};
+
+export const getAllData = async (userId: number) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/user/details/${userId}`,
+        {
+            credentials: "include",
+        },
+    );
+
+    const json = (await response.json()) as AllUserData;
+    return json;
 };
 
 /**
