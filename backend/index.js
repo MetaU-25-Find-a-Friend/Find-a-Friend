@@ -422,3 +422,72 @@ app.get("/friend", async (req, res) => {
 
     res.json(requests);
 });
+
+app.post("/friend/accept/:from", async (req, res) => {
+    const to = req.session.userId;
+
+    const from = parseInt(req.params.from);
+
+    await prisma.user.update({
+        where: {
+            id: from,
+        },
+        data: {
+            friends: {
+                push: to,
+            },
+        },
+    });
+
+    await prisma.user.update({
+        where: {
+            id: to,
+        },
+        data: {
+            friends: {
+                push: from,
+            },
+        },
+    });
+    const { id: requestId } = await prisma.friendRequest.findFirst({
+        where: {
+            fromUser: from,
+            toUser: to,
+        },
+        select: {
+            id: true,
+        },
+    });
+
+    await prisma.friendRequest.delete({
+        where: {
+            id: requestId,
+        },
+    });
+
+    res.send("Request accepted");
+});
+
+app.post("/friend/decline/:from", async (req, res) => {
+    const to = req.session.userId;
+
+    const from = parseInt(req.params.from);
+
+    const { id: requestId } = await prisma.friendRequest.findFirst({
+        where: {
+            fromUser: from,
+            toUser: to,
+        },
+        select: {
+            id: true,
+        },
+    });
+
+    await prisma.friendRequest.delete({
+        where: {
+            id: requestId,
+        },
+    });
+
+    res.send("Request declined");
+});

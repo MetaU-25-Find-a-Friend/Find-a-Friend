@@ -1,7 +1,12 @@
 import styles from "../css/Dashboard.module.css";
 import { useUser } from "../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
-import { getIncomingFriendRequests, logout } from "../utils";
+import {
+    acceptFriendRequest,
+    declineFriendRequest,
+    getIncomingFriendRequests,
+    logout,
+} from "../utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faUser,
@@ -27,6 +32,22 @@ const Dashboard = () => {
         navigate("/login");
     };
 
+    const handleAcceptFriend = (fromId: number) => {
+        acceptFriendRequest(fromId);
+
+        getIncomingFriendRequests().then((requests) =>
+            setFriendRequests(requests),
+        );
+    };
+
+    const handleDeclineFriend = (fromId: number) => {
+        declineFriendRequest(fromId);
+
+        getIncomingFriendRequests().then((requests) =>
+            setFriendRequests(requests),
+        );
+    };
+
     useEffect(() => {
         getIncomingFriendRequests().then((requests) =>
             setFriendRequests(requests),
@@ -39,9 +60,26 @@ const Dashboard = () => {
         return (
             <main className={styles.grid}>
                 <div className={styles.friendContainer}>
+                    <h2 className={styles.sectionHeader}>Friend Requests</h2>
                     {friendRequests.map((request) => (
                         <div className={styles.friendRequest}>
-                            <p>From {request.fromUser}</p>
+                            <p className={styles.friendText}>
+                                From {request.fromUser}
+                            </p>
+                            <button
+                                className={styles.friendButton}
+                                onClick={() =>
+                                    handleAcceptFriend(request.fromUser)
+                                }>
+                                Accept
+                            </button>
+                            <button
+                                className={styles.friendButton}
+                                onClick={() =>
+                                    handleDeclineFriend(request.fromUser)
+                                }>
+                                Decline
+                            </button>
                         </div>
                     ))}
                 </div>

@@ -570,3 +570,19 @@ export const getIncomingFriendRequests = async () => {
     const json = await response.json();
     return json;
 };
+
+export const acceptFriendRequest = async (from: number) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/friend/accept/${from}`, {
+        method: "post",
+        mode: "cors",
+        credentials: "include",
+    });
+};
+
+export const declineFriendRequest = async (from: number) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/friend/decline/${from}`, {
+        method: "post",
+        mode: "cors",
+        credentials: "include",
+    });
+};
