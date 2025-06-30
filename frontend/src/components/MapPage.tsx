@@ -22,10 +22,11 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeftLong } from "@fortawesome/free-solid-svg-icons";
 import { useBeforeUnload, useNavigate } from "react-router-dom";
-import type { UserGeohash } from "../types";
+import type { AllUserData, UserGeohash } from "../types";
 import Slider from "./Slider";
 import { encodeBase32 } from "geohashing";
 import RecommendationList from "./RecommendationList";
+import Modal from "./Modal";
 
 /**
  *
@@ -48,6 +49,9 @@ const MapPage = () => {
 
     // radius in which to show other users
     const [radius, setRadius] = useState(GEOHASH_RADII[0].radius);
+
+    // profile to show in modal; null if not showing
+    const [modalData, setModalData] = useState<AllUserData | null>(null);
 
     // seconds spent at approximately this location
     const timeAtLocation = useRef(0);
@@ -138,6 +142,9 @@ const MapPage = () => {
     } else if (myLocation) {
         return (
             <>
+                <Modal
+                    userData={modalData}
+                    setUserData={setModalData}></Modal>
                 <div className={styles.leftContainer}>
                     <button
                         className={styles.navButton}
@@ -199,7 +206,8 @@ const MapPage = () => {
                     disableDefaultUI={true}>
                     <MapMarker
                         id={user.id}
-                        location={myLocation}></MapMarker>
+                        location={myLocation}
+                        setModalData={setModalData}></MapMarker>
 
                     {otherUsers
                         .filter((userLoc) => {
@@ -214,7 +222,8 @@ const MapPage = () => {
                                 <MapMarker
                                     id={user.userId}
                                     key={user.userId}
-                                    location={user.geohash}></MapMarker>
+                                    location={user.geohash}
+                                    setModalData={setModalData}></MapMarker>
                             );
                         })}
                 </Map>

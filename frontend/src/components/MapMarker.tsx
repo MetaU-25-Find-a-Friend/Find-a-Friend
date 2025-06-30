@@ -1,7 +1,7 @@
 import styles from "../css/MapMarker.module.css";
 import { AdvancedMarker } from "@vis.gl/react-google-maps";
 import { useState, useEffect } from "react";
-import type { UserProfile } from "../types";
+import type { AllUserData, UserProfile } from "../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { geoHashToLatLng, getInterestName, getProfile } from "../utils";
@@ -9,6 +9,7 @@ import { geoHashToLatLng, getInterestName, getProfile } from "../utils";
 interface MapMarkerProps {
     id: number;
     location: string;
+    setModalData: React.Dispatch<React.SetStateAction<AllUserData | null>>;
 }
 
 /**
@@ -17,13 +18,24 @@ interface MapMarkerProps {
  * @param location location of the user
  * @returns A marker at the user's location with profile information in a popup on hover
  */
-const MapMarker = ({ id, location }: MapMarkerProps) => {
+const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {
     // profile of the user represented by this marker
     const [userData, setUserData] = useState<UserProfile>({
         firstName: "",
         lastName: "",
         interests: [],
     });
+
+    const handleMarkerClick = (event: React.MouseEvent) => {
+        event.stopPropagation();
+        console.log("whe");
+        setModalData({
+            id: id,
+            ...userData,
+            friends: [],
+            blockedUsers: [],
+        });
+    };
 
     // fetch user's profile to populate popup
     useEffect(() => {
@@ -36,7 +48,9 @@ const MapMarker = ({ id, location }: MapMarkerProps) => {
 
     return (
         <AdvancedMarker position={geoHashToLatLng(location)}>
-            <div className={styles.marker}>
+            <div
+                className={styles.marker}
+                onClick={handleMarkerClick}>
                 <FontAwesomeIcon
                     className={styles.markerIcon}
                     icon={faUser}></FontAwesomeIcon>
