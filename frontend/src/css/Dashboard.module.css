@@ -7,6 +7,7 @@
 }
 
 .titleContainer {
+    grid-row-start: 1;
     grid-column-start: 2;
     grid-column-end: 3;
     display: flex;
@@ -80,6 +81,27 @@
 .sectionHeader {
     font-size: 32px;
     margin: 0;
+}
+
+.messagesContainer {
+    display: flex;
+    flex-flow: column nowrap;
+    grid-column-start: 1;
+    grid-column-end: 2;
+    width: 30vw;
+    gap: 1rem;
+}
+
+.messagesButton {
+    background-color: var(--tan-background);
+    border: none;
+    font-family: inherit;
+    font-size: 24px;
+    padding: 1rem 2rem;
+    border-radius: 2rem;
+    color: var(--teal-accent);
+    height: fit-content;
+    width: fit-content;
 }
 
 .friendContainer {
