@@ -4,6 +4,12 @@ import Alert from "./Alert";
 import type { AllUserData } from "../types";
 import { getInterestName, sendFriendRequest } from "../utils";
 import { useUser } from "../contexts/UserContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+    faUserCheck,
+    faUserXmark,
+    faCircleArrowRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface ModalProps {
     userData: AllUserData | null;
@@ -69,20 +75,48 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                     </div>
                     <p className={styles.bio}>{userData.bio}</p>
                     <hr className={styles.bar}></hr>
-                    <div className={styles.friendContainer}>
-                        {userData.friends.includes(user.id) ? (
-                            <input
-                                type="text"
-                                className={styles.input}
-                                placeholder="New message"></input>
-                        ) : (
-                            <button
-                                className={styles.friendButton}
-                                onClick={handleFriendClick}>
-                                Send friend request
-                            </button>
-                        )}
-                    </div>
+                    {userData.friends.includes(user.id) ? (
+                        <>
+                            <div className={styles.friendInfoContainer}>
+                                <FontAwesomeIcon
+                                    icon={faUserCheck}
+                                    color="var(--teal-accent"
+                                    size="lg"></FontAwesomeIcon>
+                                <p className={styles.friendText}>
+                                    You are friends.
+                                </p>
+                            </div>
+                            <div className={styles.friendActionsContainer}>
+                                <input
+                                    type="text"
+                                    className={styles.input}
+                                    placeholder="New message"></input>
+                                <FontAwesomeIcon
+                                    icon={faCircleArrowRight}
+                                    color="var(--teal-accent"
+                                    size="3x"></FontAwesomeIcon>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className={styles.friendInfoContainer}>
+                                <FontAwesomeIcon
+                                    icon={faUserXmark}
+                                    color="var(--teal-accent"
+                                    size="lg"></FontAwesomeIcon>
+                                <p className={styles.friendText}>
+                                    You are not friends.
+                                </p>
+                            </div>
+                            <div className={styles.friendActionsContainer}>
+                                <button
+                                    className={styles.friendButton}
+                                    onClick={handleFriendClick}>
+                                    Send friend request
+                                </button>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         );

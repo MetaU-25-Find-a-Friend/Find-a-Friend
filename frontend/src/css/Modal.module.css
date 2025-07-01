@@ -69,6 +69,29 @@
     border: var(--teal-accent) 0.5px inset;
 }
 
+.friendInfoContainer {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.friendText {
+    font-size: 20px;
+    margin: 0;
+    color: var(--teal-accent);
+}
+
+.friendActionsContainer {
+    width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    gap: 0.5rem;
+    align-items: center;
+}
+
 .friendButton {
     font-family: inherit;
     background-color: transparent;
@@ -79,4 +102,20 @@
     padding: 0.75rem 0;
     box-sizing: border-box;
     border-radius: 2rem;
+}
+
+.input {
+    font-family: inherit;
+    color: inherit;
+    padding: 0.75rem 1.25rem;
+    border: var(--teal-accent) 2px solid;
+    border-radius: 2rem;
+    font-size: inherit;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 20px;
+}
+
+.input:focus-visible {
+    outline: none;
 }
