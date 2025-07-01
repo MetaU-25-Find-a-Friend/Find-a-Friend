@@ -114,3 +114,11 @@ export interface FriendRequestWithProfile {
     fromUserData: AllUserData;
     toUser: number;
 }
+
+export interface Message {
+    id: number;
+    fromUser: number;
+    toUser: number;
+    timestamp: Date;
+    read: boolean;
+}

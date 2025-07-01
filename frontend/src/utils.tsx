@@ -8,6 +8,7 @@ import type {
     PlaceHistory,
     AllUserData,
     FriendRequest,
+    Message,
 } from "./types";
 import {
     COUNT_WEIGHT,
@@ -627,4 +628,19 @@ export const unblockUser = async (id: number) => {
         mode: "cors",
         credentials: "include",
     });
+};
+
+/**
+ *
+ * @returns array of all messages sent from the specified user to the logged-in user
+ */
+export const getMessagesFrom = async (id: number) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/messages/${id}`,
+        {
+            credentials: "include",
+        },
+    );
+
+    return (await response.json()) as Message[];
 };

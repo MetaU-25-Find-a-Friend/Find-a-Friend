@@ -605,3 +605,19 @@ app.post("/unblock/:id", authenticate, async (req, res) => {
 
     res.send("User unblocked");
 });
+
+// get all messages to the logged-in user from the specified user
+app.get("/messages/:from", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    const fromId = parseInt(req.params.from);
+
+    const messages = prisma.message.findMany({
+        where: {
+            toUser: userId,
+            fromUser: fromId,
+        },
+    });
+
+    res.json(messages);
+});
