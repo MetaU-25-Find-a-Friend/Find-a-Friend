@@ -49,11 +49,16 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
         null,
     );
 
+    const loadCurrentUserData = async () => {
+        if (user) {
+            const data = await getAllData(user.id);
+            setCurrentUserData(data);
+        }
+    };
+
     // once user is loaded from context, get user's data
     useEffect(() => {
-        if (user) {
-            getAllData(user.id).then((data) => setCurrentUserData(data));
-        }
+        loadCurrentUserData();
     }, [user]);
 
     // message to show in alert (null when alert is not showing)
@@ -73,18 +78,20 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
     };
 
     // block user when button is clicked
-    const handleBlockClick = () => {
+    const handleBlockClick = async () => {
         if (userData) {
-            blockUser(userData.id);
+            await blockUser(userData.id);
             setAlertText("Successfully blocked user.");
+            await loadCurrentUserData();
         }
     };
 
     // unblock user when button is clicked
-    const handleUnblockClick = () => {
+    const handleUnblockClick = async () => {
         if (userData) {
-            unblockUser(userData.id);
+            await unblockUser(userData.id);
             setAlertText("Successfully unblocked user.");
+            await loadCurrentUserData();
         }
     };
 
