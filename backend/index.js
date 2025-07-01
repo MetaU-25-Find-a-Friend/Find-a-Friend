@@ -395,10 +395,23 @@ app.post("/friend/:to", authenticate, async (req, res) => {
             },
         })) > 0;
 
-    if (duplicateExists) {
+    const userFromFriends = await prisma.user.findUnique({
+        where: {
+            id: from,
+        },
+        select: {
+            friends: true,
+        },
+    });
+
+    const alreadyFriends = userFromFriends.friends.includes(to);
+
+    if (duplicateExists || alreadyFriends) {
         return res
             .status(409)
-            .send("A friend request between these users already exists");
+            .send(
+                "A friend request or relation between these users already exists",
+            );
     }
 
     await prisma.friendRequest.create({
