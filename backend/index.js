@@ -380,6 +380,7 @@ app.post("/friend/:to", authenticate, async (req, res) => {
 
     const to = parseInt(req.params.to);
 
+    // check whether an active friend request exists between them or they are already friends
     const duplicateExists =
         (await prisma.friendRequest.count({
             where: {
@@ -425,6 +426,7 @@ app.post("/friend/:to", authenticate, async (req, res) => {
     res.status(201).send("Friend request sent");
 });
 
+// get all active friend requests to the logged-in user
 app.get("/friend", async (req, res) => {
     const userId = req.session.userId;
 
@@ -437,6 +439,7 @@ app.get("/friend", async (req, res) => {
     res.json(requests);
 });
 
+// delete the friend request from the specified user to the logged-in user and make them friends
 app.post("/friend/accept/:from", async (req, res) => {
     const to = req.session.userId;
 
@@ -482,6 +485,7 @@ app.post("/friend/accept/:from", async (req, res) => {
     res.send("Request accepted");
 });
 
+// delete the friend request from the specified user to the logged-in user
 app.post("/friend/decline/:from", async (req, res) => {
     const to = req.session.userId;
 

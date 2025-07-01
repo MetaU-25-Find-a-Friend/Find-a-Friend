@@ -550,6 +550,11 @@ export const recommendPlaces = async (
     return result.sort(sortRecommendations);
 };
 
+/**
+ *
+ * @param to id of the user to whom the request is being sent
+ * @returns true if the request was made; false if there is already an active request between the logged-in user and to
+ */
 export const sendFriendRequest = async (to: number) => {
     const response = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/friend/${to}`,
@@ -563,6 +568,10 @@ export const sendFriendRequest = async (to: number) => {
     return response.ok;
 };
 
+/**
+ *
+ * @returns all active friend requests to the logged-in user
+ */
 export const getIncomingFriendRequests = async () => {
     const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/friend`, {
         credentials: "include",
@@ -572,6 +581,10 @@ export const getIncomingFriendRequests = async () => {
     return json;
 };
 
+/**
+ *
+ * @param from id of the user whom the request is from
+ */
 export const acceptFriendRequest = async (from: number) => {
     await fetch(`${import.meta.env.VITE_SERVER_URL}/friend/accept/${from}`, {
         method: "post",
@@ -580,6 +593,10 @@ export const acceptFriendRequest = async (from: number) => {
     });
 };
 
+/**
+ *
+ * @param from id of the user whom the request is from
+ */
 export const declineFriendRequest = async (from: number) => {
     await fetch(`${import.meta.env.VITE_SERVER_URL}/friend/decline/${from}`, {
         method: "post",

@@ -69,7 +69,7 @@
     border: var(--teal-accent) 0.5px inset;
 }
 
-.friendInfoContainer {
+.infoContainer {
     display: flex;
     flex-flow: row nowrap;
     justify-content: flex-start;
@@ -77,13 +77,13 @@
     align-items: center;
 }
 
-.friendText {
+.infoText {
     font-size: 20px;
     margin: 0;
     color: var(--teal-accent);
 }
 
-.friendActionsContainer {
+.actionsContainer {
     width: 100%;
     display: flex;
     flex-flow: row nowrap;
@@ -92,7 +92,7 @@
     align-items: center;
 }
 
-.friendButton {
+.button {
     font-family: inherit;
     background-color: transparent;
     border: var(--teal-accent) 2px solid;

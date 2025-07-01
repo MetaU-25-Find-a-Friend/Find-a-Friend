@@ -20,30 +20,40 @@ import { APP_TITLE } from "../constants";
 import type { AllUserData, FriendRequestWithProfile } from "../types";
 import Modal from "./Modal";
 
-// Landing page; allows navigating to profile, map, etc.
+/**
+ *
+ * @returns A landing page where the user can view notifications and navigate out to other pages
+ */
 const Dashboard = () => {
+    // the logged-in user
     const { user } = useUser();
 
-    const navigate = useNavigate();
-
-    const [showingMenu, setShowingMenu] = useState(false);
-
-    const [modalData, setModalData] = useState<AllUserData | null>(null);
-
-    const [friendRequests, setFriendRequests] = useState(
-        Array() as FriendRequestWithProfile[],
-    );
-
+    // logout the user and navigate to login page
     const handleLogout = () => {
         logout();
         navigate("/login");
     };
 
+    const navigate = useNavigate();
+
+    // whether to show profile menu
+    const [showingMenu, setShowingMenu] = useState(false);
+
+    // user data to show in modal; null when modal is hidden
+    const [modalData, setModalData] = useState<AllUserData | null>(null);
+
+    // all active incoming friend requests
+    const [friendRequests, setFriendRequests] = useState(
+        Array() as FriendRequestWithProfile[],
+    );
+
+    // load active friend requests with data on the user who sent them
     const loadFriendRequests = async () => {
         const requests = await getIncomingFriendRequests();
 
         const result = Array() as FriendRequestWithProfile[];
 
+        // iterate over each request, adding an object with its data and profile data to result
         for (const request of requests) {
             const data = await getAllData(request.fromUser);
 
@@ -57,25 +67,29 @@ const Dashboard = () => {
         setFriendRequests(result);
     };
 
+    // load friend requests on component mount
+    useEffect(() => {
+        loadFriendRequests();
+    }, []);
+
+    // accept a friend request and reload display
     const handleAcceptFriend = async (fromId: number) => {
         await acceptFriendRequest(fromId);
 
         await loadFriendRequests();
     };
 
+    // decline a friend request and reload display
     const handleDeclineFriend = async (fromId: number) => {
         await declineFriendRequest(fromId);
 
         await loadFriendRequests();
     };
 
+    // show originating user's profile when their name is clicked in a friend request
     const handleFriendNameClick = (_: React.MouseEvent, data: AllUserData) => {
         setModalData(data);
     };
-
-    useEffect(() => {
-        loadFriendRequests();
-    }, []);
 
     if (user === null) {
         return <LoggedOut></LoggedOut>;
