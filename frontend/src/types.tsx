@@ -11,6 +11,19 @@ export interface UserProfile {
     bio?: string;
 }
 
+export interface AllUserData {
+    id: number;
+    firstName: string;
+    lastName: string;
+    pronouns?: string;
+    age?: number;
+    major?: string;
+    interests: number[];
+    bio?: string;
+    friends: number[];
+    blockedUsers: number[];
+}
+
 /**
  * Represents the logged-in user's id and email for authentication on each page
  */
@@ -87,4 +100,17 @@ export interface PlaceRecUserData {
     geohash: string;
     friend: boolean;
     interestAngle: number;
+}
+
+export interface FriendRequest {
+    id: number;
+    fromUser: number;
+    toUser: number;
+}
+
+export interface FriendRequestWithProfile {
+    id: number;
+    fromUser: number;
+    fromUserData: AllUserData;
+    toUser: number;
 }

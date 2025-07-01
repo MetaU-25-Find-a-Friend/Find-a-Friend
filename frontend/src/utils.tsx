@@ -6,6 +6,8 @@ import type {
     PlaceRecData,
     PlaceRecUserData,
     PlaceHistory,
+    AllUserData,
+    FriendRequest,
 } from "./types";
 import {
     COUNT_WEIGHT,
@@ -139,6 +141,18 @@ const interests = [
  */
 export const getInterestName = (id: number) => {
     return interests[id];
+};
+
+export const getAllData = async (userId: number) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/user/details/${userId}`,
+        {
+            credentials: "include",
+        },
+    );
+
+    const json = (await response.json()) as AllUserData;
+    return json;
 };
 
 /**
@@ -534,4 +548,83 @@ export const recommendPlaces = async (
 
     // sort results
     return result.sort(sortRecommendations);
+};
+
+/**
+ *
+ * @param to id of the user to whom the request is being sent
+ * @returns true if the request was made; false if there is already an active request between the logged-in user and to
+ */
+export const sendFriendRequest = async (to: number) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/friend/${to}`,
+        {
+            method: "post",
+            mode: "cors",
+            credentials: "include",
+        },
+    );
+
+    return response.ok;
+};
+
+/**
+ *
+ * @returns all active friend requests to the logged-in user
+ */
+export const getIncomingFriendRequests = async () => {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/friend`, {
+        credentials: "include",
+    });
+
+    const json = (await response.json()) as FriendRequest[];
+    return json;
+};
+
+/**
+ *
+ * @param from id of the user whom the request is from
+ */
+export const acceptFriendRequest = async (from: number) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/friend/accept/${from}`, {
+        method: "post",
+        mode: "cors",
+        credentials: "include",
+    });
+};
+
+/**
+ *
+ * @param from id of the user whom the request is from
+ */
+export const declineFriendRequest = async (from: number) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/friend/decline/${from}`, {
+        method: "post",
+        mode: "cors",
+        credentials: "include",
+    });
+};
+
+/**
+ *
+ * @param id id of the user to block; if this is a friend, the friend relationship will be removed
+ */
+export const blockUser = async (id: number) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/block/${id}`, {
+        method: "post",
+        mode: "cors",
+        credentials: "include",
+    });
+};
+
+/**
+ *
+ * @param id id of the currently blocked user to unblock
+ */
+export const unblockUser = async (id: number) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/unblock/${id}`, {
+        method: "post",
+        mode: "cors",
+        credentials: "include",
+    });
 };

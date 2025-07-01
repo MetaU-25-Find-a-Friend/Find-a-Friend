@@ -2,6 +2,8 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     height: 100vh;
+    padding: 1rem;
+    box-sizing: border-box;
 }
 
 .titleContainer {
@@ -12,13 +14,13 @@
     justify-content: flex-end;
     align-items: center;
     gap: 1rem;
-    margin: 1rem;
     position: relative;
     align-self: start;
 }
 
 .title {
-    font-size: 36px;
+    font-size: 42px;
+    margin: 0;
 }
 
 .userMenuButton {
@@ -69,9 +71,59 @@
     color: var(--teal-accent);
     grid-column-start: 2;
     grid-column-end: 3;
-    margin: 1rem;
     height: fit-content;
     width: fit-content;
     align-self: end;
     justify-self: end;
+}
+
+.sectionHeader {
+    font-size: 32px;
+    margin: 0;
+}
+
+.friendContainer {
+    display: flex;
+    flex-flow: column nowrap;
+    grid-column-start: 1;
+    grid-column-end: 2;
+    width: 30vw;
+    gap: 1rem;
+}
+
+.friendRequest {
+    background-color: var(--tan-background);
+    padding: 1rem;
+    box-sizing: border-box;
+    border-radius: 1rem;
+    display: grid;
+    column-gap: 1rem;
+    row-gap: 1rem;
+    grid-template-columns: 1fr 1fr;
+}
+
+.friendText {
+    font-size: 20px;
+    margin: 0;
+    grid-column-start: 1;
+    grid-column-end: 3;
+}
+
+.friendButton {
+    font-family: inherit;
+    font-size: 18px;
+    color: var(--teal-accent);
+    background-color: transparent;
+    border: var(--teal-accent) 2px solid;
+    padding: 0.75rem 2rem;
+    border-radius: 2rem;
+}
+
+.friendName {
+    color: var(--teal-accent);
+    font-weight: bold;
+}
+
+.friendName:hover {
+    text-decoration: underline;
 }

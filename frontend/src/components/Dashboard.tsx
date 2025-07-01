@@ -1,28 +1,94 @@
 import styles from "../css/Dashboard.module.css";
 import { useUser } from "../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../utils";
+import {
+    acceptFriendRequest,
+    declineFriendRequest,
+    getAllData,
+    getIncomingFriendRequests,
+    logout,
+} from "../utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faUser,
     faChevronDown,
     faArrowRightLong,
 } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoggedOut from "./LoggedOut";
 import { APP_TITLE } from "../constants";
+import type { AllUserData, FriendRequestWithProfile } from "../types";
+import Modal from "./Modal";
 
-// Landing page; allows navigating to profile, map, etc.
+/**
+ *
+ * @returns A landing page where the user can view notifications and navigate out to other pages
+ */
 const Dashboard = () => {
+    // the logged-in user
     const { user } = useUser();
 
-    const navigate = useNavigate();
-
-    const [showingMenu, setShowingMenu] = useState(false);
-
+    // logout the user and navigate to login page
     const handleLogout = () => {
         logout();
         navigate("/login");
+    };
+
+    const navigate = useNavigate();
+
+    // whether to show profile menu
+    const [showingMenu, setShowingMenu] = useState(false);
+
+    // user data to show in modal; null when modal is hidden
+    const [modalData, setModalData] = useState<AllUserData | null>(null);
+
+    // all active incoming friend requests
+    const [friendRequests, setFriendRequests] = useState(
+        Array() as FriendRequestWithProfile[],
+    );
+
+    // load active friend requests with data on the user who sent them
+    const loadFriendRequests = async () => {
+        const requests = await getIncomingFriendRequests();
+
+        const result = Array() as FriendRequestWithProfile[];
+
+        // iterate over each request, adding an object with its data and profile data to result
+        for (const request of requests) {
+            const data = await getAllData(request.fromUser);
+
+            if (data) {
+                result.push({
+                    ...request,
+                    fromUserData: data,
+                });
+            }
+        }
+        setFriendRequests(result);
+    };
+
+    // load friend requests on component mount
+    useEffect(() => {
+        loadFriendRequests();
+    }, []);
+
+    // accept a friend request and reload display
+    const handleAcceptFriend = async (fromId: number) => {
+        await acceptFriendRequest(fromId);
+
+        await loadFriendRequests();
+    };
+
+    // decline a friend request and reload display
+    const handleDeclineFriend = async (fromId: number) => {
+        await declineFriendRequest(fromId);
+
+        await loadFriendRequests();
+    };
+
+    // show originating user's profile when their name is clicked in a friend request
+    const handleFriendNameClick = (_: React.MouseEvent, data: AllUserData) => {
+        setModalData(data);
     };
 
     if (user === null) {
@@ -30,6 +96,44 @@ const Dashboard = () => {
     } else {
         return (
             <main className={styles.grid}>
+                <Modal
+                    userData={modalData}
+                    setUserData={setModalData}></Modal>
+                <div className={styles.friendContainer}>
+                    <h2 className={styles.sectionHeader}>Friend Requests</h2>
+                    {friendRequests.map((request) => (
+                        <div className={styles.friendRequest}>
+                            <p className={styles.friendText}>
+                                From{" "}
+                                <span
+                                    className={styles.friendName}
+                                    onClick={(event) =>
+                                        handleFriendNameClick(
+                                            event,
+                                            request.fromUserData,
+                                        )
+                                    }>
+                                    {request.fromUserData.firstName}{" "}
+                                    {request.fromUserData.lastName}
+                                </span>
+                            </p>
+                            <button
+                                className={styles.friendButton}
+                                onClick={() =>
+                                    handleAcceptFriend(request.fromUser)
+                                }>
+                                Accept
+                            </button>
+                            <button
+                                className={styles.friendButton}
+                                onClick={() =>
+                                    handleDeclineFriend(request.fromUser)
+                                }>
+                                Decline
+                            </button>
+                        </div>
+                    ))}
+                </div>
                 <div className={styles.titleContainer}>
                     <h1 className={styles.title}>{APP_TITLE}</h1>
                     <div

@@ -205,6 +205,35 @@ app.get("/user/:id", authenticate, async (req, res) => {
     res.json(user);
 });
 
+app.get("/user/details/:id", authenticate, async (req, res) => {
+    const userId = parseInt(req.params.id);
+
+    const user = await prisma.user.findUnique({
+        where: {
+            id: userId,
+        },
+        select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            pronouns: true,
+            age: true,
+            major: true,
+            interests: true,
+            bio: true,
+            friends: true,
+            blockedUsers: true,
+            interests: true,
+        },
+    });
+
+    if (!user) {
+        return res.status(404).send("User not found");
+    }
+
+    res.json(user);
+});
+
 // get a user's friends and interests
 app.get("/user/friendsAndInterests/:id", authenticate, async (req, res) => {
     const userId = parseInt(req.params.id);
@@ -343,4 +372,236 @@ app.get("/user/geolocation/history", authenticate, async (req, res) => {
     });
 
     res.json(history);
+});
+
+// create a friend request from the logged-in user to another user
+app.post("/friend/:to", authenticate, async (req, res) => {
+    const from = req.session.userId;
+
+    const to = parseInt(req.params.to);
+
+    // check whether an active friend request exists between them or they are already friends
+    const duplicateExists =
+        (await prisma.friendRequest.count({
+            where: {
+                OR: [
+                    {
+                        fromUser: from,
+                        toUser: to,
+                    },
+                    {
+                        fromUser: to,
+                        toUser: from,
+                    },
+                ],
+            },
+        })) > 0;
+
+    const userFromFriends = await prisma.user.findUnique({
+        where: {
+            id: from,
+        },
+        select: {
+            friends: true,
+        },
+    });
+
+    const alreadyFriends = userFromFriends.friends.includes(to);
+
+    if (duplicateExists || alreadyFriends) {
+        return res
+            .status(409)
+            .send(
+                "A friend request or relation between these users already exists",
+            );
+    }
+
+    await prisma.friendRequest.create({
+        data: {
+            fromUser: from,
+            toUser: to,
+        },
+    });
+
+    res.status(201).send("Friend request sent");
+});
+
+// get all active friend requests to the logged-in user
+app.get("/friend", async (req, res) => {
+    const userId = req.session.userId;
+
+    const requests = await prisma.friendRequest.findMany({
+        where: {
+            toUser: userId,
+        },
+    });
+
+    res.json(requests);
+});
+
+// delete the friend request from the specified user to the logged-in user and make them friends
+app.post("/friend/accept/:from", async (req, res) => {
+    const to = req.session.userId;
+
+    const from = parseInt(req.params.from);
+
+    await prisma.user.update({
+        where: {
+            id: from,
+        },
+        data: {
+            friends: {
+                push: to,
+            },
+        },
+    });
+
+    await prisma.user.update({
+        where: {
+            id: to,
+        },
+        data: {
+            friends: {
+                push: from,
+            },
+        },
+    });
+    const { id } = await prisma.friendRequest.findFirst({
+        where: {
+            fromUser: from,
+            toUser: to,
+        },
+        select: {
+            id: true,
+        },
+    });
+
+    await prisma.friendRequest.delete({
+        where: {
+            id: id,
+        },
+    });
+
+    res.send("Request accepted");
+});
+
+// delete the friend request from the specified user to the logged-in user
+app.post("/friend/decline/:from", async (req, res) => {
+    const to = req.session.userId;
+
+    const from = parseInt(req.params.from);
+
+    const { id } = await prisma.friendRequest.findFirst({
+        where: {
+            fromUser: from,
+            toUser: to,
+        },
+        select: {
+            id: true,
+        },
+    });
+
+    await prisma.friendRequest.delete({
+        where: {
+            id: id,
+        },
+    });
+
+    res.send("Request declined");
+});
+
+// block the specified user
+app.post("/block/:id", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    const toBlock = parseInt(req.params.id);
+
+    // add to blocked users array
+    await prisma.user.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            blockedUsers: {
+                push: toBlock,
+            },
+        },
+    });
+
+    // check whether users were previously friends
+    const { friends } = await prisma.user.findUnique({
+        where: {
+            id: userId,
+        },
+        select: {
+            friends: true,
+        },
+    });
+
+    if (friends.includes(toBlock)) {
+        // remove friend relationship
+        const updatedFriends = friends.filter((element) => element !== toBlock);
+        await prisma.user.update({
+            where: {
+                id: userId,
+            },
+            data: {
+                friends: updatedFriends,
+            },
+        });
+
+        const { friends: blockedUserFriends } = await prisma.user.findUnique({
+            where: {
+                id: toBlock,
+            },
+            select: {
+                friends: true,
+            },
+        });
+
+        const updatedBlockedUserFriends = blockedUserFriends.filter(
+            (element) => element !== userId,
+        );
+        await prisma.user.update({
+            where: {
+                id: toBlock,
+            },
+            data: {
+                friends: updatedBlockedUserFriends,
+            },
+        });
+    }
+
+    res.send("User blocked");
+});
+
+// unblock the specified user
+app.post("/unblock/:id", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    const toUnblock = parseInt(req.params.id);
+
+    const { blockedUsers } = await prisma.user.findUnique({
+        where: {
+            id: userId,
+        },
+        select: {
+            blockedUsers: true,
+        },
+    });
+
+    const updatedBlocked = blockedUsers.filter(
+        (element) => element !== toUnblock,
+    );
+
+    await prisma.user.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            blockedUsers: updatedBlocked,
+        },
+    });
+
+    res.send("User unblocked");
 });
