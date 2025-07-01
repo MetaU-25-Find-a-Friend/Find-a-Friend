@@ -46,42 +46,47 @@ const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {
         });
     }, []);
 
-    return (
-        <AdvancedMarker position={geoHashToLatLng(location)}>
-            <div
-                className={styles.marker}
-                onClick={handleMarkerClick}>
-                <FontAwesomeIcon
-                    className={styles.markerIcon}
-                    icon={faUser}></FontAwesomeIcon>
-                <div className={styles.profilePopup}>
-                    <h3 className={styles.profileTitle}>
-                        {userData.firstName} {userData.lastName}{" "}
-                        <span className={styles.profilePronouns}>
-                            {userData.pronouns}
-                        </span>
-                    </h3>
-                    <p className={styles.profileMajor}>
-                        {userData.major ?? "(No major)"}
-                    </p>
-                    <div className={styles.interestsContainer}>
-                        {userData.interests.map((value, index) => {
-                            if (value === 1) {
-                                return (
-                                    <p className={styles.profileInterest}>
-                                        {getInterestName(index)}
-                                    </p>
-                                );
-                            } else {
-                                return <></>;
-                            }
-                        })}
+    // if this user has blocked the current user, don't show the marker
+    if (!user || userData.blockedUsers.includes(user.id)) {
+        return <></>;
+    } else {
+        return (
+            <AdvancedMarker position={geoHashToLatLng(location)}>
+                <div
+                    className={styles.marker}
+                    onClick={handleMarkerClick}>
+                    <FontAwesomeIcon
+                        className={styles.markerIcon}
+                        icon={faUser}></FontAwesomeIcon>
+                    <div className={styles.profilePopup}>
+                        <h3 className={styles.profileTitle}>
+                            {userData.firstName} {userData.lastName}{" "}
+                            <span className={styles.profilePronouns}>
+                                {userData.pronouns}
+                            </span>
+                        </h3>
+                        <p className={styles.profileMajor}>
+                            {userData.major ?? "(No major)"}
+                        </p>
+                        <div className={styles.interestsContainer}>
+                            {userData.interests.map((value, index) => {
+                                if (value === 1) {
+                                    return (
+                                        <p className={styles.profileInterest}>
+                                            {getInterestName(index)}
+                                        </p>
+                                    );
+                                } else {
+                                    return <></>;
+                                }
+                            })}
+                        </div>
+                        <p className={styles.profileBio}>{userData.bio}</p>
                     </div>
-                    <p className={styles.profileBio}>{userData.bio}</p>
                 </div>
-            </div>
-        </AdvancedMarker>
-    );
+            </AdvancedMarker>
+        );
+    }
 };
 
 export default MapMarker;
