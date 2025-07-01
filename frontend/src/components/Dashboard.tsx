@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
     acceptFriendRequest,
     declineFriendRequest,
+    getAllData,
     getIncomingFriendRequests,
     logout,
 } from "../utils";
@@ -16,6 +17,8 @@ import {
 import { useEffect, useState } from "react";
 import LoggedOut from "./LoggedOut";
 import { APP_TITLE } from "../constants";
+import type { AllUserData, FriendRequestWithProfile } from "../types";
+import Modal from "./Modal";
 
 // Landing page; allows navigating to profile, map, etc.
 const Dashboard = () => {
@@ -25,33 +28,53 @@ const Dashboard = () => {
 
     const [showingMenu, setShowingMenu] = useState(false);
 
-    const [friendRequests, setFriendRequests] = useState(Array());
+    const [modalData, setModalData] = useState<AllUserData | null>(null);
+
+    const [friendRequests, setFriendRequests] = useState(
+        Array() as FriendRequestWithProfile[],
+    );
 
     const handleLogout = () => {
         logout();
         navigate("/login");
     };
 
-    const handleAcceptFriend = (fromId: number) => {
-        acceptFriendRequest(fromId);
+    const loadFriendRequests = async () => {
+        const requests = await getIncomingFriendRequests();
 
-        getIncomingFriendRequests().then((requests) =>
-            setFriendRequests(requests),
-        );
+        const result = Array() as FriendRequestWithProfile[];
+
+        for (const request of requests) {
+            const data = await getAllData(request.fromUser);
+
+            if (data) {
+                result.push({
+                    ...request,
+                    fromUserData: data,
+                });
+            }
+        }
+        setFriendRequests(result);
     };
 
-    const handleDeclineFriend = (fromId: number) => {
-        declineFriendRequest(fromId);
+    const handleAcceptFriend = async (fromId: number) => {
+        await acceptFriendRequest(fromId);
 
-        getIncomingFriendRequests().then((requests) =>
-            setFriendRequests(requests),
-        );
+        await loadFriendRequests();
+    };
+
+    const handleDeclineFriend = async (fromId: number) => {
+        await declineFriendRequest(fromId);
+
+        await loadFriendRequests();
+    };
+
+    const handleFriendNameClick = (_: React.MouseEvent, data: AllUserData) => {
+        setModalData(data);
     };
 
     useEffect(() => {
-        getIncomingFriendRequests().then((requests) =>
-            setFriendRequests(requests),
-        );
+        loadFriendRequests();
     }, []);
 
     if (user === null) {
@@ -59,12 +82,26 @@ const Dashboard = () => {
     } else {
         return (
             <main className={styles.grid}>
+                <Modal
+                    userData={modalData}
+                    setUserData={setModalData}></Modal>
                 <div className={styles.friendContainer}>
                     <h2 className={styles.sectionHeader}>Friend Requests</h2>
                     {friendRequests.map((request) => (
                         <div className={styles.friendRequest}>
                             <p className={styles.friendText}>
-                                From {request.fromUser}
+                                From{" "}
+                                <span
+                                    className={styles.friendName}
+                                    onClick={(event) =>
+                                        handleFriendNameClick(
+                                            event,
+                                            request.fromUserData,
+                                        )
+                                    }>
+                                    {request.fromUserData.firstName}{" "}
+                                    {request.fromUserData.lastName}
+                                </span>
                             </p>
                             <button
                                 className={styles.friendButton}

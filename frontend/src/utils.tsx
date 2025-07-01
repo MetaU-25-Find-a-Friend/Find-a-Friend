@@ -7,6 +7,7 @@ import type {
     PlaceRecUserData,
     PlaceHistory,
     AllUserData,
+    FriendRequest,
 } from "./types";
 import {
     COUNT_WEIGHT,
@@ -567,7 +568,7 @@ export const getIncomingFriendRequests = async () => {
         credentials: "include",
     });
 
-    const json = await response.json();
+    const json = (await response.json()) as FriendRequest[];
     return json;
 };
 

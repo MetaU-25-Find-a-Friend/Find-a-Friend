@@ -101,3 +101,16 @@ export interface PlaceRecUserData {
     friend: boolean;
     interestAngle: number;
 }
+
+export interface FriendRequest {
+    id: number;
+    fromUser: number;
+    toUser: number;
+}
+
+export interface FriendRequestWithProfile {
+    id: number;
+    fromUser: number;
+    fromUserData: AllUserData;
+    toUser: number;
+}

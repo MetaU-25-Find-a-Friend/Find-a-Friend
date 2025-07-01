@@ -462,7 +462,7 @@ app.post("/friend/accept/:from", async (req, res) => {
             },
         },
     });
-    const { id: requestId } = await prisma.friendRequest.findFirst({
+    const { id } = await prisma.friendRequest.findFirst({
         where: {
             fromUser: from,
             toUser: to,
@@ -474,7 +474,7 @@ app.post("/friend/accept/:from", async (req, res) => {
 
     await prisma.friendRequest.delete({
         where: {
-            id: requestId,
+            id: id,
         },
     });
 
@@ -486,7 +486,7 @@ app.post("/friend/decline/:from", async (req, res) => {
 
     const from = parseInt(req.params.from);
 
-    const { id: requestId } = await prisma.friendRequest.findFirst({
+    const { id } = await prisma.friendRequest.findFirst({
         where: {
             fromUser: from,
             toUser: to,
@@ -498,7 +498,7 @@ app.post("/friend/decline/:from", async (req, res) => {
 
     await prisma.friendRequest.delete({
         where: {
-            id: requestId,
+            id: id,
         },
     });
 
