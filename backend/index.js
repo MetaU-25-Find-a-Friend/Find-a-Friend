@@ -222,6 +222,7 @@ app.get("/user/details/:id", authenticate, async (req, res) => {
             interests: true,
             bio: true,
             friends: true,
+            blockedUsers: true,
             interests: true,
         },
     });
@@ -503,4 +504,100 @@ app.post("/friend/decline/:from", async (req, res) => {
     });
 
     res.send("Request declined");
+});
+
+// block the specified user
+app.post("/block/:id", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    const toBlock = parseInt(req.params.id);
+
+    // add to blocked users array
+    await prisma.user.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            blockedUsers: {
+                push: toBlock,
+            },
+        },
+    });
+
+    // check whether users were previously friends
+    const { friends } = await prisma.user.findUnique({
+        where: {
+            id: userId,
+        },
+        select: {
+            friends: true,
+        },
+    });
+
+    if (friends.includes(toBlock)) {
+        // remove friend relationship
+        const updatedFriends = friends.filter((element) => element !== toBlock);
+        await prisma.user.update({
+            where: {
+                id: userId,
+            },
+            data: {
+                friends: updatedFriends,
+            },
+        });
+
+        const { friends: blockedUserFriends } = await prisma.user.findUnique({
+            where: {
+                id: toBlock,
+            },
+            select: {
+                friends: true,
+            },
+        });
+
+        const updatedBlockedUserFriends = blockedUserFriends.filter(
+            (element) => element !== userId,
+        );
+        await prisma.user.update({
+            where: {
+                id: toBlock,
+            },
+            data: {
+                friends: updatedBlockedUserFriends,
+            },
+        });
+    }
+
+    res.send("User blocked");
+});
+
+// unblock the specified user
+app.post("/unblock/:id", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    const toUnblock = parseInt(req.params.id);
+
+    const { blockedUsers } = await prisma.user.findUnique({
+        where: {
+            id: userId,
+        },
+        select: {
+            blockedUsers: true,
+        },
+    });
+
+    const updatedBlocked = blockedUsers.filter(
+        (element) => element !== toUnblock,
+    );
+
+    await prisma.user.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            blockedUsers: updatedBlocked,
+        },
+    });
+
+    res.send("User unblocked");
 });

@@ -587,3 +587,27 @@ export const declineFriendRequest = async (from: number) => {
         credentials: "include",
     });
 };
+
+/**
+ *
+ * @param id id of the user to block; if this is a friend, the friend relationship will be removed
+ */
+export const blockUser = async (id: number) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/block/${id}`, {
+        method: "post",
+        mode: "cors",
+        credentials: "include",
+    });
+};
+
+/**
+ *
+ * @param id id of the currently blocked user to unblock
+ */
+export const unblockUser = async (id: number) => {
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/unblock/${id}`, {
+        method: "post",
+        mode: "cors",
+        credentials: "include",
+    });
+};
