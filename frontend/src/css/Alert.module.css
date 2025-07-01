@@ -28,6 +28,7 @@
     animation-name: alert-slide;
     animation-timing-function: ease;
     animation-fill-mode: both;
+    z-index: 12;
 }
 
 .alertText {
