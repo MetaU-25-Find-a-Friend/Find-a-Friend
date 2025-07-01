@@ -81,7 +81,6 @@ const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {
                                 }
                             })}
                         </div>
-                        <p className={styles.profileBio}>{userData.bio}</p>
                     </div>
                 </div>
             </AdvancedMarker>
