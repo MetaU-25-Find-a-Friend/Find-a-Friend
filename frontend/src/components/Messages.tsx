@@ -95,7 +95,7 @@ const Messages = () => {
 
     // send a message with entered text to the selected user
     const handleSendClick = async () => {
-        if (selectedFriendId) {
+        if (newMessage && selectedFriendId) {
             const [success, result] = await sendMessage(
                 selectedFriendId,
                 newMessage,
