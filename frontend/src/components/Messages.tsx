@@ -12,6 +12,7 @@ import type { AllUserData, Message } from "../types";
 import { getAllData, getMessagesBetween, sendMessage } from "../utils";
 import Alert from "./Alert";
 import { MESSAGES_FETCH_INTERVAL, MESSAGES_PER_PAGE } from "../constants";
+import Modal from "./Modal";
 
 /**
  *
@@ -32,6 +33,8 @@ const Messages = () => {
 
     // profiles of all of current user's friends
     const [friends, setFriends] = useState(Array() as AllUserData[]);
+
+    const [modalData, setModalData] = useState<AllUserData | null>(null);
 
     // messages being shown
     const [messages, setMessages] = useState(Array() as Message[]);
@@ -71,7 +74,6 @@ const Messages = () => {
             } else {
                 setMessages((current) => [...current, ...data]);
             }
-            
         });
     };
 
@@ -80,13 +82,10 @@ const Messages = () => {
         const newest = await getMessagesBetween(id, -1);
 
         setMessages((current) => {
-
             if (current.length === 0) {
-
                 // if the display is empty, simply set it to the newest messages
                 return newest;
             } else {
-
                 // otherwise, find the newest message that is a duplicate of a message already on the display
                 const firstMatchIndex = newest.findIndex(
                     (message) => message.id === current[0].id,
@@ -157,6 +156,9 @@ const Messages = () => {
                 <Alert
                     alertText={alertText}
                     setAlertText={setAlertText}></Alert>
+                <Modal
+                    userData={modalData}
+                    setUserData={setModalData}></Modal>
                 <button
                     className={styles.navButton}
                     onClick={() => navigate("/")}>
@@ -168,8 +170,14 @@ const Messages = () => {
                     {friends.map((friend) => (
                         <div
                             className={`${styles.friend} ${friend.id === selectedFriendId ? styles.selected : ""}`}
-                            onClick={() => setSelectedFriendId(friend.id)}>
-                            {friend.firstName} {friend.lastName}
+                            onClick={() => {
+                                setSelectedFriendId(friend.id);
+                            }}>
+                            <h6
+                                className={styles.friendName}
+                                onClick={() => setModalData(friend)}>
+                                {friend.firstName} {friend.lastName}
+                            </h6>
                         </div>
                     ))}
                 </div>

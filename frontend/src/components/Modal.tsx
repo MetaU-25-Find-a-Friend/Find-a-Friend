@@ -7,6 +7,7 @@ import {
     getAllData,
     getInterestName,
     sendFriendRequest,
+    sendMessage,
     unblockUser,
 } from "../utils";
 import { useUser } from "../contexts/UserContext";
@@ -14,7 +15,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faUserCheck,
     faUserXmark,
-    faCircleArrowRight,
+    faArrowRight,
     faUserShield,
     faShieldHalved,
 } from "@fortawesome/free-solid-svg-icons";
@@ -95,6 +96,20 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
         }
     };
 
+    // text entered in the box that shows if the user is a friend
+    const [messageText, setMessageText] = useState("");
+
+    const handleSendClick = async () => {
+        if (userData && messageText) {
+            const [success, _] = await sendMessage(userData.id, messageText);
+            if (!success) {
+                setAlertText("Something went wrong.");
+            } else {
+                setAlertText("Message sent.");
+            }
+        }
+    };
+
     if (userData && currentUserData) {
         return (
             <div
@@ -144,11 +159,18 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                                 <input
                                     type="text"
                                     className={styles.input}
+                                    onChange={(event) =>
+                                        setMessageText(event.target.value)
+                                    }
                                     placeholder="New message"></input>
-                                <FontAwesomeIcon
-                                    icon={faCircleArrowRight}
-                                    color="var(--teal-accent"
-                                    size="3x"></FontAwesomeIcon>
+                                <button
+                                    className={styles.sendButton}
+                                    onClick={handleSendClick}>
+                                    <FontAwesomeIcon
+                                        icon={faArrowRight}
+                                        color="white"
+                                        size="2x"></FontAwesomeIcon>
+                                </button>
                             </div>
                         </>
                     ) : (

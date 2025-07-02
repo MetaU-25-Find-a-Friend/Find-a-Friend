@@ -43,9 +43,17 @@
     padding: 2rem 1rem;
     box-sizing: border-box;
     border-radius: 2rem;
+}
+
+.friendName {
     font-size: 24px;
     font-weight: bold;
     color: var(--teal-accent);
+    margin: 0;
+}
+
+.friendName:hover {
+    text-decoration: underline;
 }
 
 .selected {
