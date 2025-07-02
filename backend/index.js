@@ -626,7 +626,7 @@ app.get("/messages/:other", authenticate, async (req, res) => {
             ],
         },
         orderBy: {
-            timestamp: "asc",
+            timestamp: "desc",
         },
     });
 

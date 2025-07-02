@@ -71,7 +71,7 @@ const Messages = () => {
                 setAlertText("Something went wrong.");
             } else {
                 // if message successfully sent, update display and clear input
-                setMessages([...messages, result]);
+                setMessages([result, ...messages]);
                 if (inputRef.current) {
                     inputRef.current.value = "";
                 }
@@ -116,7 +116,7 @@ const Messages = () => {
                     ))}
                 </div>
                 {selectedFriendId ? (
-                    <div className={styles.rightBox}>
+                    <>
                         <div className={styles.messages}>
                             {messages.map((message) => (
                                 <div
@@ -144,7 +144,7 @@ const Messages = () => {
                                     size="2x"></FontAwesomeIcon>
                             </button>
                         </div>
-                    </div>
+                    </>
                 ) : (
                     <div className={styles.rightBox}>
                         <p className={styles.noneSelected}>No user selected.</p>

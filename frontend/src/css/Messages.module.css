@@ -1,7 +1,7 @@
 .grid {
     display: grid;
     grid-template-columns: min-content auto;
-    grid-template-rows: min-content 1fr;
+    grid-template-rows: min-content 1fr min-content;
     width: 100vw;
     height: 100vh;
     padding: 1rem;
@@ -54,9 +54,10 @@
 
 .rightBox {
     border-radius: 2rem;
-    height: 100%;
-    display: flex;
-    flex-flow: column nowrap;
+    grid-row-start: 2;
+    grid-row-end: 3;
+    grid-column-start: 2;
+    grid-column-end: 3;
 }
 
 .noneSelected {
@@ -66,11 +67,9 @@
 
 .messages {
     width: 100%;
-    flex-grow: 2;
     overflow: scroll;
     display: flex;
-    flex-flow: column nowrap;
-    justify-content: flex-end;
+    flex-flow: column-reverse nowrap;
     gap: 1rem;
     padding: 1rem;
     box-sizing: border-box;
@@ -102,6 +101,8 @@
     gap: 0.5rem;
     padding: 1rem;
     box-sizing: border-box;
+    height: 6rem;
+    grid-column: 2 / 3;
 }
 
 .input {
@@ -122,6 +123,7 @@
 .sendButton {
     background-color: var(--teal-accent);
     border: none;
-    padding: 1rem 1.1rem;
+    width: 4rem;
+    height: 4rem;
     border-radius: 100%;
 }
