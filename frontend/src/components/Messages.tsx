@@ -66,7 +66,12 @@ const Messages = () => {
             if (data.length < MESSAGES_PER_PAGE) {
                 setMoreMessages(false);
             }
-            setMessages((current) => [...current, ...data]);
+            if (cursor === -1) {
+                setMessages(data);
+            } else {
+                setMessages((current) => [...current, ...data]);
+            }
+            
         });
     };
 
