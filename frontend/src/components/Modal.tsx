@@ -99,6 +99,10 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
     // text entered in the box that shows if the user is a friend
     const [messageText, setMessageText] = useState("");
 
+    // reference to text box
+    const inputRef = useRef<HTMLInputElement | null>(null);
+
+    // send message in text box
     const handleSendClick = async () => {
         if (userData && messageText) {
             const [success, _] = await sendMessage(userData.id, messageText);
@@ -106,6 +110,9 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                 setAlertText("Something went wrong.");
             } else {
                 setAlertText("Message sent.");
+                if (inputRef.current) {
+                    inputRef.current.value = "";
+                }
             }
         }
     };
@@ -162,6 +169,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                                     onChange={(event) =>
                                         setMessageText(event.target.value)
                                     }
+                                    ref={inputRef}
                                     placeholder="New message"></input>
                                 <button
                                     className={styles.sendButton}
