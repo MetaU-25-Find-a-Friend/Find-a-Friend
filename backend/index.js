@@ -24,6 +24,7 @@ const {
     MAX_LOGIN_ATTEMPTS,
     SESSION_TIMEOUT,
     GEOHASH_DUP_RES,
+    MESSAGES_PER_PAGE,
 } = require("./constants");
 
 const loginLimiter = rateLimit({
@@ -606,31 +607,61 @@ app.post("/unblock/:id", authenticate, async (req, res) => {
     res.send("User unblocked");
 });
 
-// get all messages between the logged-in user and the specified user
-app.get("/messages/:other", authenticate, async (req, res) => {
+// get messages between the logged-in user and the specified user
+app.get("/messages/:other/:cursor", authenticate, async (req, res) => {
     const userId = req.session.userId;
 
     const otherId = parseInt(req.params.other);
 
-    const messages = await prisma.message.findMany({
-        where: {
-            OR: [
-                {
-                    fromUser: userId,
-                    toUser: otherId,
-                },
-                {
-                    fromUser: otherId,
-                    toUser: userId,
-                },
-            ],
-        },
-        orderBy: {
-            timestamp: "desc",
-        },
-    });
+    const cursor = parseInt(req.params.cursor);
 
-    res.json(messages);
+    if (cursor === -1) {
+        const messages = await prisma.message.findMany({
+            take: MESSAGES_PER_PAGE,
+            where: {
+                OR: [
+                    {
+                        fromUser: userId,
+                        toUser: otherId,
+                    },
+                    {
+                        fromUser: otherId,
+                        toUser: userId,
+                    },
+                ],
+            },
+            orderBy: {
+                timestamp: "desc",
+            },
+        });
+
+        res.json(messages);
+    } else {
+        const messages = await prisma.message.findMany({
+            skip: 1,
+            cursor: {
+                id: cursor,
+            },
+            take: MESSAGES_PER_PAGE,
+            where: {
+                OR: [
+                    {
+                        fromUser: userId,
+                        toUser: otherId,
+                    },
+                    {
+                        fromUser: otherId,
+                        toUser: userId,
+                    },
+                ],
+            },
+            orderBy: {
+                timestamp: "desc",
+            },
+        });
+
+        res.json(messages);
+    }
 });
 
 // send a message to the specified user

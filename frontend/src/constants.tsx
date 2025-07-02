@@ -82,3 +82,8 @@ export const DISTANCE_WEIGHT = 1;
  * Weight of number of past visits to the place in place recommendation algorithm
  */
 export const PAST_WEIGHT = 5;
+
+/**
+ * Number of messages returned from each query
+ */
+export const MESSAGES_PER_PAGE = 10;

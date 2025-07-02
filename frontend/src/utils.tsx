@@ -631,12 +631,13 @@ export const unblockUser = async (id: number) => {
 };
 
 /**
- *
- * @returns array of all messages sent between the specified user and the logged-in user
+ * @param id id of the other user
+ * @param cursor id of the oldest message already returned or -1 to retrieve newest messages
+ * @returns next batch of messages sent between the specified user and the logged-in user
  */
-export const getMessagesBetween = async (id: number) => {
+export const getMessagesBetween = async (id: number, cursor: number) => {
     const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/messages/${id}`,
+        `${import.meta.env.VITE_SERVER_URL}/messages/${id}/${cursor}`,
         {
             credentials: "include",
         },

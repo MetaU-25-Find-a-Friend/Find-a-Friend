@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import type { AllUserData, Message } from "../types";
 import { getAllData, getMessagesBetween, sendMessage } from "../utils";
 import Alert from "./Alert";
+import { MESSAGES_PER_PAGE } from "../constants";
 
 /**
  *
@@ -35,6 +36,9 @@ const Messages = () => {
     // messages being shown
     const [messages, setMessages] = useState(Array() as Message[]);
 
+    // true if there are older messages to be loaded
+    const [moreMessages, setMoreMessages] = useState(true);
+
     // text entered in message box
     const [newMessage, setNewMessage] = useState("");
 
@@ -56,8 +60,14 @@ const Messages = () => {
         }
     };
 
-    const loadMessagesBetween = (id: number) => {
-        getMessagesBetween(id).then((data) => setMessages(data));
+    // load next batch of messages between the logged-in user and the specified user
+    const loadMessagesBetween = (id: number, cursor: number) => {
+        getMessagesBetween(id, cursor).then((data) => {
+            if (data.length < MESSAGES_PER_PAGE) {
+                setMoreMessages(false);
+            }
+            setMessages((current) => [...current, ...data]);
+        });
     };
 
     // send a message with entered text to the selected user
@@ -71,11 +81,21 @@ const Messages = () => {
                 setAlertText("Something went wrong.");
             } else {
                 // if message successfully sent, update display and clear input
-                setMessages([result, ...messages]);
+                setMessages((current) => [result, ...current]);
                 if (inputRef.current) {
                     inputRef.current.value = "";
                 }
             }
+        }
+    };
+
+    // load older messages
+    const handleLoadMoreClick = () => {
+        if (selectedFriendId) {
+            loadMessagesBetween(
+                selectedFriendId,
+                messages[messages.length - 1].id,
+            );
         }
     };
 
@@ -84,10 +104,11 @@ const Messages = () => {
         loadFriends();
     }, [user]);
 
-    // whenever the user selects a different friend, reload messages shown
+    // whenever the user selects a different friend, reload messages shown and reset page
     useEffect(() => {
         if (selectedFriendId) {
-            loadMessagesBetween(selectedFriendId);
+            loadMessagesBetween(selectedFriendId, -1);
+            setMoreMessages(true);
         }
     }, [selectedFriendId]);
 
@@ -125,6 +146,13 @@ const Messages = () => {
                                     {message.text}
                                 </div>
                             ))}
+                            {moreMessages && (
+                                <button
+                                    className={styles.loadButton}
+                                    onClick={handleLoadMoreClick}>
+                                    Load more
+                                </button>
+                            )}
                         </div>
                         <div className={styles.inputContainer}>
                             <input
