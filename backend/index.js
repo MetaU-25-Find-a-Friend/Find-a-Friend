@@ -612,7 +612,7 @@ app.get("/messages/:from", authenticate, async (req, res) => {
 
     const fromId = parseInt(req.params.from);
 
-    const messages = prisma.message.findMany({
+    const messages = await prisma.message.findMany({
         where: {
             toUser: userId,
             fromUser: fromId,
@@ -620,4 +620,24 @@ app.get("/messages/:from", authenticate, async (req, res) => {
     });
 
     res.json(messages);
+});
+
+// send a message to the specified user
+app.post("/messages/:to", authenticate, async (req, res) => {
+    const from = req.session.userId;
+
+    const to = parseInt(req.params.to);
+
+    const { text } = req.body;
+
+    const newMessage = await prisma.message.create({
+        data: {
+            fromUser: from,
+            toUser: to,
+            text: text,
+            timestamp: new Date(),
+        },
+    });
+
+    res.json(newMessage);
 });

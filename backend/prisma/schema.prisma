@@ -52,6 +52,7 @@ model Message {
   id Int @id @default(autoincrement())
   fromUser Int
   toUser Int
+  text String
   timestamp DateTime
   read Boolean @default(false)
 }

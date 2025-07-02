@@ -644,3 +644,32 @@ export const getMessagesFrom = async (id: number) => {
 
     return (await response.json()) as Message[];
 };
+
+/**
+ *
+ * @param to id of the user to whom the message is being sent
+ * @param text text of the message
+ * @returns an array: first element is true for success; second element is the new message or error message
+ */
+export const sendMessage = async (to: number, text: string) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/messages/${to}`,
+        {
+            method: "post",
+            mode: "cors",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                text: text,
+            }),
+        },
+    );
+
+    if (response.ok) {
+        return [true, await response.json()];
+    } else {
+        return [false, await response.text()];
+    }
+};
