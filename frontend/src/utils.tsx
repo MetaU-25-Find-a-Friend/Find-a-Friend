@@ -632,9 +632,9 @@ export const unblockUser = async (id: number) => {
 
 /**
  *
- * @returns array of all messages sent from the specified user to the logged-in user
+ * @returns array of all messages sent between the specified user and the logged-in user
  */
-export const getMessagesFrom = async (id: number) => {
+export const getMessagesBetween = async (id: number) => {
     const response = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/messages/${id}`,
         {

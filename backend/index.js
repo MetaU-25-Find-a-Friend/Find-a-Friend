@@ -606,16 +606,27 @@ app.post("/unblock/:id", authenticate, async (req, res) => {
     res.send("User unblocked");
 });
 
-// get all messages to the logged-in user from the specified user
-app.get("/messages/:from", authenticate, async (req, res) => {
+// get all messages between the logged-in user and the specified user
+app.get("/messages/:other", authenticate, async (req, res) => {
     const userId = req.session.userId;
 
-    const fromId = parseInt(req.params.from);
+    const otherId = parseInt(req.params.other);
 
     const messages = await prisma.message.findMany({
         where: {
-            toUser: userId,
-            fromUser: fromId,
+            OR: [
+                {
+                    fromUser: userId,
+                    toUser: otherId,
+                },
+                {
+                    fromUser: otherId,
+                    toUser: userId,
+                },
+            ],
+        },
+        orderBy: {
+            timestamp: "asc",
         },
     });
 

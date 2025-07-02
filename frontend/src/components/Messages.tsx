@@ -7,9 +7,10 @@ import {
     faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { AllUserData, Message } from "../types";
-import { getAllData, getMessagesFrom, sendMessage } from "../utils";
+import { getAllData, getMessagesBetween, sendMessage } from "../utils";
+import Alert from "./Alert";
 
 /**
  *
@@ -18,6 +19,8 @@ import { getAllData, getMessagesFrom, sendMessage } from "../utils";
 const Messages = () => {
     // the logged-in user
     const { user } = useUser();
+
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
     const navigate = useNavigate();
 
@@ -35,6 +38,8 @@ const Messages = () => {
     // text entered in message box
     const [newMessage, setNewMessage] = useState("");
 
+    const [alertText, setAlertText] = useState<string | null>(null);
+
     // fetch and display all of user's friends in the side menu
     const loadFriends = async () => {
         if (user) {
@@ -51,14 +56,26 @@ const Messages = () => {
         }
     };
 
-    const loadMessagesFrom = (id: number) => {
-        getMessagesFrom(id).then((data) => setMessages(data));
+    const loadMessagesBetween = (id: number) => {
+        getMessagesBetween(id).then((data) => setMessages(data));
     };
 
     // send a message with entered text to the selected user
-    const handleSendClick = () => {
+    const handleSendClick = async () => {
         if (selectedFriendId) {
-            sendMessage(selectedFriendId, newMessage);
+            const [success, result] = await sendMessage(
+                selectedFriendId,
+                newMessage,
+            );
+            if (!success) {
+                setAlertText("Something went wrong.");
+            } else {
+                // if message successfully sent, update display and clear input
+                setMessages([...messages, result]);
+                if (inputRef.current) {
+                    inputRef.current.value = "";
+                }
+            }
         }
     };
 
@@ -70,7 +87,7 @@ const Messages = () => {
     // whenever the user selects a different friend, reload messages shown
     useEffect(() => {
         if (selectedFriendId) {
-            loadMessagesFrom(selectedFriendId);
+            loadMessagesBetween(selectedFriendId);
         }
     }, [selectedFriendId]);
 
@@ -79,6 +96,9 @@ const Messages = () => {
     } else {
         return (
             <div className={styles.grid}>
+                <Alert
+                    alertText={alertText}
+                    setAlertText={setAlertText}></Alert>
                 <button
                     className={styles.navButton}
                     onClick={() => navigate("/")}>
@@ -99,7 +119,9 @@ const Messages = () => {
                     <div className={styles.rightBox}>
                         <div className={styles.messages}>
                             {messages.map((message) => (
-                                <div className={styles.message}>
+                                <div
+                                    key={message.id}
+                                    className={`${styles.message} ${message.fromUser === user.id ? styles.fromMe : styles.fromOther}`}>
                                     {message.text}
                                 </div>
                             ))}
@@ -109,6 +131,7 @@ const Messages = () => {
                                 type="text"
                                 className={styles.input}
                                 placeholder="New message"
+                                ref={inputRef}
                                 onChange={(event) => {
                                     setNewMessage(event.target.value);
                                 }}></input>
