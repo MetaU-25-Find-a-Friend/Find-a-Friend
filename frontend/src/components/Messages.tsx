@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import type { AllUserData, Message } from "../types";
 import { getAllData, getMessagesBetween, sendMessage } from "../utils";
 import Alert from "./Alert";
-import { MESSAGES_PER_PAGE } from "../constants";
+import { MESSAGES_FETCH_INTERVAL, MESSAGES_PER_PAGE } from "../constants";
 
 /**
  *
@@ -70,6 +70,29 @@ const Messages = () => {
         });
     };
 
+    // add messages sent since the last fetch to the display
+    const loadNewMessages = async (id: number) => {
+        const newest = await getMessagesBetween(id, -1);
+
+        setMessages((current) => {
+
+            if (current.length === 0) {
+
+                // if the display is empty, simply set it to the newest messages
+                return newest;
+            } else {
+
+                // otherwise, find the newest message that is a duplicate of a message already on the display
+                const firstMatchIndex = newest.findIndex(
+                    (message) => message.id === current[0].id,
+                );
+
+                // add only new messages
+                return [...newest.slice(0, firstMatchIndex), ...current];
+            }
+        });
+    };
+
     // send a message with entered text to the selected user
     const handleSendClick = async () => {
         if (selectedFriendId) {
@@ -109,6 +132,15 @@ const Messages = () => {
         if (selectedFriendId) {
             loadMessagesBetween(selectedFriendId, -1);
             setMoreMessages(true);
+
+            // every interval, load newly sent messages
+            const interval = setInterval(() => {
+                loadNewMessages(selectedFriendId);
+            }, MESSAGES_FETCH_INTERVAL);
+
+            return () => {
+                clearInterval(interval);
+            };
         }
     }, [selectedFriendId]);
 

@@ -637,6 +637,7 @@ app.get("/messages/:other/:cursor", authenticate, async (req, res) => {
 
         res.json(messages);
     } else {
+        // if the id of the oldest already fetched message is given, take the first 10 messages before that
         const messages = await prisma.message.findMany({
             skip: 1,
             cursor: {

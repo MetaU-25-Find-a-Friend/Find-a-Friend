@@ -87,3 +87,8 @@ export const PAST_WEIGHT = 5;
  * Number of messages returned from each query
  */
 export const MESSAGES_PER_PAGE = 10;
+
+/**
+ * Interval in milliseconds at which new incoming messages are fetched
+ */
+export const MESSAGES_FETCH_INTERVAL = 3000;
