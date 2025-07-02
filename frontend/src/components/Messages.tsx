@@ -22,6 +22,7 @@ const Messages = () => {
     // the logged-in user
     const { user } = useUser();
 
+    // reference to new message text box
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     const navigate = useNavigate();
@@ -45,6 +46,7 @@ const Messages = () => {
     // text entered in message box
     const [newMessage, setNewMessage] = useState("");
 
+    // text to show in alert; null when alert is not showing
     const [alertText, setAlertText] = useState<string | null>(null);
 
     // fetch and display all of user's friends in the side menu
@@ -148,6 +150,79 @@ const Messages = () => {
         }
     }, [selectedFriendId]);
 
+    // side menu with list of friends to select from
+    const sideMenu = (
+        <div className={styles.friendsContainer}>
+            {friends.map((friend) => (
+                <div
+                    className={`${styles.friend} ${friend.id === selectedFriendId ? styles.selected : ""}`}
+                    onClick={() => {
+                        setSelectedFriendId(friend.id);
+                    }}>
+                    <h6
+                        className={styles.friendName}
+                        onClick={() => setModalData(friend)}>
+                        {friend.firstName} {friend.lastName}
+                    </h6>
+                </div>
+            ))}
+        </div>
+    );
+
+    // container for sent and received messages between users
+    const messageList = (
+        <div className={styles.messages}>
+            {messages.map((message) => (
+                <div
+                    key={message.id}
+                    className={`${styles.message} ${message.fromUser === user!.id ? styles.fromMe : styles.fromOther}`}>
+                    {message.text}
+                </div>
+            ))}
+            {moreMessages && (
+                <button
+                    className={styles.loadButton}
+                    onClick={handleLoadMoreClick}>
+                    Load more
+                </button>
+            )}
+        </div>
+    );
+
+    // text input and send button
+    const messageInputBox = (
+        <div className={styles.inputContainer}>
+            <input
+                type="text"
+                className={styles.input}
+                placeholder="New message"
+                ref={inputRef}
+                onChange={(event) => {
+                    setNewMessage(event.target.value);
+                }}></input>
+            <button
+                className={styles.sendButton}
+                onClick={handleSendClick}>
+                <FontAwesomeIcon
+                    icon={faArrowRight}
+                    color="white"
+                    size="2x"></FontAwesomeIcon>
+            </button>
+        </div>
+    );
+
+    // largest section; shows either messages and text box or "no user selected" message
+    const mainDisplay = selectedFriendId ? (
+        <>
+            {messageList}
+            {messageInputBox}
+        </>
+    ) : (
+        <div className={styles.rightBox}>
+            <p className={styles.noneSelected}>No user selected.</p>
+        </div>
+    );
+
     if (!user) {
         return <LoggedOut></LoggedOut>;
     } else {
@@ -166,63 +241,8 @@ const Messages = () => {
                     Back to Dashboard
                 </button>
                 <h2 className={styles.title}>Messages</h2>
-                <div className={styles.friendsContainer}>
-                    {friends.map((friend) => (
-                        <div
-                            className={`${styles.friend} ${friend.id === selectedFriendId ? styles.selected : ""}`}
-                            onClick={() => {
-                                setSelectedFriendId(friend.id);
-                            }}>
-                            <h6
-                                className={styles.friendName}
-                                onClick={() => setModalData(friend)}>
-                                {friend.firstName} {friend.lastName}
-                            </h6>
-                        </div>
-                    ))}
-                </div>
-                {selectedFriendId ? (
-                    <>
-                        <div className={styles.messages}>
-                            {messages.map((message) => (
-                                <div
-                                    key={message.id}
-                                    className={`${styles.message} ${message.fromUser === user.id ? styles.fromMe : styles.fromOther}`}>
-                                    {message.text}
-                                </div>
-                            ))}
-                            {moreMessages && (
-                                <button
-                                    className={styles.loadButton}
-                                    onClick={handleLoadMoreClick}>
-                                    Load more
-                                </button>
-                            )}
-                        </div>
-                        <div className={styles.inputContainer}>
-                            <input
-                                type="text"
-                                className={styles.input}
-                                placeholder="New message"
-                                ref={inputRef}
-                                onChange={(event) => {
-                                    setNewMessage(event.target.value);
-                                }}></input>
-                            <button
-                                className={styles.sendButton}
-                                onClick={handleSendClick}>
-                                <FontAwesomeIcon
-                                    icon={faArrowRight}
-                                    color="white"
-                                    size="2x"></FontAwesomeIcon>
-                            </button>
-                        </div>
-                    </>
-                ) : (
-                    <div className={styles.rightBox}>
-                        <p className={styles.noneSelected}>No user selected.</p>
-                    </div>
-                )}
+                {sideMenu}
+                {mainDisplay}
             </div>
         );
     }
