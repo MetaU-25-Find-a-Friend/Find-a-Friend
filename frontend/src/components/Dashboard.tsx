@@ -134,6 +134,16 @@ const Dashboard = () => {
                         </div>
                     ))}
                 </div>
+                <div className={styles.messagesContainer}>
+                    <h2 className={styles.sectionHeader}>Messages</h2>
+                    <button
+                        className={styles.messagesButton}
+                        onClick={() => navigate("/messages")}>
+                        To Messages{" "}
+                        <FontAwesomeIcon
+                            icon={faArrowRightLong}></FontAwesomeIcon>
+                    </button>
+                </div>
                 <div className={styles.titleContainer}>
                     <h1 className={styles.title}>{APP_TITLE}</h1>
                     <div

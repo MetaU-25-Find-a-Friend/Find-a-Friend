@@ -119,3 +119,10 @@
 .input:focus-visible {
     outline: none;
 }
+
+.sendButton {
+    background-color: var(--teal-accent);
+    border: none;
+    padding: 0.9rem 1rem;
+    border-radius: 100%;
+}

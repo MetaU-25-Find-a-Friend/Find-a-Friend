@@ -8,6 +8,7 @@ import type {
     PlaceHistory,
     AllUserData,
     FriendRequest,
+    Message,
 } from "./types";
 import {
     COUNT_WEIGHT,
@@ -627,4 +628,49 @@ export const unblockUser = async (id: number) => {
         mode: "cors",
         credentials: "include",
     });
+};
+
+/**
+ * @param id id of the other user
+ * @param cursor id of the oldest message already returned or -1 to retrieve newest messages
+ * @returns next batch of messages sent between the specified user and the logged-in user
+ */
+export const getMessagesBetween = async (id: number, cursor: number) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/messages/${id}/${cursor}`,
+        {
+            credentials: "include",
+        },
+    );
+
+    return (await response.json()) as Message[];
+};
+
+/**
+ *
+ * @param to id of the user to whom the message is being sent
+ * @param text text of the message
+ * @returns an array: first element is true for success; second element is the new message or error message
+ */
+export const sendMessage = async (to: number, text: string) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/messages/${to}`,
+        {
+            method: "post",
+            mode: "cors",
+            credentials: "include",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                text: text,
+            }),
+        },
+    );
+
+    if (response.ok) {
+        return [true, await response.json()];
+    } else {
+        return [false, await response.text()];
+    }
 };

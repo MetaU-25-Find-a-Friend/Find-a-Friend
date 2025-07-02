@@ -8,6 +8,7 @@ import UserProvider from "./contexts/UserContext";
 import EditProfile from "./components/EditProfile";
 import MapPage from "./components/MapPage";
 import { APIProvider } from "@vis.gl/react-google-maps";
+import Messages from "./components/Messages";
 
 createRoot(document.getElementById("root")!).render(
     <UserProvider>
@@ -33,6 +34,9 @@ createRoot(document.getElementById("root")!).render(
                             <MapPage></MapPage>
                         </APIProvider>
                     }></Route>
+                <Route
+                    path="/messages"
+                    element={<Messages></Messages>}></Route>
             </Routes>
         </BrowserRouter>
     </UserProvider>,

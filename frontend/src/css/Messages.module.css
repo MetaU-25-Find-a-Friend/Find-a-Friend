@@ -1,0 +1,150 @@
+.grid {
+    display: grid;
+    grid-template-columns: min-content auto;
+    grid-template-rows: min-content 1fr min-content;
+    width: 100vw;
+    height: 100vh;
+    padding: 1rem;
+    box-sizing: border-box;
+    row-gap: 1rem;
+    column-gap: 1rem;
+}
+
+.title {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    text-align: right;
+    font-size: 32px;
+    margin: 0;
+}
+
+.navButton {
+    font-family: inherit;
+    font-size: 24px;
+    background-color: var(--tan-background);
+    color: var(--teal-accent);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 2rem;
+    width: fit-content;
+    height: fit-content;
+}
+
+.friendsContainer {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 1rem;
+    width: 30vw;
+    justify-content: flex-start;
+}
+
+.friend {
+    background-color: var(--tan-background);
+    padding: 2rem 1rem;
+    box-sizing: border-box;
+    border-radius: 2rem;
+}
+
+.friendName {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--teal-accent);
+    margin: 0;
+}
+
+.friendName:hover {
+    text-decoration: underline;
+}
+
+.selected {
+    border: var(--teal-accent) 2px solid;
+}
+
+.rightBox {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.noneSelected {
+    width: 100%;
+    text-align: center;
+    font-size: 20px;
+}
+
+.messages {
+    width: 100%;
+    overflow: scroll;
+    display: flex;
+    flex-flow: column-reverse nowrap;
+    gap: 1rem;
+    padding: 1rem;
+    box-sizing: border-box;
+    scrollbar-color: transparent;
+}
+
+.message {
+    padding: 1rem;
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: 50%;
+    font-size: 20px;
+    border-radius: 1rem;
+}
+
+.fromMe {
+    align-self: flex-end;
+    background-color: var(--light-teal-accent);
+}
+
+.fromOther {
+    align-self: flex-start;
+    background-color: var(--tan-background);
+}
+
+.inputContainer {
+    width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 0.5rem;
+    padding: 1rem;
+    box-sizing: border-box;
+    height: 6rem;
+    grid-column: 2 / 3;
+}
+
+.input {
+    font-family: inherit;
+    font-size: 20px;
+    border: var(--teal-accent) 2px solid;
+    padding: 0.75rem 2rem;
+    box-sizing: border-box;
+    background-color: white;
+    border-radius: 2rem;
+    flex-grow: 2;
+}
+
+.input:focus-visible {
+    outline: none;
+}
+
+.sendButton {
+    background-color: var(--teal-accent);
+    border: none;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 100%;
+}
+
+.loadButton {
+    font-family: inherit;
+    font-size: 20px;
+    border: none;
+    background-color: var(--tan-background);
+    color: var(--teal-accent);
+    border-radius: 2rem;
+    padding: 1rem 2rem;
+    width: fit-content;
+    align-self: center;
+}
