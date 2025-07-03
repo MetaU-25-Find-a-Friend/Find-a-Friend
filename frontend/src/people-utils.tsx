@@ -5,7 +5,7 @@ export const getFriendsOfFriends = async (id: number) => {
     const result = Array() as SuggestedProfile[];
 
     // iterate over all friends of the current user
-    const { friends } = await getAllData(id);
+    const { friends, blockedUsers } = await getAllData(id);
 
     for (const friend of friends) {
         // iterate over all friends of the friend
@@ -16,9 +16,10 @@ export const getFriendsOfFriends = async (id: number) => {
         } = await getAllData(friend);
 
         for (const acquaintance of acquaintances) {
-            // skip this acquaintance if they are already a friend of the current user or already in result
+            // skip this acquaintance if they are the user, blocked by the user, already a friend, or already in result
             if (
                 acquaintance === id ||
+                blockedUsers.includes(acquaintance) ||
                 friends.includes(acquaintance) ||
                 result.find(
                     (suggested) => suggested.data.id === acquaintance,
