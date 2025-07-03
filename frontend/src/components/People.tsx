@@ -3,12 +3,14 @@ import styles from "../css/People.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     faArrowLeftLong,
+    faArrowsLeftRight,
+    faDiagramProject,
     faUserCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import type { SuggestedProfile } from "../types";
 import { useUser } from "../contexts/UserContext";
-import { getFriendsOfFriends } from "../people-utils";
+import { getSuggestedPeople } from "../people-utils";
 import { blockUser, getInterestName, sendFriendRequest } from "../utils";
 import LoggedOut from "./LoggedOut";
 import Alert from "./Alert";
@@ -45,7 +47,7 @@ const People = () => {
     // once logged-in user loads, load suggestions
     useEffect(() => {
         if (user) {
-            getFriendsOfFriends(user.id).then((data) => setSuggestions(data));
+            getSuggestedPeople(user.id).then((data) => setSuggestions(data));
         }
     }, [user]);
 
@@ -57,8 +59,43 @@ const People = () => {
                     className={styles.profile}
                     key={user.data.id}>
                     <div className={styles.friendInfo}>
-                        <FontAwesomeIcon icon={faUserCheck}></FontAwesomeIcon>{" "}
-                        Friends with {user.friendPath[0].userName}
+                        {user.friendPath.length === 1 ? (
+                            <>
+                                <FontAwesomeIcon
+                                    icon={faUserCheck}></FontAwesomeIcon>{" "}
+                                Friends with {user.friendPath[0].userName}
+                            </>
+                        ) : (
+                            <>
+                                <div className={styles.pathPopup}>
+                                    <p className={styles.pathEnd}>You</p>
+                                    <FontAwesomeIcon
+                                        icon={
+                                            faArrowsLeftRight
+                                        }></FontAwesomeIcon>
+                                    {user.friendPath.map((node) => (
+                                        <>
+                                            <p className={styles.pathNode}>
+                                                {node.userName}
+                                            </p>
+                                            <FontAwesomeIcon
+                                                icon={
+                                                    faArrowsLeftRight
+                                                }></FontAwesomeIcon>
+                                        </>
+                                    ))}
+                                    <p className={styles.pathEnd}>
+                                        {user.data.firstName}
+                                    </p>
+                                </div>
+                                <FontAwesomeIcon
+                                    icon={
+                                        faDiagramProject
+                                    }></FontAwesomeIcon>{" "}
+                                Acquaintance of {user.friendPath[0].userName}{" "}
+                                and {user.friendPath.length - 1} more
+                            </>
+                        )}
                     </div>
                     <h3 className={styles.name}>
                         {user.data.firstName} {user.data.lastName}{" "}

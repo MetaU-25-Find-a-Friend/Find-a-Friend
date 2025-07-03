@@ -4,7 +4,6 @@
     grid-template-rows: min-content;
     grid-auto-rows: min-content;
     width: 100vw;
-    height: 100vh;
     padding: 1rem;
     box-sizing: border-box;
     row-gap: 1rem;
@@ -45,6 +44,8 @@
 .friendInfo {
     color: var(--teal-accent);
     font-size: 18px;
+    position: relative;
+    width: 100%;
 }
 
 .name {
@@ -113,4 +114,34 @@
 .button:hover {
     background-color: var(--teal-accent);
     color: white;
+}
+
+.friendInfo:hover .pathPopup {
+    display: flex;
+}
+
+.pathNode {
+    margin: 0;
+}
+
+.pathEnd {
+    margin: 0;
+    font-weight: bold;
+}
+
+.pathPopup {
+    display: none;
+    position: absolute;
+    top: 0;
+    transform: translateY(-125%);
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--teal-accent);
+    color: white;
+    padding: 1rem;
+    box-sizing: border-box;
+    border-radius: 2rem;
+    width: 100%;
 }
