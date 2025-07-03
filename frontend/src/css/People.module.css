@@ -1,8 +1,8 @@
 .grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     grid-template-rows: min-content;
-    grid-auto-rows: auto;
+    grid-auto-rows: min-content;
     width: 100vw;
     height: 100vh;
     padding: 1rem;
@@ -12,7 +12,7 @@
 }
 
 .title {
-    grid-column: 4 / 5;
+    grid-column: 3 / 4;
     text-align: right;
     font-size: 32px;
     margin: 0;
@@ -28,4 +28,66 @@
     border-radius: 2rem;
     width: fit-content;
     height: fit-content;
+}
+
+.profile {
+    background-color: var(--tan-background);
+    padding: 2rem;
+    box-sizing: border-box;
+    border-radius: 2rem;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.friendInfo {
+    color: var(--teal-accent);
+    font-size: 18px;
+}
+
+.name {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.pronouns {
+    margin: 0;
+    font-size: 18px;
+    color: var(--teal-accent);
+    font-weight: bold;
+}
+
+.major {
+    margin: 0;
+    font-size: 18px;
+}
+
+.interestsContainer {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 18px;
+    color: var(--teal-accent);
+}
+
+.interest {
+    margin: 0;
+    border-radius: 1rem;
+    border: var(--teal-accent) 1px solid;
+    padding: 0.25rem 1rem;
+}
+
+.bio {
+    margin: 0;
+    font-size: 18px;
+}
+
+.bar {
+    border: var(--teal-accent) 0.5px inset;
+    width: 100%;
 }

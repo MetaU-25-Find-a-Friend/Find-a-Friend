@@ -1,11 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import styles from "../css/People.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeftLong } from "@fortawesome/free-solid-svg-icons";
+import {
+    faArrowLeftLong,
+    faUserCheck,
+} from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from "react";
 import type { SuggestedProfile } from "../types";
 import { useUser } from "../contexts/UserContext";
 import { getFriendsOfFriends } from "../people-utils";
+import { getInterestName } from "../utils";
 import LoggedOut from "./LoggedOut";
 
 const People = () => {
@@ -29,7 +33,38 @@ const People = () => {
     const suggestedUsersDisplay = (
         <>
             {suggestions.map((user) => (
-                <div className={styles.profile}>{user.data.firstName}</div>
+                <div
+                    className={styles.profile}
+                    key={user.data.id}>
+                    <div className={styles.friendInfo}>
+                        <FontAwesomeIcon icon={faUserCheck}></FontAwesomeIcon>{" "}
+                        Friends with {user.friendPath[0].userName}
+                    </div>
+                    <h3 className={styles.name}>
+                        {user.data.firstName} {user.data.lastName}{" "}
+                        <span className={styles.pronouns}>
+                            {user.data.pronouns}
+                        </span>
+                    </h3>
+                    <p className={styles.major}>
+                        {user.data.major ?? "(No major)"}
+                    </p>
+                    <div className={styles.interestsContainer}>
+                        {user.data.interests.map((value, index) => {
+                            if (value === 1) {
+                                return (
+                                    <p className={styles.interest}>
+                                        {getInterestName(index)}
+                                    </p>
+                                );
+                            } else {
+                                return <></>;
+                            }
+                        })}
+                    </div>
+                    <p className={styles.bio}>{user.data.bio ?? "(No bio)"}</p>
+                    <hr className={styles.bar}></hr>
+                </div>
             ))}
         </>
     );
