@@ -58,7 +58,7 @@ const People = () => {
     // profile cards for each suggested user
     const suggestedUsersDisplay = (
         <>
-            {suggestions.map((user) => (
+            {suggestions.map((user: SuggestedProfile) => (
                 <div
                     className={styles.profile}
                     key={user.data.id}>
@@ -77,17 +77,22 @@ const People = () => {
                                         icon={
                                             faArrowsLeftRight
                                         }></FontAwesomeIcon>
-                                    {user.friendPath.map((node) => (
-                                        <>
-                                            <p className={styles.pathNode}>
-                                                {node.userName}
-                                            </p>
-                                            <FontAwesomeIcon
-                                                icon={
-                                                    faArrowsLeftRight
-                                                }></FontAwesomeIcon>
-                                        </>
-                                    ))}
+                                    {user.friendPath.map(
+                                        (node: {
+                                            userId: number;
+                                            userName: string;
+                                        }) => (
+                                            <>
+                                                <p className={styles.pathNode}>
+                                                    {node.userName}
+                                                </p>
+                                                <FontAwesomeIcon
+                                                    icon={
+                                                        faArrowsLeftRight
+                                                    }></FontAwesomeIcon>
+                                            </>
+                                        ),
+                                    )}
                                     <p className={styles.pathEnd}>
                                         {user.data.firstName}
                                     </p>
@@ -111,7 +116,7 @@ const People = () => {
                         {user.data.major ?? "(No major)"}
                     </p>
                     <div className={styles.interestsContainer}>
-                        {user.data.interests.map((value, index) => {
+                        {user.data.interests.map((value: number, index) => {
                             if (value === 1) {
                                 return (
                                     <p
