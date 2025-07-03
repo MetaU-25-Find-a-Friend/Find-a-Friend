@@ -15,6 +15,10 @@ import { blockUser, getInterestName, sendFriendRequest } from "../utils";
 import LoggedOut from "./LoggedOut";
 import Alert from "./Alert";
 
+/**
+ *
+ * @returns A page where the user can view suggested people to befriend (friends of friends etc.)
+ */
 const People = () => {
     const { user } = useUser();
 

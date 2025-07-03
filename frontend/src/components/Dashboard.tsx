@@ -177,7 +177,7 @@ const Dashboard = () => {
             <button
                 className={styles.navButton}
                 onClick={() => navigate("/people")}>
-                View more{" "}
+                View people{" "}
                 <FontAwesomeIcon icon={faArrowRightLong}></FontAwesomeIcon>
             </button>
         </div>

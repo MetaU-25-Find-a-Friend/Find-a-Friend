@@ -64,7 +64,6 @@ const getFriendsOfFriends = async (
     currentUserBlocked: number[],
     friendPath: { userId: number; userName: string }[],
 ) => {
-    
     // iterate over all of friend's friends
     for (const acquaintance of friendData.acquaintances) {
         // if acquaintance is the current user, already their friend, blocked, or in result, skip them
