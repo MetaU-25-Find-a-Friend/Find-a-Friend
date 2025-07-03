@@ -123,3 +123,12 @@ export interface Message {
     timestamp: Date;
     read: boolean;
 }
+
+export interface SuggestedProfile {
+    data: AllUserData;
+    degree: number;
+    friendPath: {
+        userId: number;
+        userName: string;
+    }[];
+}

@@ -1,5 +1,5 @@
 import styles from "../css/RecommendationList.module.css";
-import { recommendPlaces, getNearbyPOIs } from "../utils";
+import { recommendPlaces, getNearbyPOIs } from "../recommendation-utils";
 import { useState } from "react";
 import type { PlaceRecData, UserGeohash } from "../types";
 

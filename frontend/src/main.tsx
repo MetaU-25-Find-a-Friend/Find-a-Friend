@@ -9,6 +9,7 @@ import EditProfile from "./components/EditProfile";
 import MapPage from "./components/MapPage";
 import { APIProvider } from "@vis.gl/react-google-maps";
 import Messages from "./components/Messages";
+import People from "./components/People";
 
 createRoot(document.getElementById("root")!).render(
     <UserProvider>
@@ -37,6 +38,9 @@ createRoot(document.getElementById("root")!).render(
                 <Route
                     path="/messages"
                     element={<Messages></Messages>}></Route>
+                <Route
+                    path="/people"
+                    element={<People></People>}></Route>
             </Routes>
         </BrowserRouter>
     </UserProvider>,

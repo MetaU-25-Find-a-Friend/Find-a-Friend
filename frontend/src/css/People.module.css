@@ -1,0 +1,147 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: min-content;
+    grid-auto-rows: min-content;
+    width: 100vw;
+    padding: 1rem;
+    box-sizing: border-box;
+    row-gap: 1rem;
+    column-gap: 1rem;
+}
+
+.title {
+    grid-column: 3 / 4;
+    text-align: right;
+    font-size: 32px;
+    margin: 0;
+}
+
+.navButton {
+    font-family: inherit;
+    font-size: 24px;
+    background-color: var(--tan-background);
+    color: var(--teal-accent);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 2rem;
+    width: fit-content;
+    height: fit-content;
+}
+
+.profile {
+    background-color: var(--tan-background);
+    padding: 2rem;
+    box-sizing: border-box;
+    border-radius: 2rem;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.friendInfo {
+    color: var(--teal-accent);
+    font-size: 18px;
+    position: relative;
+    width: 100%;
+}
+
+.name {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.pronouns {
+    margin: 0;
+    font-size: 18px;
+    color: var(--teal-accent);
+    font-weight: bold;
+}
+
+.major {
+    margin: 0;
+    font-size: 18px;
+}
+
+.interestsContainer {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 18px;
+    color: var(--teal-accent);
+}
+
+.interest {
+    margin: 0;
+    border-radius: 1rem;
+    border: var(--teal-accent) 1px solid;
+    padding: 0.25rem 1rem;
+}
+
+.bio {
+    margin: 0;
+    font-size: 18px;
+}
+
+.bar {
+    border: var(--teal-accent) 0.5px inset;
+    width: 100%;
+}
+
+.buttonsContainer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    column-gap: 1rem;
+}
+
+.button {
+    font-family: inherit;
+    font-size: 18px;
+    padding: 0.75rem 0;
+    border-radius: 2rem;
+    color: var(--teal-accent);
+    background-color: transparent;
+    border: var(--teal-accent) 2px solid;
+    transition: background-color 0.25s ease;
+}
+
+.button:hover {
+    background-color: var(--teal-accent);
+    color: white;
+}
+
+.friendInfo:hover .pathPopup {
+    display: flex;
+}
+
+.pathNode {
+    margin: 0;
+}
+
+.pathEnd {
+    margin: 0;
+    font-weight: bold;
+}
+
+.pathPopup {
+    display: none;
+    position: absolute;
+    top: 0;
+    transform: translateY(-125%);
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--teal-accent);
+    color: white;
+    padding: 1rem;
+    box-sizing: border-box;
+    border-radius: 2rem;
+    width: 100%;
+}
