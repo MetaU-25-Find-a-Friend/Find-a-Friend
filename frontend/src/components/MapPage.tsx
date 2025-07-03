@@ -4,14 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import { Map } from "@vis.gl/react-google-maps";
 import LoggedOut from "./LoggedOut";
 import {
-    addPastGeohash,
     deleteGeohash,
     geoHashToLatLng,
     getOtherUserGeohashes,
-    areHashesClose,
     isGeoHashWithinMi,
     updateGeohash,
 } from "../utils";
+import { addPastGeohash, areHashesClose } from "../recommendation-utils";
 import MapMarker from "./MapMarker";
 import {
     DEFAULT_MAP_ZOOM,
