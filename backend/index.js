@@ -261,13 +261,19 @@ app.post("/user", authenticate, async (req, res) => {
 app.post("/user/geolocation", authenticate, async (req, res) => {
     const userId = req.session.userId;
 
+    const hash = req.body.geohash;
+
+    if (!hash) {
+        return res.status(400).send("Geohash is required");
+    }
+
     await prisma.userGeohash.upsert({
         create: {
             userId: userId,
-            geohash: req.body.geohash,
+            geohash: hash,
         },
         update: {
-            geohash: req.body.geohash,
+            geohash: hash,
         },
         where: {
             userId: userId,
