@@ -25,6 +25,8 @@ const {
     SESSION_TIMEOUT,
     GEOHASH_DUP_RES,
     MESSAGES_PER_PAGE,
+    TIME_STILL_AT_LOCATION,
+    INITIAL_DURATION,
 } = require("./constants");
 
 const loginLimiter = rateLimit({
@@ -235,27 +237,6 @@ app.get("/user/details/:id", authenticate, async (req, res) => {
     res.json(user);
 });
 
-// get a user's friends and interests
-app.get("/user/friendsAndInterests/:id", authenticate, async (req, res) => {
-    const userId = parseInt(req.params.id);
-
-    const user = await prisma.user.findUnique({
-        where: {
-            id: userId,
-        },
-        select: {
-            friends: true,
-            interests: true,
-        },
-    });
-
-    if (!user) {
-        return res.status(404).send("User not found");
-    }
-
-    res.json(user);
-});
-
 // update the logged-in user's profile
 app.post("/user", authenticate, async (req, res) => {
     const userId = req.session.userId;
@@ -280,13 +261,19 @@ app.post("/user", authenticate, async (req, res) => {
 app.post("/user/geolocation", authenticate, async (req, res) => {
     const userId = req.session.userId;
 
-    await prisma.userGeohashes.upsert({
+    const hash = req.body.geohash;
+
+    if (!hash) {
+        return res.status(400).send("Geohash is required");
+    }
+
+    await prisma.userGeohash.upsert({
         create: {
             userId: userId,
-            geohash: req.body.geohash,
+            geohash: hash,
         },
         update: {
-            geohash: req.body.geohash,
+            geohash: hash,
         },
         where: {
             userId: userId,
@@ -300,7 +287,7 @@ app.post("/user/geolocation", authenticate, async (req, res) => {
 app.delete("/user/geolocation", authenticate, async (req, res) => {
     const userId = req.session.userId;
     try {
-        await prisma.userGeohashes.delete({
+        await prisma.userGeohash.delete({
             where: {
                 userId: userId,
             },
@@ -316,7 +303,7 @@ app.delete("/user/geolocation", authenticate, async (req, res) => {
 app.get("/users/otherGeolocations", authenticate, async (req, res) => {
     const userId = req.session.userId;
 
-    const locations = await prisma.userGeohashes.findMany({
+    const locations = await prisma.userGeohash.findMany({
         where: {
             NOT: {
                 userId: userId,
@@ -327,7 +314,7 @@ app.get("/users/otherGeolocations", authenticate, async (req, res) => {
     res.json(locations);
 });
 
-// add a new record to user's past locations if it is not a duplicate (too close to an existing past location)
+// add a new record to user's past locations or increment duration at location
 app.post("/user/geolocation/history", authenticate, async (req, res) => {
     const userId = req.session.userId;
 
@@ -337,36 +324,60 @@ app.post("/user/geolocation/history", authenticate, async (req, res) => {
         return res.status(400).send("Geohash is required");
     }
 
-    const duplicateExists =
-        (await prisma.userPastGeohashes.count({
-            where: {
-                userId: userId,
-                geohash: {
-                    startsWith: hash.slice(0, GEOHASH_DUP_RES),
-                },
-            },
-        })) > 0;
+    // find most recent past location, if the user has one
+    const lastRecorded = await prisma.userPastGeohash.findFirst({
+        orderBy: {
+            timestamp: "desc",
+        },
+        where: {
+            userId: userId,
+        },
+    });
 
-    if (duplicateExists) {
-        return res.status(409).send("This location has already been recorded");
+    if (lastRecorded) {
+        // calculate time since the most recent record was updated
+        const timeSinceLastRecorded =
+            new Date().valueOf() -
+            (lastRecorded.timestamp.valueOf() + lastRecorded.duration);
+
+        // if the user is at the same location and it hasn't been a significant amount of time, add to duration instead of adding a new record
+        if (
+            timeSinceLastRecorded <= TIME_STILL_AT_LOCATION &&
+            lastRecorded.geohash.startsWith(hash.slice(0, GEOHASH_DUP_RES))
+        ) {
+            await prisma.userPastGeohash.update({
+                data: {
+                    duration: {
+                        increment: timeSinceLastRecorded,
+                    },
+                },
+                where: {
+                    id: lastRecorded.id,
+                },
+            });
+
+            return res.status(200).send("Duration updated");
+        }
     }
 
-    await prisma.userPastGeohashes.create({
+    // otherwise, create a new record
+    await prisma.userPastGeohash.create({
         data: {
             userId: userId,
             timestamp: new Date(),
             geohash: hash,
+            duration: INITIAL_DURATION,
         },
     });
 
-    res.send("Successfully recorded");
+    res.status(201).send("New visit recorded");
 });
 
 // get all of user's past locations
 app.get("/user/geolocation/history", authenticate, async (req, res) => {
     const userId = req.session.userId;
 
-    const history = await prisma.userPastGeohashes.findMany({
+    const history = await prisma.userPastGeohash.findMany({
         where: {
             userId: userId,
         },

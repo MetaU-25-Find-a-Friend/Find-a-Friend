@@ -16,6 +16,7 @@ import type {
     PlaceRecUserData,
 } from "./types";
 import { decodeBase32, encodeBase32 } from "geohashing";
+import { getAllData } from "./utils";
 
 /**
  *
@@ -33,7 +34,7 @@ export const areHashesClose = (hash1: string, hash2: string) => {
 /**
  *
  * @param hash the geohash of the location where the user stayed for a significant amount of time
- * @returns true if the hash was recorded; false if the hash is very close to an existing record and was not recorded again
+ * @returns true if the location and/or duration was recorded; false if update failed
  */
 export const addPastGeohash = async (hash: string) => {
     const response = await fetch(
@@ -123,23 +124,6 @@ export const getNearbyPOIs = async (hash: string) => {
 
     const places = await response.json();
     return places.places;
-};
-
-/**
- *
- * @param id id of the user whose data to fetch
- * @returns an object with the friends array and interests array of the user
- */
-const getFriendsAndInterests = async (id: number) => {
-    const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/user/friendsAndInterests/${id}`,
-        {
-            credentials: "include",
-        },
-    );
-
-    const json = await response.json();
-    return json;
 };
 
 /**
@@ -244,19 +228,20 @@ export const recommendPlaces = async (
     // iterate over all other users, determining whether they are friends and calculating the similarity of their interests
     const allUsersData = Array() as PlaceRecUserData[];
 
-    const currentUserData = await getFriendsAndInterests(currentUser);
+    const { friends: currentUserFriends, interests: currentUserInterests } =
+        await getAllData(currentUser);
 
     for (const user of activeUsers) {
         // get other user's interests and compare to current user
-        const userData = await getFriendsAndInterests(user.userId);
+        const { interests: otherUserInterests } = await getAllData(user.userId);
 
         allUsersData.push({
             id: user.userId,
             geohash: user.geohash,
-            friend: currentUserData.friends.includes(user.userId),
+            friend: currentUserFriends.includes(user.userId),
             interestAngle: angleBetweenInterestVectors(
-                currentUserData.interests,
-                userData.interests,
+                currentUserInterests,
+                otherUserInterests,
             ),
         });
     }

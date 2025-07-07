@@ -13,7 +13,8 @@
     top: 0;
     padding: 1rem;
     box-sizing: border-box;
-    height: 100vh;
+    height: max-content;
+    max-height: 100vh;
     width: 30vw;
     display: flex;
     flex-flow: column nowrap;

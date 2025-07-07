@@ -1,4 +1,4 @@
-import { decodeBase32 } from "geohashing";
+import { decodeBase32, getNeighborsBase32 } from "geohashing";
 import type { UserProfile, AllUserData, FriendRequest, Message } from "./types";
 import { GEOHASH_RADII } from "./constants";
 
@@ -139,19 +139,25 @@ export const getAllData = async (userId: number) => {
 /**
  *
  * @param hash the geohash of the logged-in user's new location
+ * @returns true if the user's location was successfully updated; false otherwise
  */
 export const updateGeohash = async (hash: string) => {
-    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/geolocation`, {
-        method: "post",
-        mode: "cors",
-        headers: {
-            "Content-Type": "application/json",
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/user/geolocation`,
+        {
+            method: "post",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                geohash: hash,
+            }),
         },
-        credentials: "include",
-        body: JSON.stringify({
-            geohash: hash,
-        }),
-    });
+    );
+
+    return response.ok;
 };
 
 /**
@@ -202,26 +208,75 @@ export const geoHashToLatLng = (hash: string) => {
 
 /**
  *
+ * @param miles a distance in miles
+ * @returns the number of meters equivalent to the given distance
+ */
+const milesToMeters = (miles: number) => {
+    return miles * 1609.34;
+};
+
+/**
+ *
  * @param center a geohash (the center of a circle of radius miles)
  * @param hash another geohash
- * @param radius a radius contained in GEOHASH_RADII
+ * @param radius a radius less than or equal to one in GEOHASH_RADII (in miles)
+ * @param computeDistanceFunction a function to compute the distance in meters between two lat-long points
  * @returns true if hash is within at least radius of center (assuming 30deg lat); false otherwise; or null if radius is invalid
  */
 export const isGeoHashWithinMi = (
     center: string,
     hash: string,
     radius: number,
+    computeDistanceFunction: (
+        p1: google.maps.LatLngLiteral,
+        p2: google.maps.LatLngLiteral,
+    ) => number,
 ) => {
-    // find known resolution for radius
-    const res = GEOHASH_RADII.find((element) => {
-        return element.radius === radius;
-    })?.res;
-
-    if (!res) {
+    // find resolution to narrow down options within radius
+    const firstIndexWithGreaterRadius = GEOHASH_RADII.findIndex(
+        (element) => element.radius >= radius,
+    );
+    if (firstIndexWithGreaterRadius === -1) {
         return null;
-    } else {
-        return center.slice(0, res) === hash.slice(0, res);
     }
+
+    const res = GEOHASH_RADII[firstIndexWithGreaterRadius].res;
+
+    let possiblyWithin = false;
+    const slicedCenter = center.slice(0, res);
+    const slicedHash = hash.slice(0, res);
+
+    // if center and hash are in the same res-level box, set possiblyWithin and skip neighbor search
+    if (slicedCenter === slicedHash) {
+        possiblyWithin = true;
+    } else {
+        // get res-level neighbor boxes of center
+        const neighbors = getNeighborsBase32(slicedCenter);
+
+        // iterate over neighbors, trying to find a match for hash
+        for (const direction in neighbors) {
+            // @ts-ignore
+            if (neighbors[direction] === slicedHash) {
+                possiblyWithin = true;
+                break;
+            }
+        }
+    }
+
+    // if no match was found, hash is definitely not within radius
+    if (!possiblyWithin) {
+        return false;
+    }
+
+    // if a match was found, check lat and long to be sure that hash is truly within radius
+    const hashLatLong = geoHashToLatLng(hash);
+    const centerLatLong = geoHashToLatLng(center);
+
+    const radiusMeters = milesToMeters(radius);
+
+    const distance = computeDistanceFunction(centerLatLong, hashLatLong);
+
+    return distance <= radiusMeters;
 };
 
 /**
