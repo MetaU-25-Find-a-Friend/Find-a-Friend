@@ -182,12 +182,13 @@ const MapPage = () => {
                         <Slider
                             value={radius}
                             setValue={setRadius}
-                            options={GEOHASH_RADII.map(
-                                (element) => element.radius,
-                            )}
-                            optionsDisplay={GEOHASH_RADII.map(
-                                (element) => element.radius + "mi",
-                            )}></Slider>
+                            options={[0.5, 1, 2, 5]}
+                            optionsDisplay={[
+                                "0.5mi",
+                                "1mi",
+                                "2mi",
+                                "5mi",
+                            ]}></Slider>
                     </div>
                     <div className={styles.sliderLabel}>
                         <h6 className={styles.sliderTitle}>Nearby radius</h6>

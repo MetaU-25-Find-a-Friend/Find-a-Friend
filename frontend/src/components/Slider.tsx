@@ -31,7 +31,9 @@ const Slider = ({ value, setValue, options, optionsDisplay }: SliderProps) => {
             <div className={styles.sliderOptions}>
                 {options.map((option, index) => (
                     <p
+                        key={index}
                         className={styles.option}
+                        style={{ width: 100 / options.length + "%" }}
                         onClick={() => {
                             setValue(option);
                         }}>

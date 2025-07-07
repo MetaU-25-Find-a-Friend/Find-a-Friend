@@ -213,7 +213,7 @@ const milesToMeters = (miles: number) => {
  *
  * @param center a geohash (the center of a circle of radius miles)
  * @param hash another geohash
- * @param radius a radius contained in GEOHASH_RADII (in miles)
+ * @param radius a radius less than or equal to one in GEOHASH_RADII (in miles)
  * @param computeDistanceFunction a function to compute the distance in meters between two lat-long points
  * @returns true if hash is within at least radius of center (assuming 30deg lat); false otherwise; or null if radius is invalid
  */
@@ -226,15 +226,15 @@ export const isGeoHashWithinMi = (
         p2: google.maps.LatLngLiteral,
     ) => number,
 ) => {
-    // find known resolution for radius
-    const res = GEOHASH_RADII.find((element) => {
-        return element.radius === radius;
-    })?.res;
-
-    // immediately return if radius was invalid
-    if (!res) {
+    // find resolution to narrow down options within radius
+    const firstIndexWithGreaterRadius = GEOHASH_RADII.findIndex(
+        (element) => element.radius >= radius,
+    );
+    if (firstIndexWithGreaterRadius === -1) {
         return null;
     }
+
+    const res = GEOHASH_RADII[firstIndexWithGreaterRadius].res;
 
     let possiblyWithin = false;
     const slicedCenter = center.slice(0, res);
