@@ -91,17 +91,22 @@ const MapPage = () => {
                 if (oldLocation) {
                     if (!areHashesClose(geohash, oldLocation)) {
                         // if the user has moved, reset tracked time
+                        console.log("moved");
                         timeAtLocation.current = 0;
-                    } else if (timeAtLocation.current !== -1) {
+                    } else {
+                        console.log(
+                            "hasn't moved for " + timeAtLocation.current,
+                        );
                         // otherwise, increase time by interval seconds
                         timeAtLocation.current += FETCH_INTERVAL / 1000;
 
                         // if this has reached a significant amount of time, record in database
                         if (timeAtLocation.current >= SIG_TIME_AT_LOCATION) {
+                            console.log("recording");
                             addPastGeohash(geohash);
 
-                            // prevent this location from being added again until the user moves
-                            timeAtLocation.current = -1;
+                            // reset timer
+                            timeAtLocation.current = 0;
                         }
                     }
                 }

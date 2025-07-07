@@ -29,17 +29,18 @@ model User {
   friends Int[]
 }
 
-model UserGeohashes {
+model UserGeohash {
   id Int @id @default(autoincrement())
   userId Int @unique
   geohash String
 }
 
-model UserPastGeohashes {
+model UserPastGeohash {
   id Int @id @default(autoincrement())
   userId Int
   timestamp DateTime
   geohash String
+  duration Int
 }
 
 model FriendRequest {

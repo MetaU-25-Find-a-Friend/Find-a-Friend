@@ -26,7 +26,7 @@ export const GEOHASH_RADII = [
  * If a user's geohash and the hash of a location are identical up to this number of characters,
  * we can say the user is at the location
  */
-export const GEOHASH_AT_PLACE_RES = 8;
+export const GEOHASH_AT_PLACE_RES = 7;
 
 /**
  * Interval in milliseconds at which user's browser location is updated and other users' locations are re-fetched
