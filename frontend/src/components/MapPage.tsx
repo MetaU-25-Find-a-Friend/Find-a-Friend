@@ -196,7 +196,6 @@ const MapPage = () => {
                     </button>
 
                     <RecommendationList
-                        myId={user.id}
                         myLocation={myLocation}
                         otherUsers={otherUsers}></RecommendationList>
                 </div>

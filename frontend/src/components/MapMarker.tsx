@@ -23,18 +23,11 @@ const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {
     const { user } = useUser();
 
     // profile of the user represented by this marker
-    const [userData, setUserData] = useState<AllUserData>({
-        id: id,
-        firstName: "",
-        lastName: "",
-        interests: [],
-        friends: [],
-        blockedUsers: [],
-    });
+    const [userData, setUserData] = useState<AllUserData | null>(null);
 
     const handleMarkerClick = (event: React.MouseEvent) => {
         event.stopPropagation();
-        if (userData.id !== user?.id) {
+        if (userData && userData.id !== user?.id) {
             setModalData(userData);
         }
     };
@@ -47,7 +40,7 @@ const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {
     }, []);
 
     // if this user has blocked the current user, don't show the marker
-    if (!user || userData.blockedUsers.includes(user.id)) {
+    if (!user || !userData || userData.blockedUsers.includes(user.id)) {
         return <></>;
     } else {
         return (
@@ -72,7 +65,9 @@ const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {
                             {userData.interests.map((value, index) => {
                                 if (value === 1) {
                                     return (
-                                        <p className={styles.profileInterest}>
+                                        <p
+                                            key={index}
+                                            className={styles.profileInterest}>
                                             {getInterestName(index)}
                                         </p>
                                     );

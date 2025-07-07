@@ -5,7 +5,6 @@ import type { PlaceRecData, UserGeohash } from "../types";
 import { useUser } from "../contexts/UserContext";
 
 interface RecommendationListProps {
-    myId: number;
     myLocation: string;
     otherUsers: UserGeohash[];
 }
