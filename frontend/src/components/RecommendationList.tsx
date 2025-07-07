@@ -2,6 +2,7 @@ import styles from "../css/RecommendationList.module.css";
 import { recommendPlaces, getNearbyPOIs } from "../recommendation-utils";
 import { useState } from "react";
 import type { PlaceRecData, UserGeohash } from "../types";
+import { useUser } from "../contexts/UserContext";
 
 interface RecommendationListProps {
     myId: number;
@@ -17,17 +18,18 @@ interface RecommendationListProps {
  * @returns A list of nearby points of interest ordered by a recommendation algorithm
  */
 const RecommendationList = ({
-    myId,
     myLocation,
     otherUsers,
 }: RecommendationListProps) => {
+    const { user } = useUser();
+
     // array of places combined with data on the number of users there and their similarity to the current user
     const [nearbyPlaces, setNearbyPlaces] = useState(Array() as PlaceRecData[]);
 
     return (
-        <div className={styles.placesListContainer}>
-            <div
-                className={`${styles.placesList} ${nearbyPlaces.length === 0 ? styles.closed : styles.open}`}>
+        <div
+            className={`${styles.placesListContainer} ${nearbyPlaces.length === 0 ? "" : styles.open}`}>
+            <div className={styles.placesList}>
                 <button
                     className={styles.placesButton}
                     onClick={() => {
@@ -37,7 +39,7 @@ const RecommendationList = ({
                                 // combine each place with data on users there
                                 recommendPlaces(
                                     places,
-                                    myId,
+                                    user!.id,
                                     myLocation,
                                     otherUsers,
                                 ),
