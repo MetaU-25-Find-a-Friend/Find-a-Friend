@@ -55,6 +55,7 @@ const MapPage = () => {
     // seconds spent at approximately this location
     const timeAtLocation = useRef(0);
 
+    // google maps library used for calculating distance between lat-long coordinates
     const geometry = useMapsLibrary("geometry");
 
     // when Back button is clicked, remove user's location from active table and navigate to dashboard
@@ -91,18 +92,13 @@ const MapPage = () => {
                 if (oldLocation) {
                     if (!areHashesClose(geohash, oldLocation)) {
                         // if the user has moved, reset tracked time
-                        console.log("moved");
                         timeAtLocation.current = 0;
                     } else {
-                        console.log(
-                            "hasn't moved for " + timeAtLocation.current,
-                        );
                         // otherwise, increase time by interval seconds
                         timeAtLocation.current += FETCH_INTERVAL / 1000;
 
                         // if this has reached a significant amount of time, record in database
                         if (timeAtLocation.current >= SIG_TIME_AT_LOCATION) {
-                            console.log("recording");
                             addPastGeohash(geohash);
 
                             // reset timer
@@ -143,6 +139,45 @@ const MapPage = () => {
         };
     }, [user, hideLocation]);
 
+    // label and slider to toggle whether the user's location is hidden from others
+    const hideSlider = (
+        <div className={styles.hideLocationContainer}>
+            <div className={styles.sliderLabel}>
+                <h6 className={styles.sliderTitle}>Hide location?</h6>
+                <p className={styles.sliderLabelText}>
+                    This will prevent any other users from seeing your location
+                    on the map.
+                </p>
+            </div>
+            <div className={styles.sliderContainer}>
+                <Slider
+                    value={hideLocation}
+                    setValue={setHideLocation}
+                    options={[false, true]}
+                    optionsDisplay={["Show", "Hide"]}></Slider>
+            </div>
+        </div>
+    );
+
+    // label and slider to pick radius in which to show other users
+    const radiusSlider = (
+        <div className={styles.radiusContainer}>
+            <div className={styles.sliderContainer}>
+                <Slider
+                    value={radius}
+                    setValue={setRadius}
+                    options={[0.5, 1, 2, 5]}
+                    optionsDisplay={["0.5mi", "1mi", "2mi", "5mi"]}></Slider>
+            </div>
+            <div className={styles.sliderLabel}>
+                <h6 className={styles.sliderTitle}>Nearby radius</h6>
+                <p className={styles.sliderLabelText}>
+                    Choose a radius around you in which to show other users.
+                </p>
+            </div>
+        </div>
+    );
+
     if (!user) {
         return <LoggedOut></LoggedOut>;
     } else if (myLocation && geometry) {
@@ -166,43 +201,8 @@ const MapPage = () => {
                         otherUsers={otherUsers}></RecommendationList>
                 </div>
 
-                <div className={styles.hideLocationContainer}>
-                    <div className={styles.sliderLabel}>
-                        <h6 className={styles.sliderTitle}>Hide location?</h6>
-                        <p className={styles.sliderLabelText}>
-                            This will prevent any other users from seeing your
-                            location on the map.
-                        </p>
-                    </div>
-                    <div className={styles.sliderContainer}>
-                        <Slider
-                            value={hideLocation}
-                            setValue={setHideLocation}
-                            options={[false, true]}
-                            optionsDisplay={["Show", "Hide"]}></Slider>
-                    </div>
-                </div>
-                <div className={styles.radiusContainer}>
-                    <div className={styles.sliderContainer}>
-                        <Slider
-                            value={radius}
-                            setValue={setRadius}
-                            options={[0.5, 1, 2, 5]}
-                            optionsDisplay={[
-                                "0.5mi",
-                                "1mi",
-                                "2mi",
-                                "5mi",
-                            ]}></Slider>
-                    </div>
-                    <div className={styles.sliderLabel}>
-                        <h6 className={styles.sliderTitle}>Nearby radius</h6>
-                        <p className={styles.sliderLabelText}>
-                            Choose a radius around you in which to show other
-                            users.
-                        </p>
-                    </div>
-                </div>
+                {hideSlider}
+                {radiusSlider}
 
                 <Map
                     className={styles.map}
