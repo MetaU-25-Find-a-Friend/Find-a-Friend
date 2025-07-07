@@ -57,3 +57,10 @@ model Message {
   timestamp DateTime
   read Boolean @default(false)
 }
+
+model Session {
+  id String @id
+  sid String @unique
+  data String
+  expiresAt DateTime
+}
