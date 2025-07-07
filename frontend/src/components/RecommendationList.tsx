@@ -58,7 +58,7 @@ const RecommendationList = ({
                             {place.place.displayName.text}
                         </h6>
                         <p className={styles.placeAddress}>
-                            {place.place.formattedAddress} {place.geohash}
+                            {place.place.formattedAddress}
                         </p>
                         <p className={styles.userList}>
                             {place.userData.count}{" "}
