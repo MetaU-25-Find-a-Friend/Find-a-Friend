@@ -1,7 +1,7 @@
 import styles from "../css/MapPage.module.css";
 import { useUser } from "../contexts/UserContext";
 import { useState, useEffect, useRef } from "react";
-import { Map } from "@vis.gl/react-google-maps";
+import { Map, useMapsLibrary } from "@vis.gl/react-google-maps";
 import LoggedOut from "./LoggedOut";
 import {
     deleteGeohash,
@@ -54,6 +54,8 @@ const MapPage = () => {
 
     // seconds spent at approximately this location
     const timeAtLocation = useRef(0);
+
+    const geometry = useMapsLibrary("geometry");
 
     // when Back button is clicked, remove user's location from active table and navigate to dashboard
     const handleBack = () => {
@@ -138,7 +140,7 @@ const MapPage = () => {
 
     if (!user) {
         return <LoggedOut></LoggedOut>;
-    } else if (myLocation) {
+    } else if (myLocation && geometry) {
         return (
             <>
                 <Modal
@@ -214,6 +216,7 @@ const MapPage = () => {
                                 myLocation,
                                 userLoc.geohash,
                                 radius,
+                                geometry.spherical.computeDistanceBetween,
                             );
                         })
                         .map((user) => {
