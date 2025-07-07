@@ -38,12 +38,18 @@ const loginLimiter = rateLimit({
 });
 
 // setup session middleware and cookie settings
+
+const { PrismaSessionStore } = require("@quixo3/prisma-session-store");
+
 const session = require("express-session");
 app.use(
     session({
         secret: process.env.VITE_SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
+        store: new PrismaSessionStore(prisma, {
+            dbRecordIdIsSessionId: true,
+        }),
         cookie: {
             maxAge: SESSION_TIMEOUT,
         },
