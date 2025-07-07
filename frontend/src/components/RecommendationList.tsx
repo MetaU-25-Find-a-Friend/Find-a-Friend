@@ -11,7 +11,6 @@ interface RecommendationListProps {
 
 /**
  *
- * @param myId the id of the current user
  * @param myLocation the current user's geohashed location
  * @param otherUsers the array of other active users
  * @returns A list of nearby points of interest ordered by a recommendation algorithm
@@ -59,7 +58,7 @@ const RecommendationList = ({
                             {place.place.displayName.text}
                         </h6>
                         <p className={styles.placeAddress}>
-                            {place.place.formattedAddress}
+                            {place.place.formattedAddress} {place.geohash}
                         </p>
                         <p className={styles.userList}>
                             {place.userData.count}{" "}
