@@ -237,27 +237,6 @@ app.get("/user/details/:id", authenticate, async (req, res) => {
     res.json(user);
 });
 
-// get a user's friends and interests
-app.get("/user/friendsAndInterests/:id", authenticate, async (req, res) => {
-    const userId = parseInt(req.params.id);
-
-    const user = await prisma.user.findUnique({
-        where: {
-            id: userId,
-        },
-        select: {
-            friends: true,
-            interests: true,
-        },
-    });
-
-    if (!user) {
-        return res.status(404).send("User not found");
-    }
-
-    res.json(user);
-});
-
 // update the logged-in user's profile
 app.post("/user", authenticate, async (req, res) => {
     const userId = req.session.userId;

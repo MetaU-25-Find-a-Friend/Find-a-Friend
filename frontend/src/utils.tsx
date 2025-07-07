@@ -139,19 +139,25 @@ export const getAllData = async (userId: number) => {
 /**
  *
  * @param hash the geohash of the logged-in user's new location
+ * @returns true if the user's location was successfully updated; false otherwise
  */
 export const updateGeohash = async (hash: string) => {
-    await fetch(`${import.meta.env.VITE_SERVER_URL}/user/geolocation`, {
-        method: "post",
-        mode: "cors",
-        headers: {
-            "Content-Type": "application/json",
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/user/geolocation`,
+        {
+            method: "post",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                geohash: hash,
+            }),
         },
-        credentials: "include",
-        body: JSON.stringify({
-            geohash: hash,
-        }),
-    });
+    );
+
+    return response.ok;
 };
 
 /**
