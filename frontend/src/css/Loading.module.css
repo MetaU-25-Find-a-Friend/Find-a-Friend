@@ -1,0 +1,9 @@
+.container {
+    z-index: 5;
+    background-color: var(--tan-background);
+    width: 100%;
+    text-align: center;
+    border-radius: 2rem;
+    padding: 1rem;
+    box-sizing: border-box;
+}
