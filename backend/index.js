@@ -55,6 +55,7 @@ app.use(
         }),
         cookie: {
             maxAge: SESSION_TIMEOUT,
+            sameSite: "none",
         },
     }),
 );
