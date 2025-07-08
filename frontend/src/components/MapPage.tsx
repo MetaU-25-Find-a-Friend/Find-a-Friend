@@ -26,6 +26,7 @@ import Slider from "./Slider";
 import { encodeBase32 } from "geohashing";
 import RecommendationList from "./RecommendationList";
 import Modal from "./Modal";
+import Loading from "./Loading";
 
 /**
  *
@@ -238,9 +239,9 @@ const MapPage = () => {
         );
     } else {
         return (
-            <>
-                <p>Loading</p>
-            </>
+            <div className={styles.loadingContainer}>
+                <Loading></Loading>
+            </div>
         );
     }
 };

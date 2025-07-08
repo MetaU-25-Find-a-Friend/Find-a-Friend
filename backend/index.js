@@ -56,7 +56,8 @@ app.use(
         }),
         cookie: {
             maxAge: SESSION_TIMEOUT,
-            sameSite: process.env.VITE_ENV_TYPE === "production" ? "none" : "lax",
+            sameSite:
+                process.env.VITE_ENV_TYPE === "production" ? "none" : "lax",
             secure: process.env.VITE_ENV_TYPE === "production" ? true : false,
         },
     }),
