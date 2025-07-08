@@ -34,3 +34,45 @@
 .cluster:hover .popupList {
     display: flex;
 }
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(30, 30, 30, 0.5);
+    z-index: 10;
+}
+
+.picker {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60vw;
+    background-color: var(--tan-background);
+    z-index: 11;
+    border-radius: 2rem;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.pickerText {
+    grid-column: 1 / 4;
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 20px;
+}
+
+.userOption {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 5rem;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--teal-accent);
+}
