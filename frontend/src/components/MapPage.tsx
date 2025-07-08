@@ -217,26 +217,15 @@ const MapPage = () => {
                         location={myLocation}
                         setModalData={setModalData}></MapMarker>
 
-                    {/* {otherUsers
-                        .filter((userLoc) => {
+                    <ClusteredMarkers
+                        otherUsers={otherUsers.filter((userLoc) => {
                             return isGeoHashWithinMi(
                                 myLocation,
                                 userLoc.geohash,
                                 radius,
                                 geometry.spherical.computeDistanceBetween,
                             );
-                        })
-                        .map((user) => {
-                            return (
-                                <MapMarker
-                                    id={user.userId}
-                                    key={user.userId}
-                                    location={user.geohash}
-                                    setModalData={setModalData}></MapMarker>
-                            );
-                        })} */}
-                    <ClusteredMarkers
-                        otherUsers={otherUsers}
+                        })}
                         setModalData={setModalData}></ClusteredMarkers>
                 </Map>
             </>
