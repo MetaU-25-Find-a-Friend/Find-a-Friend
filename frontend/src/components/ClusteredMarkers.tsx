@@ -17,9 +17,7 @@ const ClusteredMarkers = ({
     const [clusters, setClusters] = useState(Array() as ClusterData[]);
 
     useEffect(() => {
-        const a = findClusters(otherUsers);
-        setClusters(a);
-        console.log(a);
+        setClusters(findClusters(otherUsers));
     }, [otherUsers]);
 
     return (

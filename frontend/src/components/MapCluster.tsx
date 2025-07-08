@@ -19,10 +19,15 @@ const MapCluster = ({ cluster, setModalData }: MapClusterProps) => {
         );
     } else {
         return (
-            <AdvancedMarker
-                className={styles.cluster}
-                position={geoHashToLatLng(cluster.geohash)}>
-                <p className={styles.number}>{cluster.userIds.length}</p>
+            <AdvancedMarker position={geoHashToLatLng(cluster.geohash)}>
+                <div className={styles.cluster}>
+                    <p className={styles.number}>{cluster.userIds.length}</p>
+                    <div className={styles.popupList}>
+                        {cluster.userIds.map((id) => (
+                            <p>{id}</p>
+                        ))}
+                    </div>
+                </div>
             </AdvancedMarker>
         );
     }

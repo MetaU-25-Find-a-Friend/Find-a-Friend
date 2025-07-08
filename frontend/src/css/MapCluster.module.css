@@ -4,6 +4,8 @@
     height: 2rem;
     border-radius: 100%;
     border: var(--teal-accent) 0.2rem solid;
+    outline: var(--light-teal-accent) 0.2rem solid;
+    outline-offset: 0.2rem;
 }
 
 .number {
@@ -15,4 +17,23 @@
     color: var(--teal-accent);
     font-size: 24px;
     font-weight: bold;
+}
+
+.popupList {
+    display: none;
+    transform: translate(8%, -110%);
+    width: 32rem;
+    background-color: var(--tan-background);
+    border-radius: 2rem;
+    padding: 2rem;
+    box-sizing: border-box;
+    font-family: Sen, sans-serif;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.cluster:hover .popupList {
+    display: flex;
 }

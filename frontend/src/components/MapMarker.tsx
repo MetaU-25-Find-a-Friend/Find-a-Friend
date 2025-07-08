@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import type { AllUserData } from "../types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
-import { geoHashToLatLng, getAllData, getInterestName } from "../utils";
+import { geoHashToLatLng, getAllData } from "../utils";
 import { useUser } from "../contexts/UserContext";
+import ProfilePopup from "./ProfilePopup";
 
 interface MapMarkerProps {
     id: number;
@@ -25,19 +26,19 @@ const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {
     // profile of the user represented by this marker
     const [userData, setUserData] = useState<AllUserData | null>(null);
 
-    const handleMarkerClick = (event: React.MouseEvent) => {
-        event.stopPropagation();
-        if (userData && userData.id !== user?.id) {
-            setModalData(userData);
-        }
-    };
-
     // fetch user's profile to populate popup
     useEffect(() => {
         getAllData(id).then((data) => {
             setUserData(data);
         });
     }, []);
+
+    const handleMarkerClick = (event: React.MouseEvent) => {
+        event.stopPropagation();
+        if (userData && userData.id !== user?.id) {
+            setModalData(userData);
+        }
+    };
 
     if (!user || !userData) {
         return <></>;
@@ -50,31 +51,8 @@ const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {
                     <FontAwesomeIcon
                         className={styles.markerIcon}
                         icon={faUser}></FontAwesomeIcon>
-                    <div className={styles.profilePopup}>
-                        <h3 className={styles.profileTitle}>
-                            {userData.firstName} {userData.lastName}{" "}
-                            <span className={styles.profilePronouns}>
-                                {userData.pronouns}
-                            </span>
-                        </h3>
-                        <p className={styles.profileMajor}>
-                            {userData.major ?? "(No major)"}
-                        </p>
-                        <div className={styles.interestsContainer}>
-                            {userData.interests.map((value, index) => {
-                                if (value === 1) {
-                                    return (
-                                        <p
-                                            key={index}
-                                            className={styles.profileInterest}>
-                                            {getInterestName(index)}
-                                        </p>
-                                    );
-                                } else {
-                                    return <></>;
-                                }
-                            })}
-                        </div>
+                    <div className={styles.profilePopupContainer}>
+                        <ProfilePopup userData={userData}></ProfilePopup>
                     </div>
                 </div>
             </AdvancedMarker>
