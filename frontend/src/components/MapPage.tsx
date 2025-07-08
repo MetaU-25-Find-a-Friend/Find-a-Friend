@@ -27,6 +27,7 @@ import { encodeBase32 } from "geohashing";
 import RecommendationList from "./RecommendationList";
 import Modal from "./Modal";
 import Loading from "./Loading";
+import ClusteredMarkers from "./ClusteredMarkers";
 
 /**
  *
@@ -216,7 +217,7 @@ const MapPage = () => {
                         location={myLocation}
                         setModalData={setModalData}></MapMarker>
 
-                    {otherUsers
+                    {/* {otherUsers
                         .filter((userLoc) => {
                             return isGeoHashWithinMi(
                                 myLocation,
@@ -233,7 +234,10 @@ const MapPage = () => {
                                     location={user.geohash}
                                     setModalData={setModalData}></MapMarker>
                             );
-                        })}
+                        })} */}
+                    <ClusteredMarkers
+                        otherUsers={otherUsers}
+                        setModalData={setModalData}></ClusteredMarkers>
                 </Map>
             </>
         );

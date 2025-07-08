@@ -132,3 +132,8 @@ export interface SuggestedProfile {
         userName: string;
     }[];
 }
+
+export interface ClusterData {
+    geohash: string;
+    userIds: number[];
+}

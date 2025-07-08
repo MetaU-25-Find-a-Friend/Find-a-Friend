@@ -1,6 +1,14 @@
 import { decodeBase32, getNeighborsBase32 } from "geohashing";
-import type { UserProfile, AllUserData, FriendRequest, Message } from "./types";
+import type {
+    UserProfile,
+    AllUserData,
+    FriendRequest,
+    Message,
+    UserGeohash,
+    ClusterData,
+} from "./types";
 import { GEOHASH_RADII } from "./constants";
+import { areHashesClose } from "./recommendation-utils";
 
 /**
  *
@@ -401,4 +409,27 @@ export const sendMessage = async (to: number, text: string) => {
     } else {
         return [false, await response.text()];
     }
+};
+
+export const findClusters = (userData: UserGeohash[]) => {
+    const result = Array() as ClusterData[];
+
+    for (const user of userData) {
+        // check for an existing cluster at this user's location
+        const existingCluster = result.find((cluster) =>
+            areHashesClose(cluster.geohash, user.geohash),
+        );
+        if (existingCluster) {
+            // if one exists, add this user
+            existingCluster.userIds.push(user.userId);
+        } else {
+            // otherwise, create a new cluster at this user's location
+            result.push({
+                geohash: user.geohash,
+                userIds: [user.userId],
+            });
+        }
+    }
+
+    return result;
 };
