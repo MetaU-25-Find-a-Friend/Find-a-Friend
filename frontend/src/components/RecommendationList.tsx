@@ -25,7 +25,7 @@ const RecommendationList = ({
     // array of places combined with data on the number of users there and their similarity to the current user
     const [nearbyPlaces, setNearbyPlaces] = useState(Array() as PlaceRecData[]);
 
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     if (loading) {
         return <Loading></Loading>;
@@ -37,6 +37,7 @@ const RecommendationList = ({
                     <button
                         className={styles.placesButton}
                         onClick={() => {
+                            setLoading(true);
                             // get all places nearby
                             getNearbyPOIs(myLocation)
                                 .then((places) =>
@@ -48,10 +49,11 @@ const RecommendationList = ({
                                         otherUsers,
                                     ),
                                 )
-                                .then((placesWithUsers) =>
+                                .then((placesWithUsers) => {
                                     // load data and display in list
-                                    setNearbyPlaces(placesWithUsers),
-                                );
+                                    (setNearbyPlaces(placesWithUsers),
+                                        setLoading(false));
+                                });
                         }}>
                         {nearbyPlaces.length === 0 ? "Load places" : "Reload"}
                     </button>
