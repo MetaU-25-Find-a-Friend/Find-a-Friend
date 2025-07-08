@@ -9,7 +9,7 @@ app.use(
     cors({
         origin: [
             "http://localhost:5173",
-            "https://find-a-friend-ufeh.onrender.com",
+            "https://find-a-friend-site.onrender.com",
         ],
         credentials: true,
     }),
