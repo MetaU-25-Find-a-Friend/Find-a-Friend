@@ -3,10 +3,14 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(
     cors({
-        origin: "http://localhost:5173",
+        origin: [
+            "http://localhost:5173",
+            "https://find-a-friend-site.onrender.com",
+        ],
         credentials: true,
     }),
 );
@@ -38,14 +42,22 @@ const loginLimiter = rateLimit({
 });
 
 // setup session middleware and cookie settings
+
+const { PrismaSessionStore } = require("@quixo3/prisma-session-store");
+
 const session = require("express-session");
 app.use(
     session({
         secret: process.env.VITE_SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
+        store: new PrismaSessionStore(prisma, {
+            dbRecordIdIsSessionId: true,
+        }),
         cookie: {
             maxAge: SESSION_TIMEOUT,
+            sameSite: process.env.VITE_ENV_TYPE === "production" ? "none" : "lax",
+            secure: process.env.VITE_ENV_TYPE === "production" ? true : false,
         },
     }),
 );
