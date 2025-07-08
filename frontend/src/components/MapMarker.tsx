@@ -39,8 +39,7 @@ const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {
         });
     }, []);
 
-    // if this user has blocked the current user, don't show the marker
-    if (!user || !userData || userData.blockedUsers.includes(user.id)) {
+    if (!user || !userData) {
         return <></>;
     } else {
         return (
