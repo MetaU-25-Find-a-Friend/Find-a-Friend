@@ -3,6 +3,35 @@ import { getAllData } from "./utils";
 
 /**
  *
+ * @param id1 one user id
+ * @param id2 another user id
+ * @returns the number of messages sent between the users
+ */
+const getNumMessagesBetween = async (id1: number, id2: number) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/numMessages/${id1}/${id2}`,
+        {
+            credentials: "include",
+        },
+    );
+
+    return await response.json();
+};
+
+/**
+ *
+ * @param id1 one user id
+ * @param id2 another user id
+ * @returns a number representing the users' closeness: lower as they are closer
+ */
+const getProximityOf = async (id1: number, id2: number) => {
+    const { count } = await getNumMessagesBetween(id1, id2);
+
+    return 1 / (count + 1);
+};
+
+/**
+ *
  * @param id id of the current user
  * @returns an array of data on friends of friends etc. of the current user
  */
@@ -21,7 +50,7 @@ export const getSuggestedPeople = async (id: number) => {
         // push friend's data to the queue (they won't be added to result, but their friends etc. will be processed)
         queue.push({
             data: friendData,
-            degree: 1,
+            degree: await getProximityOf(id, friend),
             friendPath: Array(),
         });
     }
@@ -43,7 +72,9 @@ export const getSuggestedPeople = async (id: number) => {
                 ) {
                     queue.push({
                         data: acquaintanceData,
-                        degree: user.degree + 1,
+                        degree:
+                            user.degree +
+                            (await getProximityOf(user.data.id, acquaintance)),
                         friendPath: [
                             ...user.friendPath,
                             {
@@ -83,7 +114,9 @@ export const getSuggestedPeople = async (id: number) => {
                 ) {
                     queue.push({
                         data: acquaintanceData,
-                        degree: user.degree + 1,
+                        degree:
+                            user.degree +
+                            (await getProximityOf(user.data.id, acquaintance)),
                         friendPath: [
                             ...user.friendPath,
                             {
@@ -100,5 +133,5 @@ export const getSuggestedPeople = async (id: number) => {
         }
     }
 
-    return result;
+    return result.sort((a, b) => a.degree - b.degree);
 };

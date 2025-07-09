@@ -701,6 +701,32 @@ app.get("/messages/:other/:cursor", authenticate, async (req, res) => {
     }
 });
 
+// get the number of messages sent between two users
+app.get("/numMessages/:one/:other", authenticate, async (req, res) => {
+    const oneId = parseInt(req.params.one);
+
+    const otherId = parseInt(req.params.other);
+
+    const num = await prisma.message.count({
+        where: {
+            OR: [
+                {
+                    fromUser: oneId,
+                    toUser: otherId,
+                },
+                {
+                    fromUser: otherId,
+                    toUser: oneId,
+                },
+            ],
+        },
+    });
+
+    res.json({
+        count: num,
+    });
+});
+
 // send a message to the specified user
 app.post("/messages/:to", authenticate, async (req, res) => {
     const from = req.session.userId;
