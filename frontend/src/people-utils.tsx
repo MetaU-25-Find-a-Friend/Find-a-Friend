@@ -1,3 +1,4 @@
+import { MS_IN_DAY } from "./constants";
 import type { SuggestedProfile } from "./types";
 import { getAllData } from "./utils";
 
@@ -15,7 +16,29 @@ const getNumMessagesBetween = async (id1: number, id2: number) => {
         },
     );
 
-    return await response.json();
+    return (await response.json()).count;
+};
+
+/**
+ *
+ * @param id1 one user id
+ * @param id2 another user id
+ * @returns the number of days the users have been friends, or 0 if they are not friends
+ */
+const getFriendshipDuration = async (id1: number, id2: number) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/friends/duration/${id1}/${id2}`,
+        {
+            credentials: "include",
+        },
+    );
+
+    if (response.ok) {
+        const ms = (await response.json()).duration;
+        return ms / MS_IN_DAY;
+    } else {
+        return 0;
+    }
 };
 
 /**
@@ -25,9 +48,11 @@ const getNumMessagesBetween = async (id1: number, id2: number) => {
  * @returns a number representing the users' closeness: lower as they are closer
  */
 const getProximityOf = async (id1: number, id2: number) => {
-    const { count } = await getNumMessagesBetween(id1, id2);
+    const numMessages = await getNumMessagesBetween(id1, id2);
 
-    return 1 / (count + 1);
+    const duration = await getFriendshipDuration(id1, id2);
+
+    return 1 / (numMessages + duration + 1);
 };
 
 /**

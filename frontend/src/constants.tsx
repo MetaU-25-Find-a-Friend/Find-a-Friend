@@ -92,3 +92,8 @@ export const MESSAGES_PER_PAGE = 10;
  * Interval in milliseconds at which new incoming messages are fetched
  */
 export const MESSAGES_FETCH_INTERVAL = 3000;
+
+/**
+ * The number of milliseconds in a day
+ */
+export const MS_IN_DAY = 24 * 60 * 60 * 1000;
