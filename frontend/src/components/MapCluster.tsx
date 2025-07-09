@@ -25,6 +25,11 @@ const MapCluster = ({ cluster, setModalData }: MapClusterProps) => {
         }
     };
 
+    const handleClusterClick = (event: React.MouseEvent) => {
+        event.stopPropagation();
+        setShowingPicker(true);
+    };
+
     useEffect(() => {
         const result = Array() as AllUserData[];
 
@@ -40,7 +45,7 @@ const MapCluster = ({ cluster, setModalData }: MapClusterProps) => {
             <AdvancedMarker position={geoHashToLatLng(cluster.geohash)}>
                 <div
                     className={styles.cluster}
-                    onClick={() => setShowingPicker(true)}>
+                    onClick={handleClusterClick}>
                     <p className={styles.number}>{cluster.userIds.length}</p>
                     <div className={styles.popupList}>
                         {usersInCluster.map((user) => (

@@ -35,7 +35,7 @@ const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {
 
     const handleMarkerClick = (event: React.MouseEvent) => {
         event.stopPropagation();
-        if (userData && userData.id !== user?.id) {
+        if (userData) {
             setModalData(userData);
         }
     };

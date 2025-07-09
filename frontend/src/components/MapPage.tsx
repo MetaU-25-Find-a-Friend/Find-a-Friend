@@ -11,7 +11,6 @@ import {
     updateGeohash,
 } from "../utils";
 import { addPastGeohash, areHashesClose } from "../recommendation-utils";
-import MapMarker from "./MapMarker";
 import {
     DEFAULT_MAP_ZOOM,
     FETCH_INTERVAL,
@@ -212,20 +211,18 @@ const MapPage = () => {
                     defaultZoom={DEFAULT_MAP_ZOOM}
                     gestureHandling={"greedy"}
                     disableDefaultUI={true}>
-                    <MapMarker
-                        id={user.id}
-                        location={myLocation}
-                        setModalData={setModalData}></MapMarker>
-
                     <ClusteredMarkers
-                        otherUsers={otherUsers.filter((userLoc) => {
-                            return isGeoHashWithinMi(
-                                myLocation,
-                                userLoc.geohash,
-                                radius,
-                                geometry.spherical.computeDistanceBetween,
-                            );
-                        })}
+                        otherUsers={[
+                            { id: -2, userId: user.id, geohash: myLocation },
+                            ...otherUsers.filter((userLoc) => {
+                                return isGeoHashWithinMi(
+                                    myLocation,
+                                    userLoc.geohash,
+                                    radius,
+                                    geometry.spherical.computeDistanceBetween,
+                                );
+                            }),
+                        ]}
                         setModalData={setModalData}></ClusteredMarkers>
                 </Map>
             </>
