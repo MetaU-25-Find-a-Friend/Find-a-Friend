@@ -61,7 +61,9 @@ const MapCluster = ({ cluster, setModalData }: MapClusterProps) => {
                     <p className={styles.number}>{cluster.userIds.length}</p>
                     <div className={styles.popupList}>
                         {usersInCluster.map((user) => (
-                            <ProfilePopup userData={user}></ProfilePopup>
+                            <ProfilePopup
+                                key={user.id}
+                                userData={user}></ProfilePopup>
                         ))}
                     </div>
                 </div>
@@ -77,6 +79,7 @@ const MapCluster = ({ cluster, setModalData }: MapClusterProps) => {
                         </p>
                         {usersInCluster.map((user) => (
                             <div
+                                key={user.id}
                                 className={styles.userOption}
                                 onClick={() => {
                                     setModalData(user);

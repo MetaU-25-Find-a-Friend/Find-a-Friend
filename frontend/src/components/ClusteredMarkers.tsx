@@ -30,6 +30,7 @@ const ClusteredMarkers = ({ users, setModalData }: ClusteredMarkerProps) => {
                 if (cluster.userIds.length === 1) {
                     return (
                         <MapMarker
+                            key={cluster.userIds[0]}
                             id={cluster.userIds[0]}
                             location={cluster.geohash}
                             setModalData={setModalData}></MapMarker>
@@ -37,6 +38,7 @@ const ClusteredMarkers = ({ users, setModalData }: ClusteredMarkerProps) => {
                 } else {
                     return (
                         <MapCluster
+                            key={cluster.userIds[0]}
                             cluster={cluster}
                             setModalData={setModalData}></MapCluster>
                     );
