@@ -14,6 +14,7 @@ import { getSuggestedPeople } from "../people-utils";
 import { blockUser, getInterestName, sendFriendRequest } from "../utils";
 import LoggedOut from "./LoggedOut";
 import Alert from "./Alert";
+import Loading from "./Loading";
 
 /**
  *
@@ -164,7 +165,13 @@ const People = () => {
                     Back to Dashboard
                 </button>
                 <h2 className={styles.title}>People You May Know</h2>
-                {suggestedUsersDisplay}
+                {suggestions.length === 0 ? (
+                    <div className={styles.loadingContainer}>
+                        <Loading></Loading>
+                    </div>
+                ) : (
+                    suggestedUsersDisplay
+                )}
             </div>
         );
     }

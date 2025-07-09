@@ -145,3 +145,7 @@
     border-radius: 2rem;
     width: 100%;
 }
+
+.loadingContainer {
+    grid-column: 1 / 4;
+}
