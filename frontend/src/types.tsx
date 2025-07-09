@@ -48,7 +48,7 @@ export interface UserLocation {
 }
 
 export interface UserGeohash {
-    id: number;
+    id?: number;
     userId: number;
     geohash: string;
 }
@@ -131,4 +131,9 @@ export interface SuggestedProfile {
         userId: number;
         userName: string;
     }[];
+}
+
+export interface ClusterData {
+    geohash: string;
+    userIds: number[];
 }

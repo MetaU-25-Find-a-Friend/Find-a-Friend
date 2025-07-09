@@ -7,10 +7,7 @@ app.set("trust proxy", 1);
 app.use(express.json());
 app.use(
     cors({
-        origin: [
-            "http://localhost:5173",
-            /\.onrender\.com$/,
-        ],
+        origin: ["http://localhost:5173", /\.onrender\.com$/],
         credentials: true,
     }),
 );
@@ -324,7 +321,22 @@ app.get("/users/otherGeolocations", authenticate, async (req, res) => {
         },
     });
 
-    res.json(locations);
+    const result = Array();
+
+    // if the user at a location has blocked the current user, don't include them
+    for (const location of locations) {
+        const { blockedUsers } = await prisma.user.findUnique({
+            where: {
+                id: location.userId,
+            },
+        });
+
+        if (!blockedUsers.includes(userId)) {
+            result.push(location);
+        }
+    }
+
+    res.json(result);
 });
 
 // add a new record to user's past locations or increment duration at location

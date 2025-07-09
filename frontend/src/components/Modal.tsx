@@ -117,6 +117,96 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
         }
     };
 
+    const alreadyFriendsDisplay = (
+        <>
+            <div className={styles.infoContainer}>
+                <FontAwesomeIcon
+                    icon={faUserCheck}
+                    color="var(--teal-accent)"
+                    size="lg"></FontAwesomeIcon>
+                <p className={styles.infoText}>You are friends.</p>
+            </div>
+            <div className={styles.actionsContainer}>
+                <input
+                    type="text"
+                    className={styles.input}
+                    onChange={(event) => setMessageText(event.target.value)}
+                    ref={inputRef}
+                    placeholder="New message"></input>
+                <button
+                    className={styles.sendButton}
+                    onClick={handleSendClick}>
+                    <FontAwesomeIcon
+                        icon={faArrowRight}
+                        color="white"
+                        size="2x"></FontAwesomeIcon>
+                </button>
+            </div>
+        </>
+    );
+
+    const notFriendsDisplay = (
+        <>
+            <div className={styles.infoContainer}>
+                <FontAwesomeIcon
+                    icon={faUserXmark}
+                    color="var(--teal-accent)"
+                    size="lg"></FontAwesomeIcon>
+                <p className={styles.infoText}>You are not friends.</p>
+            </div>
+            <div className={styles.actionsContainer}>
+                <button
+                    className={styles.button}
+                    onClick={handleFriendClick}>
+                    Send friend request
+                </button>
+            </div>
+        </>
+    );
+
+    const alreadyBlockedDisplay = (
+        <>
+            <div className={styles.infoContainer}>
+                <FontAwesomeIcon
+                    icon={faShieldHalved}
+                    color="var(--teal-accent)"
+                    size="lg"></FontAwesomeIcon>
+                <p className={styles.infoText}>
+                    You have blocked this user. They cannot see your location or
+                    message you.
+                </p>
+            </div>
+            <div className={styles.actionsContainer}>
+                <button
+                    className={styles.button}
+                    onClick={handleUnblockClick}>
+                    Unblock user
+                </button>
+            </div>
+        </>
+    );
+
+    const notBlockedDisplay = (
+        <>
+            <div className={styles.infoContainer}>
+                <FontAwesomeIcon
+                    icon={faUserShield}
+                    color="var(--teal-accent)"
+                    size="lg"></FontAwesomeIcon>
+                <p className={styles.infoText}>
+                    This user can see your location and request to message you.
+                </p>
+            </div>
+            <div className={styles.actionsContainer}>
+                <button
+                    className={styles.button}
+                    onClick={handleBlockClick}>
+                    Block user
+                </button>
+            </div>
+        </>
+    );
+
     if (userData && currentUserData) {
         return (
             <div
@@ -140,7 +230,9 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                         {userData.interests.map((value, index) => {
                             if (value === 1) {
                                 return (
-                                    <p className={styles.interest}>
+                                    <p
+                                        key={index}
+                                        className={styles.interest}>
                                         {getInterestName(index)}
                                     </p>
                                 );
@@ -150,96 +242,15 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                         })}
                     </div>
                     <p className={styles.bio}>{userData.bio}</p>
-                    <hr className={styles.bar}></hr>
-                    {currentUserData.friends.includes(userData.id) ? (
+                    {userData.id !== user?.id && (
                         <>
-                            <div className={styles.infoContainer}>
-                                <FontAwesomeIcon
-                                    icon={faUserCheck}
-                                    color="var(--teal-accent"
-                                    size="lg"></FontAwesomeIcon>
-                                <p className={styles.infoText}>
-                                    You are friends.
-                                </p>
-                            </div>
-                            <div className={styles.actionsContainer}>
-                                <input
-                                    type="text"
-                                    className={styles.input}
-                                    onChange={(event) =>
-                                        setMessageText(event.target.value)
-                                    }
-                                    ref={inputRef}
-                                    placeholder="New message"></input>
-                                <button
-                                    className={styles.sendButton}
-                                    onClick={handleSendClick}>
-                                    <FontAwesomeIcon
-                                        icon={faArrowRight}
-                                        color="white"
-                                        size="2x"></FontAwesomeIcon>
-                                </button>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div className={styles.infoContainer}>
-                                <FontAwesomeIcon
-                                    icon={faUserXmark}
-                                    color="var(--teal-accent"
-                                    size="lg"></FontAwesomeIcon>
-                                <p className={styles.infoText}>
-                                    You are not friends.
-                                </p>
-                            </div>
-                            <div className={styles.actionsContainer}>
-                                <button
-                                    className={styles.button}
-                                    onClick={handleFriendClick}>
-                                    Send friend request
-                                </button>
-                            </div>
-                        </>
-                    )}
-                    {currentUserData.blockedUsers.includes(userData.id) ? (
-                        <>
-                            <div className={styles.infoContainer}>
-                                <FontAwesomeIcon
-                                    icon={faShieldHalved}
-                                    color="var(--teal-accent)"
-                                    size="lg"></FontAwesomeIcon>
-                                <p className={styles.infoText}>
-                                    You have blocked this user. They cannot see
-                                    your location or message you.
-                                </p>
-                            </div>
-                            <div className={styles.actionsContainer}>
-                                <button
-                                    className={styles.button}
-                                    onClick={handleUnblockClick}>
-                                    Unblock user
-                                </button>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div className={styles.infoContainer}>
-                                <FontAwesomeIcon
-                                    icon={faUserShield}
-                                    color="var(--teal-accent)"
-                                    size="lg"></FontAwesomeIcon>
-                                <p className={styles.infoText}>
-                                    This user can see your location and request
-                                    to message you.
-                                </p>
-                            </div>
-                            <div className={styles.actionsContainer}>
-                                <button
-                                    className={styles.button}
-                                    onClick={handleBlockClick}>
-                                    Block user
-                                </button>
-                            </div>
+                            <hr className={styles.bar}></hr>
+                            {currentUserData.friends.includes(userData.id)
+                                ? alreadyFriendsDisplay
+                                : notFriendsDisplay}
+                            {currentUserData.blockedUsers.includes(userData.id)
+                                ? alreadyBlockedDisplay
+                                : notBlockedDisplay}
                         </>
                     )}
                 </div>

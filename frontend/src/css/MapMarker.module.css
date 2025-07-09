@@ -13,56 +13,12 @@
     color: var(--teal-accent);
 }
 
-.profilePopup {
+.profilePopupContainer {
     display: none;
-    transform: translate(8%, -110%);
-    width: 32rem;
-    background-color: var(--tan-background);
-    border-radius: 2rem;
-    padding: 2rem;
-    box-sizing: border-box;
-    font-family: Sen, sans-serif;
-    flex-flow: column nowrap;
-    justify-content: flex-start;
-    align-items: flex-start;
-    gap: 0.5rem;
+    transform: translate(8%, calc(-100% - 2rem));
+    width: 26rem;
 }
 
-.profileTitle {
-    font-family: inherit;
-    font-size: 24px;
-    margin: 0;
-}
-
-.marker:hover .profilePopup {
-    display: flex;
-}
-
-.profilePronouns {
-    font-size: 18px;
-    font-weight: bold;
-    color: var(--teal-accent);
-    margin: 0;
-}
-
-.profileMajor {
-    font-size: 18px;
-    margin: 0;
-}
-
-.interestsContainer {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: flex-start;
-    align-items: flex-start;
-    gap: 0.5rem;
-    font-size: 18px;
-    color: var(--teal-accent);
-}
-
-.profileInterest {
-    margin: 0;
-    border-radius: 1rem;
-    border: var(--teal-accent) 1px solid;
-    padding: 0.25rem 1rem;
+.marker:hover .profilePopupContainer {
+    display: block;
 }

@@ -11,7 +11,6 @@ import {
     updateGeohash,
 } from "../utils";
 import { addPastGeohash, areHashesClose } from "../recommendation-utils";
-import MapMarker from "./MapMarker";
 import {
     DEFAULT_MAP_ZOOM,
     FETCH_INTERVAL,
@@ -27,6 +26,7 @@ import { encodeBase32 } from "geohashing";
 import RecommendationList from "./RecommendationList";
 import Modal from "./Modal";
 import Loading from "./Loading";
+import ClusteredMarkers from "./ClusteredMarkers";
 
 /**
  *
@@ -211,29 +211,19 @@ const MapPage = () => {
                     defaultZoom={DEFAULT_MAP_ZOOM}
                     gestureHandling={"greedy"}
                     disableDefaultUI={true}>
-                    <MapMarker
-                        id={user.id}
-                        location={myLocation}
-                        setModalData={setModalData}></MapMarker>
-
-                    {otherUsers
-                        .filter((userLoc) => {
-                            return isGeoHashWithinMi(
-                                myLocation,
-                                userLoc.geohash,
-                                radius,
-                                geometry.spherical.computeDistanceBetween,
-                            );
-                        })
-                        .map((user) => {
-                            return (
-                                <MapMarker
-                                    id={user.userId}
-                                    key={user.userId}
-                                    location={user.geohash}
-                                    setModalData={setModalData}></MapMarker>
-                            );
-                        })}
+                    <ClusteredMarkers
+                        users={[
+                            { userId: user.id, geohash: myLocation },
+                            ...otherUsers.filter((userLoc) => {
+                                return isGeoHashWithinMi(
+                                    myLocation,
+                                    userLoc.geohash,
+                                    radius,
+                                    geometry.spherical.computeDistanceBetween,
+                                );
+                            }),
+                        ]}
+                        setModalData={setModalData}></ClusteredMarkers>
                 </Map>
             </>
         );
