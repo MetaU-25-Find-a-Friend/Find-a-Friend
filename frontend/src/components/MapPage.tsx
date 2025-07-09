@@ -212,8 +212,8 @@ const MapPage = () => {
                     gestureHandling={"greedy"}
                     disableDefaultUI={true}>
                     <ClusteredMarkers
-                        otherUsers={[
-                            { id: -2, userId: user.id, geohash: myLocation },
+                        users={[
+                            { userId: user.id, geohash: myLocation },
                             ...otherUsers.filter((userLoc) => {
                                 return isGeoHashWithinMi(
                                     myLocation,

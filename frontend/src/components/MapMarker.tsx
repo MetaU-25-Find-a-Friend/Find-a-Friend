@@ -18,6 +18,7 @@ interface MapMarkerProps {
  *
  * @param id id of the user whom this marker represents (used to fetch profile)
  * @param location location of the user
+ * @param setModalData a function to update which user is shown in the modal
  * @returns A marker at the user's location with profile information in a popup on hover
  */
 const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {

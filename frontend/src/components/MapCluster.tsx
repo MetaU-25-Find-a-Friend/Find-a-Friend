@@ -10,26 +10,38 @@ interface MapClusterProps {
     setModalData: React.Dispatch<React.SetStateAction<AllUserData | null>>;
 }
 
+/**
+ *
+ * @param cluster data on the location of and users in this cluster
+ * @param setModalData a function to update which user is shown in the modal
+ * @returns An AdvancedMarker representing multiple users at the same location on the map
+ */
 const MapCluster = ({ cluster, setModalData }: MapClusterProps) => {
+    // full data on users in this cluster
     const [usersInCluster, setUsersInCluster] = useState(
         Array() as AllUserData[],
     );
 
+    // whether the user picker is showing
     const [showingPicker, setShowingPicker] = useState(false);
 
+    // reference to the overlay div behind the picker
     const overlayRef = useRef<HTMLDivElement | null>(null);
 
+    // when the overlay div itself is clicked, hide it and the picker
     const handleOverlayClick = (event: React.MouseEvent) => {
         if (overlayRef.current === event.target) {
             setShowingPicker(false);
         }
     };
 
+    // when a cluster is clicked, stop the event from propagating to the map and show the picker
     const handleClusterClick = (event: React.MouseEvent) => {
         event.stopPropagation();
         setShowingPicker(true);
     };
 
+    // on component mount, load data for this cluster's users
     useEffect(() => {
         const result = Array() as AllUserData[];
 

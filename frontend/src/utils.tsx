@@ -411,6 +411,11 @@ export const sendMessage = async (to: number, text: string) => {
     }
 };
 
+/**
+ *
+ * @param userData an array of data on users and their locations
+ * @returns an array of clusters: locations with 1 or more users present and the array of their user ids
+ */
 export const findClusters = (userData: UserGeohash[]) => {
     const result = Array() as ClusterData[];
 

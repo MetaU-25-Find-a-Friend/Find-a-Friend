@@ -6,20 +6,23 @@ import MapMarker from "./MapMarker";
 import MapCluster from "./MapCluster";
 
 interface ClusteredMarkerProps {
-    otherUsers: UserGeohash[];
+    users: UserGeohash[];
     setModalData: React.Dispatch<React.SetStateAction<AllUserData | null>>;
 }
 
-const ClusteredMarkers = ({
-    otherUsers,
-    setModalData,
-}: ClusteredMarkerProps) => {
+/**
+ *
+ * @param users ids and locations of all active users on the map
+ * @param setModalData a function to update which user is shown in the modal
+ * @returns A collection of clusters and markers representing users
+ */
+const ClusteredMarkers = ({ users, setModalData }: ClusteredMarkerProps) => {
     // on component mount, find and load clusters
     const [clusters, setClusters] = useState(Array() as ClusterData[]);
 
     useEffect(() => {
-        setClusters(findClusters(otherUsers));
-    }, [otherUsers]);
+        setClusters(findClusters(users));
+    }, [users]);
 
     return (
         <>

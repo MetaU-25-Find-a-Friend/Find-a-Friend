@@ -6,6 +6,11 @@ interface ProfilePopupProps {
     userData: AllUserData;
 }
 
+/**
+ *
+ * @param userData all data on this user
+ * @returns A small popup showing the user's name, pronouns, major, and interests
+ */
 const ProfilePopup = ({ userData }: ProfilePopupProps) => {
     return (
         <div className={styles.profilePopup}>

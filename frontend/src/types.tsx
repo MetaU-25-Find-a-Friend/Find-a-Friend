@@ -48,7 +48,7 @@ export interface UserLocation {
 }
 
 export interface UserGeohash {
-    id: number;
+    id?: number;
     userId: number;
     geohash: string;
 }

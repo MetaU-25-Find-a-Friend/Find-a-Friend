@@ -122,7 +122,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
             <div className={styles.infoContainer}>
                 <FontAwesomeIcon
                     icon={faUserCheck}
-                    color="var(--teal-accent"
+                    color="var(--teal-accent)"
                     size="lg"></FontAwesomeIcon>
                 <p className={styles.infoText}>You are friends.</p>
             </div>
@@ -150,7 +150,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
             <div className={styles.infoContainer}>
                 <FontAwesomeIcon
                     icon={faUserXmark}
-                    color="var(--teal-accent"
+                    color="var(--teal-accent)"
                     size="lg"></FontAwesomeIcon>
                 <p className={styles.infoText}>You are not friends.</p>
             </div>
