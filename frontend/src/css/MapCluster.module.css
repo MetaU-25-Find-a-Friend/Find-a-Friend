@@ -21,8 +21,8 @@
 
 .popupList {
     display: none;
-    transform: translate(8%, -110%);
-    width: 32rem;
+    transform: translate(8%, calc(-100% - 2rem));
+    width: 26rem;
     box-sizing: border-box;
     font-family: Sen, sans-serif;
     flex-flow: column nowrap;

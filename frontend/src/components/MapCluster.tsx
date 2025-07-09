@@ -41,7 +41,7 @@ const MapCluster = ({ cluster, setModalData }: MapClusterProps) => {
         setShowingPicker(true);
     };
 
-    // on component mount, load data for this cluster's users
+    // whenever users change, load data for this cluster's users
     useEffect(() => {
         const result = Array() as AllUserData[];
 
