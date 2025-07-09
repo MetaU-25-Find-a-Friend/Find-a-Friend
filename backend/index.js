@@ -650,6 +650,29 @@ app.post("/block/:id", authenticate, async (req, res) => {
                 friends: updatedBlockedUserFriends,
             },
         });
+
+        const friendRequest = await prisma.friendRequest.findFirst({
+            where: {
+                OR: [
+                    {
+                        fromUser: userId,
+                        toUser: toBlock,
+                    },
+                    {
+                        fromUser: toBlock,
+                        toUser: userId,
+                    },
+                ],
+            },
+        });
+
+        if (friendRequest) {
+            await prisma.friendRequest.delete({
+                where: {
+                    id: friendRequest.id,
+                },
+            });
+        }
     }
 
     res.send("User blocked");
