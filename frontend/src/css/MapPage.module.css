@@ -4,11 +4,11 @@
     position: fixed;
     top: 0;
     left: 0;
+    z-index: -1;
 }
 
 .leftContainer {
     position: fixed;
-    z-index: 5;
     left: 0;
     top: 0;
     padding: 1rem;
@@ -34,7 +34,6 @@
 }
 
 .hideLocationContainer {
-    z-index: 5;
     position: fixed;
     right: 0;
     margin: 1rem;
@@ -47,7 +46,6 @@
 }
 
 .radiusContainer {
-    z-index: 5;
     position: fixed;
     right: 0;
     bottom: 0;

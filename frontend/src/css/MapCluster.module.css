@@ -41,8 +41,6 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(30, 30, 30, 0.5);
-    z-index: 10;
 }
 
 .picker {
@@ -57,6 +55,7 @@
     box-sizing: border-box;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    border: var(--teal-accent) 5px solid;
 }
 
 .pickerText {
