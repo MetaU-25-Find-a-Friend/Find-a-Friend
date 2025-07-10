@@ -137,3 +137,10 @@ export interface ClusterData {
     geohash: string;
     userIds: number[];
 }
+
+export interface MessagesPreview {
+    friendId: number;
+    friendName: string;
+    unreadCount: number;
+    latestUnread: string;
+}
