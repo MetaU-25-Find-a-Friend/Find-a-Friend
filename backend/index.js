@@ -795,6 +795,7 @@ app.get("/messages/:other/:cursor", authenticate, async (req, res) => {
     }
 });
 
+// get the number of unread messages from the other user and the latest unread message if one exists
 app.get("/unreadMessages/:other", authenticate, async (req, res) => {
     const userId = req.session.userId;
 
@@ -865,6 +866,10 @@ app.post("/messages/:to", authenticate, async (req, res) => {
     const to = parseInt(req.params.to);
 
     const { text } = req.body;
+
+    if (!text) {
+        return res.status(400).send("Message text is required");
+    }
 
     const newMessage = await prisma.message.create({
         data: {
