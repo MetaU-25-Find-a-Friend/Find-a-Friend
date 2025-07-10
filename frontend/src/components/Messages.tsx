@@ -107,7 +107,7 @@ const Messages = () => {
                 newMessage,
             );
             if (!success) {
-                setAlertText("Something went wrong.");
+                setAlertText("Failed to send message. Please try again.");
             } else {
                 // if message successfully sent, update display and clear input
                 setMessages((current) => [result, ...current]);

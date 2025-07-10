@@ -57,7 +57,7 @@
 }
 
 .selected {
-    border: var(--teal-accent) 2px solid;
+    outline: var(--teal-accent) 2px solid;
 }
 
 .rightBox {
