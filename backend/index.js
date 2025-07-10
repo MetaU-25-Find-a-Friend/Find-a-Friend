@@ -421,14 +421,21 @@ app.post("/friend/:to", authenticate, async (req, res) => {
     const duplicateExists =
         (await prisma.friendRequest.count({
             where: {
-                OR: [
+                AND: [
                     {
-                        fromUser: from,
-                        toUser: to,
+                        OR: [
+                            {
+                                fromUser: from,
+                                toUser: to,
+                            },
+                            {
+                                fromUser: to,
+                                toUser: from,
+                            },
+                        ],
                     },
                     {
-                        fromUser: to,
-                        toUser: from,
+                        acceptedAt: null,
                     },
                 ],
             },
@@ -470,13 +477,14 @@ app.get("/friend", async (req, res) => {
     const requests = await prisma.friendRequest.findMany({
         where: {
             toUser: userId,
+            acceptedAt: null,
         },
     });
 
     res.json(requests);
 });
 
-// delete the friend request from the specified user to the logged-in user and make them friends
+// accept the friend request from the specified user to the logged-in user and make them friends
 app.post("/friend/accept/:from", async (req, res) => {
     const to = req.session.userId;
 
@@ -513,9 +521,12 @@ app.post("/friend/accept/:from", async (req, res) => {
         },
     });
 
-    await prisma.friendRequest.delete({
+    await prisma.friendRequest.update({
         where: {
             id: id,
+        },
+        data: {
+            acceptedAt: new Date(),
         },
     });
 
@@ -545,6 +556,38 @@ app.post("/friend/decline/:from", async (req, res) => {
     });
 
     res.send("Request declined");
+});
+
+// get duration in ms that users have been friends
+app.get("/friends/duration/:one/:other", authenticate, async (req, res) => {
+    const oneId = parseInt(req.params.one);
+
+    const otherId = parseInt(req.params.other);
+
+    const friendRequest = await prisma.friendRequest.findFirst({
+        where: {
+            OR: [
+                {
+                    fromUser: oneId,
+                    toUser: otherId,
+                },
+                {
+                    fromUser: otherId,
+                    toUser: oneId,
+                },
+            ],
+        },
+    });
+
+    if (!friendRequest || !friendRequest.acceptedAt) {
+        return res.status(400).send("The users are not friends");
+    }
+
+    const duration = new Date() - friendRequest.acceptedAt;
+
+    res.json({
+        duration: duration,
+    });
 });
 
 // block the specified user
@@ -607,6 +650,29 @@ app.post("/block/:id", authenticate, async (req, res) => {
                 friends: updatedBlockedUserFriends,
             },
         });
+
+        const friendRequest = await prisma.friendRequest.findFirst({
+            where: {
+                OR: [
+                    {
+                        fromUser: userId,
+                        toUser: toBlock,
+                    },
+                    {
+                        fromUser: toBlock,
+                        toUser: userId,
+                    },
+                ],
+            },
+        });
+
+        if (friendRequest) {
+            await prisma.friendRequest.delete({
+                where: {
+                    id: friendRequest.id,
+                },
+            });
+        }
     }
 
     res.send("User blocked");
@@ -699,6 +765,32 @@ app.get("/messages/:other/:cursor", authenticate, async (req, res) => {
 
         res.json(messages);
     }
+});
+
+// get the number of messages sent between two users
+app.get("/numMessages/:one/:other", authenticate, async (req, res) => {
+    const oneId = parseInt(req.params.one);
+
+    const otherId = parseInt(req.params.other);
+
+    const num = await prisma.message.count({
+        where: {
+            OR: [
+                {
+                    fromUser: oneId,
+                    toUser: otherId,
+                },
+                {
+                    fromUser: otherId,
+                    toUser: oneId,
+                },
+            ],
+        },
+    });
+
+    res.json({
+        count: num,
+    });
 });
 
 // send a message to the specified user
