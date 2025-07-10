@@ -6,6 +6,7 @@ import {
     declineFriendRequest,
     getAllData,
     getIncomingFriendRequests,
+    getMessagesPreviews,
     logout,
 } from "../utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,7 +18,11 @@ import {
 import { useEffect, useState } from "react";
 import LoggedOut from "./LoggedOut";
 import { APP_TITLE } from "../constants";
-import type { AllUserData, FriendRequestWithProfile } from "../types";
+import type {
+    AllUserData,
+    FriendRequestWithProfile,
+    MessagesPreview,
+} from "../types";
 import Modal from "./Modal";
 
 /**
@@ -47,6 +52,11 @@ const Dashboard = () => {
         Array() as FriendRequestWithProfile[],
     );
 
+    // all friends who have sent the user as-yet-unread messages
+    const [unreadMessages, setUnreadMessages] = useState(
+        Array() as MessagesPreview[],
+    );
+
     // load active friend requests with data on the user who sent them
     const loadFriendRequests = async () => {
         const requests = await getIncomingFriendRequests();
@@ -67,10 +77,15 @@ const Dashboard = () => {
         setFriendRequests(result);
     };
 
-    // load friend requests on component mount
+    // load friend requests and message previews on component mount
     useEffect(() => {
-        loadFriendRequests();
-    }, []);
+        if (user) {
+            loadFriendRequests();
+            getMessagesPreviews(user.id).then((data) => {
+                setUnreadMessages(data);
+            });
+        }
+    }, [user]);
 
     // accept a friend request and reload display
     const handleAcceptFriend = async (fromId: number) => {
@@ -128,6 +143,30 @@ const Dashboard = () => {
     const messagesSection = (
         <div className={styles.messagesContainer}>
             <h2 className={styles.sectionHeader}>Messages</h2>
+            <div className={styles.previews}>
+                {unreadMessages.map((preview) => (
+                    <div
+                        key={preview.friendId}
+                        className={styles.messagesPreview}>
+                        <p className={styles.previewText}>
+                            {preview.latestUnread}
+                            {preview.unreadCount > 1 && (
+                                <span className={styles.tealText}>
+                                    {" "}
+                                    and {preview.unreadCount - 1} more
+                                </span>
+                            )}
+                        </p>
+                        <p className={styles.previewName}>
+                            from{" "}
+                            <span className={styles.tealText}>
+                                {preview.friendName}
+                            </span>
+                        </p>
+                    </div>
+                ))}
+            </div>
+
             <button
                 className={styles.navButton}
                 onClick={() => navigate("/messages")}>

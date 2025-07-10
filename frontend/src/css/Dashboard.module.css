@@ -4,6 +4,7 @@
     height: 100vh;
     padding: 1rem;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .titleContainer {
@@ -87,6 +88,38 @@
     grid-column: 1 / 2;
     width: 30vw;
     gap: 1rem;
+}
+
+.previews {
+    width: 100%;
+    height: stretch;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 1rem;
+}
+
+.messagesPreview {
+    width: 100%;
+    padding: 1.5rem;
+    box-sizing: border-box;
+    background-color: var(--tan-background);
+    border-radius: 2rem;
+}
+
+.previewText {
+    margin: 0 0 1rem;
+    font-size: 18px;
+}
+
+.previewName {
+    margin: 0;
+    font-size: 18px;
+}
+
+.tealText {
+    color: var(--teal-accent);
 }
 
 .navButton {

@@ -737,6 +737,20 @@ app.get("/messages/:other/:cursor", authenticate, async (req, res) => {
             },
         });
 
+        // mark messages sent to the current user as read
+        for (const id of messages
+            .filter((element) => element.toUser === userId)
+            .map((element) => element.id)) {
+            await prisma.message.update({
+                where: {
+                    id: id,
+                },
+                data: {
+                    read: true,
+                },
+            });
+        }
+
         res.json(messages);
     } else {
         // if the id of the oldest already fetched message is given, take the first 10 messages before that
@@ -763,7 +777,59 @@ app.get("/messages/:other/:cursor", authenticate, async (req, res) => {
             },
         });
 
+        // mark messages sent to the current user as read
+        for (const id of messages
+            .filter((element) => element.toUser === userId)
+            .map((element) => element.id)) {
+            await prisma.message.update({
+                where: {
+                    id: id,
+                },
+                data: {
+                    read: true,
+                },
+            });
+        }
+
         res.json(messages);
+    }
+});
+
+// get the number of unread messages from the other user and the latest unread message if one exists
+app.get("/unreadMessages/:other", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    const otherId = parseInt(req.params.other);
+
+    const unreadCount = await prisma.message.count({
+        where: {
+            fromUser: otherId,
+            toUser: userId,
+            read: false,
+        },
+    });
+
+    if (unreadCount > 0) {
+        const latestUnread = await prisma.message.findFirst({
+            take: 1,
+            where: {
+                fromUser: otherId,
+                toUser: userId,
+                read: false,
+            },
+            orderBy: {
+                timestamp: "desc",
+            },
+        });
+
+        res.json({
+            unreadCount: unreadCount,
+            latestUnread: latestUnread.text,
+        });
+    } else {
+        res.json({
+            unreadCount: unreadCount,
+        });
     }
 });
 
@@ -800,6 +866,10 @@ app.post("/messages/:to", authenticate, async (req, res) => {
     const to = parseInt(req.params.to);
 
     const { text } = req.body;
+
+    if (!text) {
+        return res.status(400).send("Message text is required");
+    }
 
     const newMessage = await prisma.message.create({
         data: {

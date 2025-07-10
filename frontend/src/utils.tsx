@@ -6,6 +6,7 @@ import type {
     Message,
     UserGeohash,
     ClusterData,
+    MessagesPreview,
 } from "./types";
 import { GEOHASH_RADII } from "./constants";
 import { areHashesClose } from "./recommendation-utils";
@@ -432,6 +433,39 @@ export const findClusters = (userData: UserGeohash[]) => {
             result.push({
                 geohash: user.geohash,
                 userIds: [user.userId],
+            });
+        }
+    }
+
+    return result;
+};
+
+/**
+ *
+ * @param id the id of the current user
+ * @returns an array of data on friends who have sent the user unread messages
+ */
+export const getMessagesPreviews = async (id: number) => {
+    const { friends } = await getAllData(id);
+
+    const result = Array() as MessagesPreview[];
+
+    for (const friend of friends) {
+        const response = await fetch(
+            `${import.meta.env.VITE_SERVER_URL}/unreadMessages/${friend}`,
+            {
+                credentials: "include",
+            },
+        );
+
+        const unreads = await response.json();
+
+        if (unreads.unreadCount > 0) {
+            const { firstName, lastName } = await getAllData(friend);
+            result.push({
+                friendId: friend,
+                friendName: firstName + " " + lastName,
+                ...unreads,
             });
         }
     }

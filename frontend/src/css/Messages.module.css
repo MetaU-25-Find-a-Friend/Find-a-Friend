@@ -57,7 +57,7 @@
 }
 
 .selected {
-    border: var(--teal-accent) 2px solid;
+    outline: var(--teal-accent) 2px solid;
 }
 
 .rightBox {
@@ -75,7 +75,8 @@
 
 .messages {
     width: 100%;
-    overflow: scroll;
+    overflow-x: hidden;
+    overflow-y: scroll;
     display: flex;
     flex-flow: column-reverse nowrap;
     gap: 1rem;
@@ -85,22 +86,58 @@
 }
 
 .message {
-    padding: 1rem;
     box-sizing: border-box;
     width: fit-content;
-    max-width: 50%;
+    max-width: calc(50% + 6rem);
     font-size: 20px;
-    border-radius: 1rem;
+    display: flex;
+    gap: 0.5rem;
 }
 
 .fromMe {
     align-self: flex-end;
-    background-color: var(--light-teal-accent);
+    flex-flow: row-reverse nowrap;
 }
 
 .fromOther {
     align-self: flex-start;
+    flex-flow: row nowrap;
+}
+
+.messageText {
+    box-sizing: border-box;
+    padding: 1rem;
+    border-radius: 1rem;
+    max-width: calc(100% - 6.5rem);
+}
+
+.fromMe .messageText {
+    background-color: var(--light-teal-accent);
+}
+
+.fromOther .messageText {
     background-color: var(--tan-background);
+}
+
+.messageTime {
+    font-size: 16px;
+    width: 6rem;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.fromMe .messageTime {
+    align-items: flex-start;
+}
+
+.fromOther .messageTime {
+    align-items: flex-end;
+}
+
+.messageTime p {
+    margin: 0;
 }
 
 .inputContainer {
@@ -135,6 +172,11 @@
     width: 4rem;
     height: 4rem;
     border-radius: 100%;
+}
+
+.sendButton:disabled {
+    background-color: var(--light-teal-accent);
+    cursor: not-allowed;
 }
 
 .loadButton {

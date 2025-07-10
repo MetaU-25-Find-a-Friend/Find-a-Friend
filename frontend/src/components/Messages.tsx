@@ -7,7 +7,7 @@ import {
     faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { AllUserData, Message } from "../types";
 import { getAllData, getMessagesBetween, sendMessage } from "../utils";
 import Alert from "./Alert";
@@ -21,9 +21,6 @@ import Modal from "./Modal";
 const Messages = () => {
     // the logged-in user
     const { user } = useUser();
-
-    // reference to new message text box
-    const inputRef = useRef<HTMLInputElement | null>(null);
 
     const navigate = useNavigate();
 
@@ -70,6 +67,8 @@ const Messages = () => {
         getMessagesBetween(id, cursor).then((data) => {
             if (data.length < MESSAGES_PER_PAGE) {
                 setMoreMessages(false);
+            } else {
+                setMoreMessages(true);
             }
             if (cursor === -1) {
                 setMessages(data);
@@ -90,30 +89,34 @@ const Messages = () => {
             } else {
                 // otherwise, find the newest message that is a duplicate of a message already on the display
                 const firstMatchIndex = newest.findIndex(
-                    (message) => message.id === current[0].id,
+                    (message: Message) => message.id === current[0].id,
                 );
 
                 // add only new messages
-                return [...newest.slice(0, firstMatchIndex), ...current];
+                return [
+                    ...newest.slice(
+                        0,
+                        firstMatchIndex === -1 ? undefined : firstMatchIndex,
+                    ),
+                    ...current,
+                ];
             }
         });
     };
 
     // send a message with entered text to the selected user
     const handleSendClick = async () => {
-        if (newMessage && selectedFriendId) {
+        if (newMessage.trim() && selectedFriendId) {
             const [success, result] = await sendMessage(
                 selectedFriendId,
                 newMessage,
             );
             if (!success) {
-                setAlertText("Something went wrong.");
+                setAlertText("Failed to send message. Please try again.");
             } else {
                 // if message successfully sent, update display and clear input
-                setMessages((current) => [result, ...current]);
-                if (inputRef.current) {
-                    inputRef.current.value = "";
-                }
+                setMessages((current: Message[]) => [result, ...current]);
+                setNewMessage("");
             }
         }
     };
@@ -128,6 +131,13 @@ const Messages = () => {
         }
     };
 
+    // check for enter presses in new message text box
+    const handleInputKeyDown = (event: React.KeyboardEvent) => {
+        if (event.key === "Enter") {
+            handleSendClick();
+        }
+    };
+
     // once logged-in user loads, populate side menu
     useEffect(() => {
         loadFriends();
@@ -137,7 +147,6 @@ const Messages = () => {
     useEffect(() => {
         if (selectedFriendId) {
             loadMessagesBetween(selectedFriendId, -1);
-            setMoreMessages(true);
 
             // every interval, load newly sent messages
             const interval = setInterval(() => {
@@ -153,8 +162,9 @@ const Messages = () => {
     // side menu with list of friends to select from
     const sideMenu = (
         <div className={styles.friendsContainer}>
-            {friends.map((friend) => (
+            {friends.map((friend: AllUserData) => (
                 <div
+                    key={friend.id}
                     className={`${styles.friend} ${friend.id === selectedFriendId ? styles.selected : ""}`}
                     onClick={() => {
                         setSelectedFriendId(friend.id);
@@ -176,7 +186,29 @@ const Messages = () => {
                 <div
                     key={message.id}
                     className={`${styles.message} ${message.fromUser === user!.id ? styles.fromMe : styles.fromOther}`}>
-                    {message.text}
+                    <div className={styles.messageTime}>
+                        <p>
+                            {new Date(message.timestamp).toLocaleDateString(
+                                "en-US",
+                                {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                },
+                            )}
+                        </p>
+                        <p>
+                            {new Date(message.timestamp).toLocaleTimeString(
+                                "en-US",
+                                {
+                                    hour12: true,
+                                    hour: "numeric",
+                                    minute: "numeric",
+                                },
+                            )}
+                        </p>
+                    </div>
+                    <div className={styles.messageText}>{message.text}</div>
                 </div>
             ))}
             {moreMessages && (
@@ -196,13 +228,15 @@ const Messages = () => {
                 type="text"
                 className={styles.input}
                 placeholder="New message"
-                ref={inputRef}
+                value={newMessage}
+                onKeyDown={handleInputKeyDown}
                 onChange={(event) => {
                     setNewMessage(event.target.value);
                 }}></input>
             <button
                 className={styles.sendButton}
-                onClick={handleSendClick}>
+                onClick={handleSendClick}
+                disabled={!newMessage.trim()}>
                 <FontAwesomeIcon
                     icon={faArrowRight}
                     color="white"
