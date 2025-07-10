@@ -7,7 +7,7 @@ import {
     faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { AllUserData, Message } from "../types";
 import { getAllData, getMessagesBetween, sendMessage } from "../utils";
 import Alert from "./Alert";
@@ -21,9 +21,6 @@ import Modal from "./Modal";
 const Messages = () => {
     // the logged-in user
     const { user } = useUser();
-
-    // reference to new message text box
-    const inputRef = useRef<HTMLInputElement | null>(null);
 
     const navigate = useNavigate();
 
@@ -101,7 +98,7 @@ const Messages = () => {
 
     // send a message with entered text to the selected user
     const handleSendClick = async () => {
-        if (newMessage && selectedFriendId) {
+        if (newMessage.trim() && selectedFriendId) {
             const [success, result] = await sendMessage(
                 selectedFriendId,
                 newMessage,
@@ -111,9 +108,7 @@ const Messages = () => {
             } else {
                 // if message successfully sent, update display and clear input
                 setMessages((current) => [result, ...current]);
-                if (inputRef.current) {
-                    inputRef.current.value = "";
-                }
+                setNewMessage("");
             }
         }
     };
@@ -125,6 +120,12 @@ const Messages = () => {
                 selectedFriendId,
                 messages[messages.length - 1].id,
             );
+        }
+    };
+
+    const handleInputKeyDown = (event: React.KeyboardEvent) => {
+        if (event.key === "Enter") {
+            handleSendClick();
         }
     };
 
@@ -218,13 +219,15 @@ const Messages = () => {
                 type="text"
                 className={styles.input}
                 placeholder="New message"
-                ref={inputRef}
+                value={newMessage}
+                onKeyDown={handleInputKeyDown}
                 onChange={(event) => {
                     setNewMessage(event.target.value);
                 }}></input>
             <button
                 className={styles.sendButton}
-                onClick={handleSendClick}>
+                onClick={handleSendClick}
+                disabled={!newMessage.trim()}>
                 <FontAwesomeIcon
                     icon={faArrowRight}
                     color="white"
