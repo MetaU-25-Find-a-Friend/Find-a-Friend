@@ -176,7 +176,29 @@ const Messages = () => {
                 <div
                     key={message.id}
                     className={`${styles.message} ${message.fromUser === user!.id ? styles.fromMe : styles.fromOther}`}>
-                    {message.text}
+                    <div className={styles.messageTime}>
+                        <p>
+                            {new Date(message.timestamp).toLocaleDateString(
+                                "en-US",
+                                {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                },
+                            )}
+                        </p>
+                        <p>
+                            {new Date(message.timestamp).toLocaleTimeString(
+                                "en-US",
+                                {
+                                    hour12: true,
+                                    hour: "numeric",
+                                    minute: "numeric",
+                                },
+                            )}
+                        </p>
+                    </div>
+                    <div className={styles.messageText}>{message.text}</div>
                 </div>
             ))}
             {moreMessages && (
