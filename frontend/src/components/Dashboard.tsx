@@ -143,27 +143,30 @@ const Dashboard = () => {
     const messagesSection = (
         <div className={styles.messagesContainer}>
             <h2 className={styles.sectionHeader}>Messages</h2>
-            {unreadMessages.map((preview) => (
-                <div
-                    key={preview.friendId}
-                    className={styles.messagesPreview}>
-                    <p className={styles.previewText}>
-                        {preview.latestUnread}
-                        {preview.unreadCount > 1 && (
+            <div className={styles.previews}>
+                {unreadMessages.map((preview) => (
+                    <div
+                        key={preview.friendId}
+                        className={styles.messagesPreview}>
+                        <p className={styles.previewText}>
+                            {preview.latestUnread}
+                            {preview.unreadCount > 1 && (
+                                <span className={styles.tealText}>
+                                    {" "}
+                                    and {preview.unreadCount - 1} more
+                                </span>
+                            )}
+                        </p>
+                        <p className={styles.previewName}>
+                            from{" "}
                             <span className={styles.tealText}>
-                                {" "}
-                                and {preview.unreadCount - 1} more
+                                {preview.friendName}
                             </span>
-                        )}
-                    </p>
-                    <p className={styles.previewName}>
-                        from{" "}
-                        <span className={styles.tealText}>
-                            {preview.friendName}
-                        </span>
-                    </p>
-                </div>
-            ))}
+                        </p>
+                    </div>
+                ))}
+            </div>
+
             <button
                 className={styles.navButton}
                 onClick={() => navigate("/messages")}>

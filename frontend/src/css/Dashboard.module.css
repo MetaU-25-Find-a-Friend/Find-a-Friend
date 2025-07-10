@@ -4,6 +4,7 @@
     height: 100vh;
     padding: 1rem;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .titleContainer {
@@ -86,6 +87,16 @@
     flex-flow: column nowrap;
     grid-column: 1 / 2;
     width: 30vw;
+    gap: 1rem;
+}
+
+.previews {
+    width: 100%;
+    height: stretch;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    display: flex;
+    flex-flow: column nowrap;
     gap: 1rem;
 }
 
