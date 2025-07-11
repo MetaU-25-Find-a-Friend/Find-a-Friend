@@ -14,6 +14,7 @@ import type {
     Place,
     UserGeohash,
     PlaceRecUserData,
+    WeightAdjustments,
 } from "./types";
 import { decodeBase32, encodeBase32 } from "geohashing";
 import { getAllData } from "./utils";
@@ -184,29 +185,24 @@ const getUserLocationHistory = async () => {
 
 /**
  *
- * @param placeData1
- * @param placeData2
- * @returns a negative value if placeData1 should come before placeData2, 0 if they are equal, and positive otherwise
+ * @param placeData relevant data on a point of interest
+ * @param adjustments values by which to increase/decrease weights due to user feedback
+ * @returns the same place data with a calculated score
  */
-const sortRecommendations = (
-    placeData1: PlaceRecData,
-    placeData2: PlaceRecData,
+const calculateScore = (
+    placeData: PlaceRecData,
+    adjustments: WeightAdjustments,
 ) => {
-    // calculate final scores: the higher, the more likely it is for the user to want to go there
-    const placeScore1 =
-        placeData1.userData.friendCount * FRIEND_COUNT_WEIGHT +
-        placeData1.numVisits * PAST_WEIGHT +
-        placeData1.userData.count * COUNT_WEIGHT -
-        placeData1.userData.avgInterestAngle * SIMILARITY_WEIGHT +
-        placeData1.geohashDistance * DISTANCE_WEIGHT;
-    const placeScore2 =
-        placeData2.userData.friendCount * FRIEND_COUNT_WEIGHT +
-        placeData2.numVisits * PAST_WEIGHT +
-        placeData2.userData.count * COUNT_WEIGHT -
-        placeData2.userData.avgInterestAngle * SIMILARITY_WEIGHT +
-        placeData2.geohashDistance * DISTANCE_WEIGHT;
-
-    return placeScore2 - placeScore1;
+    return {
+        ...placeData,
+        score:
+            placeData.userData.friendCount * FRIEND_COUNT_WEIGHT +
+            placeData.numVisits * (PAST_WEIGHT + adjustments.pastVisits) +
+            placeData.userData.count * (COUNT_WEIGHT + adjustments.numUsers) -
+            placeData.userData.avgInterestAngle * SIMILARITY_WEIGHT +
+            placeData.geohashDistance *
+                (DISTANCE_WEIGHT + adjustments.distance),
+    };
 };
 
 /**
@@ -222,6 +218,7 @@ export const recommendPlaces = async (
     currentUser: number,
     currentLocation: string,
     activeUsers: UserGeohash[],
+    adjustments: WeightAdjustments,
 ) => {
     const result = Array() as PlaceRecData[];
 
@@ -292,19 +289,28 @@ export const recommendPlaces = async (
         );
 
         // push object to result
-        result.push({
-            place: place,
-            geohash: placeGeohash,
-            geohashDistance: numSameCharacters(placeGeohash, currentLocation),
-            numVisits: numVisits,
-            userData: {
-                count: userDataAtPlace.length,
-                avgInterestAngle: avgInterestAngle,
-                friendCount: friendCount,
-            },
-        });
+        result.push(
+            calculateScore(
+                {
+                    place: place,
+                    geohash: placeGeohash,
+                    geohashDistance: numSameCharacters(
+                        placeGeohash,
+                        currentLocation,
+                    ),
+                    numVisits: numVisits,
+                    userData: {
+                        count: userDataAtPlace.length,
+                        avgInterestAngle: avgInterestAngle,
+                        friendCount: friendCount,
+                    },
+                    score: 0,
+                },
+                adjustments,
+            ),
+        );
     }
 
     // sort results
-    return result.sort(sortRecommendations);
+    return result.sort((a, b) => b.score - a.score);
 };

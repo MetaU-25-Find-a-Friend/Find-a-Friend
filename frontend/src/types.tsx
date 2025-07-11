@@ -93,6 +93,7 @@ export interface PlaceRecData {
         avgInterestAngle: number;
         friendCount: number;
     };
+    score: number;
 }
 
 export interface PlaceRecUserData {
@@ -143,4 +144,10 @@ export interface MessagesPreview {
     friendName: string;
     unreadCount: number;
     latestUnread: string;
+}
+
+export interface WeightAdjustments {
+    distance: number;
+    numUsers: number;
+    pastVisits: number;
 }

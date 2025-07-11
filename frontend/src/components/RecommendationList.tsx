@@ -1,7 +1,7 @@
 import styles from "../css/RecommendationList.module.css";
 import { recommendPlaces, getNearbyPOIs } from "../recommendation-utils";
-import { useState } from "react";
-import type { PlaceRecData, UserGeohash } from "../types";
+import { useEffect, useState } from "react";
+import type { WeightAdjustments, PlaceRecData, UserGeohash } from "../types";
 import { useUser } from "../contexts/UserContext";
 import Loading from "./Loading";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -34,19 +34,52 @@ const RecommendationList = ({
 
     const [loading, setLoading] = useState(false);
 
-    const handleLoadClick = () => {
+    // user-prompted adjustments to algorithm weights
+    const [weightAdjustments, setWeightAdjustments] =
+        useState<WeightAdjustments>({
+            distance: 0,
+            numUsers: 0,
+            pastVisits: 0,
+        });
+
+    const loadPlaces = () => {
         setLoading(true);
         // get all places nearby
         getNearbyPOIs(myLocation)
             .then((places) =>
-                // combine each place with data on users there
-                recommendPlaces(places, user!.id, myLocation, otherUsers),
+                // combine each place with data on users there and sort using algorithm
+                recommendPlaces(
+                    places,
+                    user!.id,
+                    myLocation,
+                    otherUsers,
+                    weightAdjustments,
+                ),
             )
             .then((placesWithUsers) => {
                 // load data and display in list
-                (setNearbyPlaces(placesWithUsers), setLoading(false));
+                setNearbyPlaces(placesWithUsers);
+                setLoading(false);
             });
     };
+
+    // update weight adjustments (and trigger reload) when the user clicks a feedback button
+    const handleFeedbackClick = (
+        weightName: "distance" | "numUsers" | "pastVisits",
+        increase: boolean,
+    ) => {
+        setWeightAdjustments({
+            ...weightAdjustments,
+            [weightName]: weightAdjustments[weightName] + (increase ? 1 : -1),
+        });
+    };
+
+    useEffect(() => {
+        // don't reload places on initial mount; only after user has provided feedback
+        if (nearbyPlaces.length > 0) {
+            loadPlaces();
+        }
+    }, [weightAdjustments]);
 
     // information on 1 recommended place
     const PlaceComponent = ({ place }: { place: PlaceRecData }) => (
@@ -64,21 +97,30 @@ const RecommendationList = ({
         </div>
     );
 
-    const feedbackPopup = (
+    // container for feedback buttons
+    const feedbackBox = (
         <div className={styles.feedbackContainer}>
             <h3 className={styles.feedbackHeader}>
                 Show me places that are...
             </h3>
-            <button className={styles.leftButton}>
+            <button
+                className={styles.leftButton}
+                onClick={() => handleFeedbackClick("distance", true)}>
                 <FontAwesomeIcon icon={faArrowDown}></FontAwesomeIcon> Closer
             </button>
-            <button className={styles.rightButton}>
+            <button
+                className={styles.rightButton}
+                onClick={() => handleFeedbackClick("distance", false)}>
                 <FontAwesomeIcon icon={faArrowUp}></FontAwesomeIcon> Farther
             </button>
-            <button className={styles.leftButton}>
+            <button
+                className={styles.leftButton}
+                onClick={() => handleFeedbackClick("numUsers", true)}>
                 <FontAwesomeIcon icon={faUsers}></FontAwesomeIcon> More popular
             </button>
-            <button className={styles.rightButton}>
+            <button
+                className={styles.rightButton}
+                onClick={() => handleFeedbackClick("pastVisits", true)}>
                 <FontAwesomeIcon icon={faClock}></FontAwesomeIcon> In my history
             </button>
         </div>
@@ -93,7 +135,7 @@ const RecommendationList = ({
                 <div className={styles.placesList}>
                     <button
                         className={styles.placesButton}
-                        onClick={handleLoadClick}>
+                        onClick={loadPlaces}>
                         {nearbyPlaces.length === 0 ? "Load places" : "Reload"}
                     </button>
                     <p className={styles.explanation}>
@@ -103,7 +145,7 @@ const RecommendationList = ({
                         <PlaceComponent place={place}></PlaceComponent>
                     ))}
                 </div>
-                {feedbackPopup}
+                {nearbyPlaces.length > 0 && feedbackBox}
             </div>
         );
     }
