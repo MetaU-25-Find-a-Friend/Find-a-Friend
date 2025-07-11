@@ -51,7 +51,7 @@ export const APP_TITLE = "Find a Friend";
 /**
  * Radius of circle used in Nearby Search to find POIs
  */
-export const NEARBY_PLACES_RADIUS = 2000;
+export const NEARBY_PLACES_RADIUS = 5000;
 
 /**
  * Maximum number of results to get from Nearby Search
