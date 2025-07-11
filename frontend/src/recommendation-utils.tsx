@@ -21,15 +21,80 @@ import { getAllData } from "./utils";
 
 /**
  *
- * @param hash1
- * @param hash2
- * @returns true if the geohashes are within meters of each other; false if not
+ * @param places array of places that might be recommended to user
+ * @param currentUser id of the current user
+ * @param currentLocation the current user's geohashed location
+ * @param activeUsers array of other active users and their locations
+ * @returns array of place/user data objects ordered by chance the user might go there
  */
-export const areHashesClose = (hash1: string, hash2: string) => {
-    return (
-        hash1.slice(0, GEOHASH_AT_PLACE_RES) ===
-        hash2.slice(0, GEOHASH_AT_PLACE_RES)
-    );
+export const recommendPlaces = async (
+    places: Place[],
+    currentUser: number,
+    currentLocation: string,
+    activeUsers: UserGeohash[],
+    adjustments: WeightAdjustments,
+) => {
+    const result = Array() as PlaceRecData[];
+
+    // compile data on active users, their interests, and whether they are friends with the current user
+    const allUsersData = await getPlaceRecUserData(currentUser, activeUsers);
+
+    // get all past places the current user has visited
+    const userLocationHistory = await getUserLocationHistory();
+
+    // iterate over all nearby places, recording distance from the current user, how many other users are there, and how similar they are to the user
+    for (const place of places) {
+        // geohash place location
+        const placeGeohash = encodeBase32(
+            place.location.latitude,
+            place.location.longitude,
+        );
+
+        // use only users at this place
+        const userDataAtPlace = allUsersData.filter((element) =>
+            areHashesClose(element.geohash, placeGeohash),
+        );
+
+        // get the average similarity of users at the place to the current user and the number of their friends there
+        const [avgInterestAngle, friendCount] = getUsersStats(userDataAtPlace);
+
+        // calculate number of times the current user has been at this place
+        const numVisits = userLocationHistory.reduce<number>(
+            (prev, element) => {
+                if (areHashesClose(placeGeohash, element.geohash)) {
+                    return prev + 1;
+                } else {
+                    return prev;
+                }
+            },
+            0,
+        );
+
+        // calculate place's recommendation score given this data and push the final data object to result
+        result.push(
+            calculateScore(
+                {
+                    place: place,
+                    geohash: placeGeohash,
+                    geohashDistance: numSameCharacters(
+                        placeGeohash,
+                        currentLocation,
+                    ),
+                    numVisits: numVisits,
+                    userData: {
+                        count: userDataAtPlace.length,
+                        avgInterestAngle: avgInterestAngle,
+                        friendCount: friendCount,
+                    },
+                    score: 0,
+                },
+                adjustments,
+            ),
+        );
+    }
+
+    // sort results by score
+    return result.sort((a, b) => b.score - a.score);
 };
 
 /**
@@ -129,6 +194,84 @@ export const getNearbyPOIs = async (hash: string) => {
 
 /**
  *
+ * @param hash1
+ * @param hash2
+ * @returns true if the geohashes are within meters of each other; false if not
+ */
+export const areHashesClose = (hash1: string, hash2: string) => {
+    return (
+        hash1.slice(0, GEOHASH_AT_PLACE_RES) ===
+        hash2.slice(0, GEOHASH_AT_PLACE_RES)
+    );
+};
+
+/**
+ *
+ * @param users data on a group of users (here, users at a place)
+ * @returns the average similarity of users to the current user and the number of friends of the current user among them
+ */
+const getUsersStats = (users: PlaceRecUserData[]) => {
+    // set initial values
+    // interest angle starts at the least possible similarity to represent there being 0 users
+    let avgInterestAngle = Math.PI / 2;
+    let friendCount = 0;
+
+    if (users.length > 0) {
+        // if there are users in the group, set angle to 0 to prepare for incrementing
+        avgInterestAngle = 0;
+
+        // iterate over users, adding to sum of angles and checking friend status
+        for (const user of users) {
+            avgInterestAngle += user.interestAngle;
+            if (user.friend) {
+                friendCount++;
+            }
+        }
+
+        // divide to complete average calculation
+        avgInterestAngle /= users.length;
+    }
+
+    return [avgInterestAngle, friendCount];
+};
+
+/**
+ *
+ * @param currentUser the id of the current user
+ * @param activeUsers array of all active users on the map and their locations
+ * @returns an array of data on the active users with their interests and friend status
+ */
+const getPlaceRecUserData = async (
+    currentUser: number,
+    activeUsers: UserGeohash[],
+) => {
+    const result = Array() as PlaceRecUserData[];
+
+    // get the current user's friends and interests arrays
+    const { friends: currentUserFriends, interests: currentUserInterests } =
+        await getAllData(currentUser);
+
+    for (const user of activeUsers) {
+        // get other user's interests
+        const { interests: otherUserInterests } = await getAllData(user.userId);
+
+        // check friendship and calculate similarity to the current user
+        result.push({
+            id: user.userId,
+            geohash: user.geohash,
+            friend: currentUserFriends.includes(user.userId),
+            interestAngle: angleBetweenInterestVectors(
+                currentUserInterests,
+                otherUserInterests,
+            ),
+        });
+    }
+
+    return result;
+};
+
+/**
+ *
  * @param v1 one interest array (all values 0 or 1)
  * @param v2 another interest array (all values 0 or 1)
  * @returns the acute angle between v1 and v2 in radians; this will be in the range [0, pi/2]
@@ -145,8 +288,12 @@ const angleBetweenInterestVectors = (v1: number[], v2: number[]) => {
         dotProduct += v1[i] * v2[i];
     }
 
+    const denominator = Math.sqrt(m1) * Math.sqrt(m2);
+
     // theta = arccos((v1 . v2)/(|v1||v2|))
-    return Math.acos(dotProduct / (Math.sqrt(m1) * Math.sqrt(m2)));
+    return denominator === 0
+        ? Math.PI / 2
+        : Math.acos(dotProduct / denominator);
 };
 
 /**
@@ -203,114 +350,4 @@ const calculateScore = (
             placeData.geohashDistance *
                 (DISTANCE_WEIGHT + adjustments.distance),
     };
-};
-
-/**
- *
- * @param places array of places that might be recommended to user
- * @param currentUser id of the current user
- * @param currentLocation the current user's geohashed location
- * @param activeUsers array of other active users and their locations
- * @returns array of place/user data objects ordered by chance the user might go there
- */
-export const recommendPlaces = async (
-    places: Place[],
-    currentUser: number,
-    currentLocation: string,
-    activeUsers: UserGeohash[],
-    adjustments: WeightAdjustments,
-) => {
-    const result = Array() as PlaceRecData[];
-
-    // iterate over all other users, determining whether they are friends and calculating the similarity of their interests
-    const allUsersData = Array() as PlaceRecUserData[];
-
-    const { friends: currentUserFriends, interests: currentUserInterests } =
-        await getAllData(currentUser);
-
-    for (const user of activeUsers) {
-        // get other user's interests and compare to current user
-        const { interests: otherUserInterests } = await getAllData(user.userId);
-
-        allUsersData.push({
-            id: user.userId,
-            geohash: user.geohash,
-            friend: currentUserFriends.includes(user.userId),
-            interestAngle: angleBetweenInterestVectors(
-                currentUserInterests,
-                otherUserInterests,
-            ),
-        });
-    }
-
-    const userLocationHistory = await getUserLocationHistory();
-
-    // iterate over all nearby places, recording distance from the current user, how many other users are there, and how similar they are to the user
-    for (const place of places) {
-        // geohash place location
-        const placeGeohash = encodeBase32(
-            place.location.latitude,
-            place.location.longitude,
-        );
-
-        // use only users at this place
-        const userDataAtPlace = allUsersData.filter((element) =>
-            areHashesClose(element.geohash, placeGeohash),
-        );
-
-        // calculate average similarity of users and number of friends
-        // if there are 0 other users there, set max difference in similarity (pi/2 radians)
-        let avgInterestAngle = Math.PI / 2;
-        let friendCount = 0;
-
-        if (userDataAtPlace.length !== 0) {
-            avgInterestAngle = 0;
-
-            for (const user of userDataAtPlace) {
-                avgInterestAngle += user.interestAngle;
-                if (user.friend) {
-                    friendCount++;
-                }
-            }
-
-            avgInterestAngle /= userDataAtPlace.length;
-        }
-
-        // calculate number of times the current user has been at this place
-        const numVisits = userLocationHistory.reduce<number>(
-            (prev, element) => {
-                if (areHashesClose(placeGeohash, element.geohash)) {
-                    return prev + 1;
-                } else {
-                    return prev;
-                }
-            },
-            0,
-        );
-
-        // push object to result
-        result.push(
-            calculateScore(
-                {
-                    place: place,
-                    geohash: placeGeohash,
-                    geohashDistance: numSameCharacters(
-                        placeGeohash,
-                        currentLocation,
-                    ),
-                    numVisits: numVisits,
-                    userData: {
-                        count: userDataAtPlace.length,
-                        avgInterestAngle: avgInterestAngle,
-                        friendCount: friendCount,
-                    },
-                    score: 0,
-                },
-                adjustments,
-            ),
-        );
-    }
-
-    // sort results
-    return result.sort((a, b) => b.score - a.score);
 };
