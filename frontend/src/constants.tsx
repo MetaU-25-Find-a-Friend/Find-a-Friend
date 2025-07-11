@@ -61,17 +61,17 @@ export const MAX_PLACE_RESULTS = 10;
 /**
  * Weight of average present user similarity in place recommendation algorithm
  */
-export const SIMILARITY_WEIGHT = 2;
+export const SIMILARITY_WEIGHT = 1;
 
 /**
  * Weight of present user count in place recommendation algorithm
  */
-export const COUNT_WEIGHT = 3;
+export const COUNT_WEIGHT = 1;
 
 /**
  * Weight of present friend count in place recommendation algorithm
  */
-export const FRIEND_COUNT_WEIGHT = 4;
+export const FRIEND_COUNT_WEIGHT = 1;
 
 /**
  * Weight of distance in place recommendation algorithm
@@ -81,7 +81,7 @@ export const DISTANCE_WEIGHT = 1;
 /**
  * Weight of number of past visits to the place in place recommendation algorithm
  */
-export const PAST_WEIGHT = 5;
+export const PAST_WEIGHT = 1;
 
 /**
  * Number of messages returned from each query
