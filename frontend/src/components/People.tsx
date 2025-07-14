@@ -56,99 +56,107 @@ const People = () => {
         }
     }, [user]);
 
-    // profile cards for each suggested user
-    const suggestedUsersDisplay = (
-        <>
-            {suggestions.map((user: SuggestedProfile) => (
-                <div
-                    className={styles.profile}
-                    key={user.data.id}>
-                    <div className={styles.friendInfo}>
-                        {user.friendPath.length === 1 ? (
-                            <>
-                                <FontAwesomeIcon
-                                    icon={faUserCheck}></FontAwesomeIcon>{" "}
-                                Friends with {user.friendPath[0].userName}
-                            </>
-                        ) : (
-                            <>
-                                <div className={styles.pathPopup}>
-                                    <p className={styles.pathEnd}>You</p>
+    // shows summary of path taken from the current user to this suggestion and provides detailed popup on hover
+    const PathComponent = ({
+        path,
+        endName,
+    }: {
+        path: { userId: number; userName: string }[];
+        endName: string;
+    }) => (
+        <div className={styles.friendInfo}>
+            {path.length === 1 ? (
+                <>
+                    <FontAwesomeIcon icon={faUserCheck}></FontAwesomeIcon>{" "}
+                    Friends with {path[0].userName}
+                </>
+            ) : (
+                <>
+                    <div className={styles.pathPopup}>
+                        <p className={styles.pathEnd}>You</p>
+                        <FontAwesomeIcon
+                            icon={faArrowsLeftRight}></FontAwesomeIcon>
+                        {path.map(
+                            (node: { userId: number; userName: string }) => (
+                                <>
+                                    <p className={styles.pathNode}>
+                                        {node.userName}
+                                    </p>
                                     <FontAwesomeIcon
                                         icon={
                                             faArrowsLeftRight
                                         }></FontAwesomeIcon>
-                                    {user.friendPath.map(
-                                        (node: {
-                                            userId: number;
-                                            userName: string;
-                                        }) => (
-                                            <>
-                                                <p className={styles.pathNode}>
-                                                    {node.userName}
-                                                </p>
-                                                <FontAwesomeIcon
-                                                    icon={
-                                                        faArrowsLeftRight
-                                                    }></FontAwesomeIcon>
-                                            </>
-                                        ),
-                                    )}
-                                    <p className={styles.pathEnd}>
-                                        {user.data.firstName}
-                                    </p>
-                                </div>
-                                <FontAwesomeIcon
-                                    icon={
-                                        faDiagramProject
-                                    }></FontAwesomeIcon>{" "}
-                                Acquaintance of {user.friendPath[0].userName}{" "}
-                                and {user.friendPath.length - 1} more
-                            </>
+                                </>
+                            ),
                         )}
+                        <p className={styles.pathEnd}>{endName}</p>
                     </div>
-                    <h3 className={styles.name}>
-                        {user.data.firstName} {user.data.lastName}{" "}
-                        <span className={styles.pronouns}>
-                            {user.data.pronouns}
-                        </span>
-                    </h3>
-                    <p className={styles.major}>
-                        {user.data.major ?? "(No major)"}
-                    </p>
-                    <div className={styles.interestsContainer}>
-                        {user.data.interests.map((value: number, index) => {
-                            if (value === 1) {
-                                return (
-                                    <p
-                                        className={styles.interest}
-                                        key={index}>
-                                        {getInterestName(index)}
-                                    </p>
-                                );
-                            } else {
-                                return <></>;
-                            }
-                        })}
-                    </div>
-                    <p className={styles.bio}>{user.data.bio ?? "(No bio)"}</p>
-                    <hr className={styles.bar}></hr>
-                    <div className={styles.buttonsContainer}>
-                        <button
-                            className={styles.button}
-                            onClick={() => handleFriendClick(user.data.id)}>
-                            Send friend request
-                        </button>
-                        <button
-                            className={styles.button}
-                            onClick={() => handleBlockClick(user.data.id)}>
-                            Block
-                        </button>
-                    </div>
-                </div>
-            ))}
-        </>
+                    <FontAwesomeIcon icon={faDiagramProject}></FontAwesomeIcon>{" "}
+                    Acquaintance of {path[0].userName} and {path.length - 1}{" "}
+                    more
+                </>
+            )}
+        </div>
     );
+
+    const SuggestedCardComponent = ({ user }: { user: SuggestedProfile }) => (
+        <div
+            className={styles.profile}
+            key={user.data.id}>
+            <PathComponent
+                path={user.friendPath}
+                endName={user.data.firstName}></PathComponent>
+            <h3 className={styles.name}>
+                {user.data.firstName} {user.data.lastName}{" "}
+                <span className={styles.pronouns}>{user.data.pronouns}</span>
+            </h3>
+            <p className={styles.major}>{user.data.major ?? "(No major)"}</p>
+            <div className={styles.interestsContainer}>
+                {user.data.interests.map((value: number, index) => {
+                    if (value === 1) {
+                        return (
+                            <p
+                                className={styles.interest}
+                                key={index}>
+                                {getInterestName(index)}
+                            </p>
+                        );
+                    } else {
+                        return <></>;
+                    }
+                })}
+            </div>
+            <p className={styles.bio}>{user.data.bio ?? "(No bio)"}</p>
+            <hr className={styles.bar}></hr>
+            <div className={styles.buttonsContainer}>
+                <button
+                    className={styles.button}
+                    onClick={() => handleFriendClick(user.data.id)}>
+                    Send friend request
+                </button>
+                <button
+                    className={styles.button}
+                    onClick={() => handleBlockClick(user.data.id)}>
+                    Block
+                </button>
+            </div>
+        </div>
+    );
+
+    // profile cards for each suggested user
+    const suggestedUsersDisplay =
+        suggestions.length === 0 ? (
+            <div className={styles.loadingContainer}>
+                <Loading></Loading>
+            </div>
+        ) : (
+            <>
+                {suggestions.map((user: SuggestedProfile) => (
+                    <SuggestedCardComponent
+                        user={user}></SuggestedCardComponent>
+                ))}
+            </>
+        );
 
     if (!user) {
         return <LoggedOut></LoggedOut>;
@@ -165,13 +173,7 @@ const People = () => {
                     Back to Dashboard
                 </button>
                 <h2 className={styles.title}>People You May Know</h2>
-                {suggestions.length === 0 ? (
-                    <div className={styles.loadingContainer}>
-                        <Loading></Loading>
-                    </div>
-                ) : (
-                    suggestedUsersDisplay
-                )}
+                {suggestedUsersDisplay}
             </div>
         );
     }
