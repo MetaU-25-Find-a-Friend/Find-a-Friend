@@ -97,3 +97,8 @@ export const MESSAGES_FETCH_INTERVAL = 3000;
  * The number of milliseconds in a day
  */
 export const MS_IN_DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * The number of milliseconds in a minute
+ */
+export const MS_IN_MINUTE = 60 * 1000;

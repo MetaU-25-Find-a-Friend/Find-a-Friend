@@ -7,6 +7,8 @@ import {
     DISTANCE_WEIGHT,
     SIMILARITY_WEIGHT,
     FRIEND_COUNT_WEIGHT,
+    MS_IN_DAY,
+    MS_IN_MINUTE,
 } from "./constants";
 import type {
     PlaceHistory,
@@ -58,16 +60,10 @@ export const recommendPlaces = async (
         // get the average similarity of users at the place to the current user and the number of their friends there
         const [avgInterestAngle, friendCount] = getUsersStats(userDataAtPlace);
 
-        // calculate number of times the current user has been at this place
-        const numVisits = userLocationHistory.reduce<number>(
-            (prev, element) => {
-                if (areHashesClose(placeGeohash, element.geohash)) {
-                    return prev + 1;
-                } else {
-                    return prev;
-                }
-            },
-            0,
+        // calculate past visit score based on the recency and duration of each visit
+        const [numVisits, visitScore] = getPastVisitsStats(
+            placeGeohash,
+            userLocationHistory,
         );
 
         // calculate place's recommendation score given this data and push the final data object to result
@@ -81,6 +77,7 @@ export const recommendPlaces = async (
                         currentLocation,
                     ),
                     numVisits: numVisits,
+                    visitScore: visitScore,
                     userData: {
                         count: userDataAtPlace.length,
                         avgInterestAngle: avgInterestAngle,
@@ -203,6 +200,31 @@ export const areHashesClose = (hash1: string, hash2: string) => {
         hash1.slice(0, GEOHASH_AT_PLACE_RES) ===
         hash2.slice(0, GEOHASH_AT_PLACE_RES)
     );
+};
+
+const getPastVisitsStats = (
+    placeGeohash: string,
+    locationHistory: PlaceHistory[],
+) => {
+    let visitScore = 0;
+    let numVisits = 0;
+
+    // iterate over all entries in user's history
+    for (const history of locationHistory) {
+        // if the entry is at this place, add its weighted visit score
+        if (areHashesClose(placeGeohash, history.geohash)) {
+            const daysSinceVisit =
+                (new Date().valueOf() - new Date(history.timestamp).valueOf()) /
+                MS_IN_DAY;
+
+            // this entry's score is the minutes spent there divided by days since the visit + 1
+            visitScore +=
+                history.duration / MS_IN_MINUTE / (daysSinceVisit + 1);
+            numVisits++;
+        }
+    }
+
+    return [numVisits, visitScore];
 };
 
 /**
@@ -344,7 +366,7 @@ const calculateScore = (
         ...placeData,
         score:
             placeData.userData.friendCount * FRIEND_COUNT_WEIGHT +
-            placeData.numVisits * (PAST_WEIGHT + adjustments.pastVisits) +
+            placeData.visitScore * (PAST_WEIGHT + adjustments.pastVisits) +
             placeData.userData.count * (COUNT_WEIGHT + adjustments.numUsers) -
             placeData.userData.avgInterestAngle * SIMILARITY_WEIGHT +
             placeData.geohashDistance *

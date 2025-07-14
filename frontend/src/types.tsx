@@ -85,8 +85,10 @@ export interface PlaceHistory {
  * geohashDistance is the resolution up to which this place and the current user are in the same hash box:
  * as it increases, the place is closer
  *
+ * visitScore increases with the recency and duration of the user's past visits to the place
+ *
  * userData contains information about users found to be at the place:
- * count is the number of users, avgInterestAngle is inversely related to their average similarity to the current user, 
+ * count is the number of users, avgInterestAngle is inversely related to their average similarity to the current user,
  * and friendCount is the number of friends at the place
  */
 export interface PlaceRecData {
@@ -94,6 +96,7 @@ export interface PlaceRecData {
     geohash: string;
     geohashDistance: number;
     numVisits: number;
+    visitScore: number;
     userData: {
         count: number;
         avgInterestAngle: number;
@@ -113,7 +116,7 @@ export interface PlaceRecUserData {
 }
 
 /**
- * Represents adjustments, prompted by user input, made to the weights of 
+ * Represents adjustments, prompted by user input, made to the weights of
  * certain factors in a place's recommendation score
  */
 export interface WeightAdjustments {
