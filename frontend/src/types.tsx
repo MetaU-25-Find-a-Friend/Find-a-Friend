@@ -53,6 +53,9 @@ export interface UserGeohash {
     geohash: string;
 }
 
+/**
+ * Represents data on a point of interest returned from a Google Maps Places API (New) Nearby Places search
+ */
 export interface Place {
     displayName: {
         text: string;
@@ -65,10 +68,14 @@ export interface Place {
     };
 }
 
+/**
+ * Represents data on a user's past visit to a certain location
+ */
 export interface PlaceHistory {
     id: number;
     userId: number;
     timestamp: Date;
+    duration: number;
     geohash: string;
 }
 
@@ -78,28 +85,44 @@ export interface PlaceHistory {
  * geohashDistance is the resolution up to which this place and the current user are in the same hash box:
  * as it increases, the place is closer
  *
- * userData.count is the number of other users at the place
+ * visitScore increases with the recency and duration of the user's past visits to the place
  *
- * for each element of userData.users, friend is true if the user is a friend of the current user;
- * interestSimilarity is the angle between their interest vector and the current user's, so as this increases, the users are less similar
+ * userData contains information about users found to be at the place:
+ * count is the number of users, avgInterestAngle is inversely related to their average similarity to the current user,
+ * and friendCount is the number of friends at the place
  */
 export interface PlaceRecData {
     place: Place;
     geohash: string;
     geohashDistance: number;
     numVisits: number;
+    visitScore: number;
     userData: {
         count: number;
         avgInterestAngle: number;
         friendCount: number;
     };
+    score: number;
 }
 
+/**
+ * Represents user data used during the calculation of a place's recommendation score
+ */
 export interface PlaceRecUserData {
     id: number;
     geohash: string;
     friend: boolean;
     interestAngle: number;
+}
+
+/**
+ * Represents adjustments, prompted by user input, made to the weights of
+ * certain factors in a place's recommendation score
+ */
+export interface WeightAdjustments {
+    distance: number;
+    numUsers: number;
+    pastVisits: number;
 }
 
 export interface FriendRequest {

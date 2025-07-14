@@ -51,7 +51,7 @@ export const APP_TITLE = "Find a Friend";
 /**
  * Radius of circle used in Nearby Search to find POIs
  */
-export const NEARBY_PLACES_RADIUS = 2000;
+export const NEARBY_PLACES_RADIUS = 5000;
 
 /**
  * Maximum number of results to get from Nearby Search
@@ -61,17 +61,17 @@ export const MAX_PLACE_RESULTS = 10;
 /**
  * Weight of average present user similarity in place recommendation algorithm
  */
-export const SIMILARITY_WEIGHT = 2;
+export const SIMILARITY_WEIGHT = 1;
 
 /**
  * Weight of present user count in place recommendation algorithm
  */
-export const COUNT_WEIGHT = 3;
+export const COUNT_WEIGHT = 1;
 
 /**
  * Weight of present friend count in place recommendation algorithm
  */
-export const FRIEND_COUNT_WEIGHT = 4;
+export const FRIEND_COUNT_WEIGHT = 1;
 
 /**
  * Weight of distance in place recommendation algorithm
@@ -81,7 +81,7 @@ export const DISTANCE_WEIGHT = 1;
 /**
  * Weight of number of past visits to the place in place recommendation algorithm
  */
-export const PAST_WEIGHT = 5;
+export const PAST_WEIGHT = 1;
 
 /**
  * Number of messages returned from each query
@@ -97,3 +97,8 @@ export const MESSAGES_FETCH_INTERVAL = 3000;
  * The number of milliseconds in a day
  */
 export const MS_IN_DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * The number of milliseconds in a minute
+ */
+export const MS_IN_MINUTE = 60 * 1000;

@@ -87,25 +87,8 @@ const MapPage = () => {
 
             // set location state variable
             setMyLocation((oldLocation) => {
-                // compare old and new locations for tracking time spent; if this is not done
-                // within setState, we might get stale values of oldLocation/myLocation when this function
-                // is called in the setInterval
                 if (oldLocation) {
-                    if (!areHashesClose(geohash, oldLocation)) {
-                        // if the user has moved, reset tracked time
-                        timeAtLocation.current = 0;
-                    } else {
-                        // otherwise, increase time by interval seconds
-                        timeAtLocation.current += FETCH_INTERVAL / 1000;
-
-                        // if this has reached a significant amount of time, record in database
-                        if (timeAtLocation.current >= SIG_TIME_AT_LOCATION) {
-                            addPastGeohash(geohash);
-
-                            // reset timer
-                            timeAtLocation.current = 0;
-                        }
-                    }
+                    saveOldLocation(geohash, oldLocation);
                 }
 
                 return geohash;
@@ -126,6 +109,25 @@ const MapPage = () => {
                 });
             }
         });
+    };
+
+    // extend an ongoing visit or save this location as a new past visit
+    const saveOldLocation = (currentLocation: string, oldLocation: string) => {
+        if (!areHashesClose(currentLocation, oldLocation)) {
+            // if the user has moved, reset tracked time
+            timeAtLocation.current = 0;
+        } else {
+            // otherwise, increase time by interval seconds
+            timeAtLocation.current += FETCH_INTERVAL / 1000;
+
+            // if this has reached a significant amount of time, record in database
+            if (timeAtLocation.current >= SIG_TIME_AT_LOCATION) {
+                addPastGeohash(currentLocation);
+
+                // reset timer
+                timeAtLocation.current = 0;
+            }
+        }
     };
 
     // at each interval, reload location data
