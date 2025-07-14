@@ -147,13 +147,15 @@ export interface Message {
     read: boolean;
 }
 
+export interface FriendPathNode {
+    userId: number;
+    userName: string;
+}
+
 export interface SuggestedProfile {
     data: AllUserData;
     degree: number;
-    friendPath: {
-        userId: number;
-        userName: string;
-    }[];
+    friendPath: FriendPathNode[];
 }
 
 export interface ClusterData {

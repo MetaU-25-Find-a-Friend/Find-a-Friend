@@ -7,8 +7,8 @@ import {
     faDiagramProject,
     faUserCheck,
 } from "@fortawesome/free-solid-svg-icons";
-import { useEffect, useState } from "react";
-import type { SuggestedProfile } from "../types";
+import { Fragment, useEffect, useState } from "react";
+import type { FriendPathNode, SuggestedProfile } from "../types";
 import { useUser } from "../contexts/UserContext";
 import { getSuggestedPeople } from "../people-utils";
 import { blockUser, getInterestName, sendFriendRequest } from "../utils";
@@ -61,7 +61,7 @@ const People = () => {
         path,
         endName,
     }: {
-        path: { userId: number; userName: string }[];
+        path: FriendPathNode[];
         endName: string;
     }) => (
         <div className={styles.friendInfo}>
@@ -76,19 +76,15 @@ const People = () => {
                         <p className={styles.pathEnd}>You</p>
                         <FontAwesomeIcon
                             icon={faArrowsLeftRight}></FontAwesomeIcon>
-                        {path.map(
-                            (node: { userId: number; userName: string }) => (
-                                <>
-                                    <p className={styles.pathNode}>
-                                        {node.userName}
-                                    </p>
-                                    <FontAwesomeIcon
-                                        icon={
-                                            faArrowsLeftRight
-                                        }></FontAwesomeIcon>
-                                </>
-                            ),
-                        )}
+                        {path.map((node: FriendPathNode) => (
+                            <Fragment key={node.userId}>
+                                <p className={styles.pathNode}>
+                                    {node.userName}
+                                </p>
+                                <FontAwesomeIcon
+                                    icon={faArrowsLeftRight}></FontAwesomeIcon>
+                            </Fragment>
+                        ))}
                         <p className={styles.pathEnd}>{endName}</p>
                     </div>
                     <FontAwesomeIcon icon={faDiagramProject}></FontAwesomeIcon>{" "}
