@@ -8,13 +8,18 @@ import {
     faUserCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { Fragment, useEffect, useState } from "react";
-import type { FriendPathNode, SuggestedProfile } from "../types";
+import type {
+    CachedSuggestedProfile,
+    FriendPathNode,
+    SuggestedProfile,
+} from "../types";
 import { useUser } from "../contexts/UserContext";
 import { getSuggestedPeople } from "../people-utils";
 import { blockUser, getInterestName, sendFriendRequest } from "../utils";
 import LoggedOut from "./LoggedOut";
 import Alert from "./Alert";
 import Loading from "./Loading";
+import { usePeople } from "../contexts/PeopleContext";
 
 /**
  *
@@ -25,25 +30,25 @@ const People = () => {
 
     const navigate = useNavigate();
 
+    const { peopleCache, setPeopleCache } = usePeople();
+
     // users at some degree of separation from the current user
-    const [suggestions, setSuggestions] = useState(
-        Array() as SuggestedProfile[],
-    );
+    const [suggestions, setSuggestions] = useState<
+        SuggestedProfile[] | CachedSuggestedProfile[]
+    >(Array() as SuggestedProfile[]);
 
     // text shown in alert; null when alert is not showing
     const [alertText, setAlertText] = useState<string | null>(null);
 
     // boost profiles connected through the specified user
     const boostConnectionsOf = (id: number) => {
-        const newSuggestions = suggestions;
-
-        for (const profile of newSuggestions) {
-            if (profile.friendPath.find((node) => node.userId === id)) {
-                profile.degree -= 2;
-            }
-        }
-
-        setSuggestions(newSuggestions);
+        // const newSuggestions = suggestions;
+        // for (const profile of newSuggestions) {
+        //     if (profile.friendPath.find((node) => node.userId === id)) {
+        //         profile.degree -= 2;
+        //     }
+        // }
+        // setSuggestions(newSuggestions);
     };
 
     // when profile button is clicked, try to send friend request
@@ -63,11 +68,42 @@ const People = () => {
         setAlertText("Successfully blocked user.");
     };
 
+    const loadSuggestedPeople = async () => {
+        if (!user) {
+            return;
+        }
+
+        // if the cache is empty (initial state), fetch and calculate suggestions and add to cache
+        if (peopleCache.size === 0) {
+            const data = await getSuggestedPeople(user.id);
+            const newCache = new Map(peopleCache);
+            for (const suggestion of data) {
+                newCache.set(suggestion.data.id, {
+                    data: suggestion.data,
+                    degree: suggestion.degree,
+                    parent: suggestion.friendPath[
+                        suggestion.friendPath.length - 1
+                    ],
+                });
+            }
+            setPeopleCache(newCache);
+            setSuggestions(data);
+            return;
+        }
+
+        // TODO: cache invalidation criteria and update logic here
+
+        // otherwise, load suggestions from cache
+        const newSuggestions = Array() as CachedSuggestedProfile[];
+        for (const cacheValue of peopleCache.values()) {
+            newSuggestions.push(cacheValue);
+        }
+        setSuggestions(newSuggestions);
+    };
+
     // once logged-in user loads, load suggestions
     useEffect(() => {
-        if (user) {
-            getSuggestedPeople(user.id).then((data) => setSuggestions(data));
-        }
+        loadSuggestedPeople();
     }, [user]);
 
     // shows summary of path taken from the current user to this suggestion and provides detailed popup on hover
@@ -109,13 +145,17 @@ const People = () => {
         </div>
     );
 
-    const SuggestedCardComponent = ({ user }: { user: SuggestedProfile }) => (
+    const SuggestedCardComponent = ({
+        user,
+    }: {
+        user: SuggestedProfile | CachedSuggestedProfile;
+    }) => (
         <div
             className={styles.profile}
             key={user.data.id}>
-            <PathComponent
+            {/* <PathComponent
                 path={user.friendPath}
-                endName={user.data.firstName}></PathComponent>
+                endName={user.data.firstName}></PathComponent> */}
             <h3 className={styles.name}>
                 {user.data.firstName} {user.data.lastName}{" "}
                 <span className={styles.pronouns}>{user.data.pronouns}</span>
@@ -163,7 +203,7 @@ const People = () => {
             <>
                 {suggestions
                     .sort((a, b) => a.degree - b.degree)
-                    .map((user: SuggestedProfile) => (
+                    .map((user) => (
                         <SuggestedCardComponent
                             user={user}></SuggestedCardComponent>
                     ))}

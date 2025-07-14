@@ -158,6 +158,19 @@ export interface SuggestedProfile {
     friendPath: FriendPathNode[];
 }
 
+export interface CachedSuggestedProfile {
+    data: AllUserData;
+    degree: number;
+    parent: FriendPathNode;
+}
+
+export interface PeopleCacheContext {
+    peopleCache: Map<number, CachedSuggestedProfile>;
+    setPeopleCache: React.Dispatch<
+        React.SetStateAction<Map<number, CachedSuggestedProfile>>
+    >;
+}
+
 export interface ClusterData {
     geohash: string;
     userIds: number[];
