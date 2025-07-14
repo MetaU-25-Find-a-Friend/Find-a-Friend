@@ -65,7 +65,7 @@ const RecommendationList = ({
 
     // update weight adjustments (and trigger reload) when the user clicks a feedback button
     const handleFeedbackClick = (
-        weightName: "distance" | "numUsers" | "pastVisits",
+        weightName: keyof WeightAdjustments,
         increase: boolean,
     ) => {
         setWeightAdjustments({
