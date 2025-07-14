@@ -33,6 +33,19 @@ const People = () => {
     // text shown in alert; null when alert is not showing
     const [alertText, setAlertText] = useState<string | null>(null);
 
+    // boost profiles connected through the specified user
+    const boostConnectionsOf = (id: number) => {
+        const newSuggestions = suggestions;
+
+        for (const profile of newSuggestions) {
+            if (profile.friendPath.find((node) => node.userId === id)) {
+                profile.degree -= 2;
+            }
+        }
+
+        setSuggestions(newSuggestions);
+    };
+
     // when profile button is clicked, try to send friend request
     const handleFriendClick = async (id: number) => {
         const success = await sendFriendRequest(id);
@@ -41,6 +54,7 @@ const People = () => {
                 ? "Friend request sent."
                 : "A friend request between you already exists.",
         );
+        boostConnectionsOf(id);
     };
 
     // when profile button is clicked, block user
@@ -147,10 +161,12 @@ const People = () => {
             </div>
         ) : (
             <>
-                {suggestions.map((user: SuggestedProfile) => (
-                    <SuggestedCardComponent
-                        user={user}></SuggestedCardComponent>
-                ))}
+                {suggestions
+                    .sort((a, b) => a.degree - b.degree)
+                    .map((user: SuggestedProfile) => (
+                        <SuggestedCardComponent
+                            user={user}></SuggestedCardComponent>
+                    ))}
             </>
         );
 

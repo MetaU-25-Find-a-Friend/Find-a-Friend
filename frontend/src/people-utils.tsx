@@ -105,7 +105,7 @@ export const getSuggestedPeople = async (id: number) => {
         }
     }
 
-    return result.sort((a, b) => a.degree - b.degree);
+    return result;
 };
 
 /**
