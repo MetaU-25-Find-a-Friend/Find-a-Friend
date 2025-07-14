@@ -144,7 +144,9 @@ const RecommendationList = ({
                                 nearby:
                             </p>
                             {nearbyPlaces.map((place) => (
-                                <PlaceComponent key={place.geohash} place={place}></PlaceComponent>
+                                <PlaceComponent
+                                    key={place.geohash}
+                                    place={place}></PlaceComponent>
                             ))}
                         </>
                     )}
