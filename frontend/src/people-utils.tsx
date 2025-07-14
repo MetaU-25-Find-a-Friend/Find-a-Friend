@@ -4,59 +4,6 @@ import { getAllData } from "./utils";
 
 /**
  *
- * @param id1 one user id
- * @param id2 another user id
- * @returns the number of messages sent between the users
- */
-const getNumMessagesBetween = async (id1: number, id2: number) => {
-    const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/numMessages/${id1}/${id2}`,
-        {
-            credentials: "include",
-        },
-    );
-
-    return (await response.json()).count;
-};
-
-/**
- *
- * @param id1 one user id
- * @param id2 another user id
- * @returns the number of days the users have been friends, or 0 if they are not friends
- */
-const getFriendshipDuration = async (id1: number, id2: number) => {
-    const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/friends/duration/${id1}/${id2}`,
-        {
-            credentials: "include",
-        },
-    );
-
-    if (response.ok) {
-        const ms = (await response.json()).duration;
-        return ms / MS_IN_DAY;
-    } else {
-        return 0;
-    }
-};
-
-/**
- *
- * @param id1 one user id
- * @param id2 another user id
- * @returns a number representing the users' closeness: lower as they are closer
- */
-const getProximityOf = async (id1: number, id2: number) => {
-    const numMessages = await getNumMessagesBetween(id1, id2);
-
-    const duration = await getFriendshipDuration(id1, id2);
-
-    return 1 / (numMessages + duration + 1);
-};
-
-/**
- *
  * @param id id of the current user
  * @returns an array of data on friends of friends etc. of the current user
  */
@@ -159,4 +106,57 @@ export const getSuggestedPeople = async (id: number) => {
     }
 
     return result.sort((a, b) => a.degree - b.degree);
+};
+
+/**
+ *
+ * @param id1 one user id
+ * @param id2 another user id
+ * @returns a number representing the users' closeness: lower as they are closer
+ */
+const getProximityOf = async (id1: number, id2: number) => {
+    const numMessages = await getNumMessagesBetween(id1, id2);
+
+    const duration = await getFriendshipDuration(id1, id2);
+
+    return 1 / (numMessages + duration + 1);
+};
+
+/**
+ *
+ * @param id1 one user id
+ * @param id2 another user id
+ * @returns the number of messages sent between the users
+ */
+const getNumMessagesBetween = async (id1: number, id2: number) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/numMessages/${id1}/${id2}`,
+        {
+            credentials: "include",
+        },
+    );
+
+    return (await response.json()).count;
+};
+
+/**
+ *
+ * @param id1 one user id
+ * @param id2 another user id
+ * @returns the number of days the users have been friends, or 0 if they are not friends
+ */
+const getFriendshipDuration = async (id1: number, id2: number) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/friends/duration/${id1}/${id2}`,
+        {
+            credentials: "include",
+        },
+    );
+
+    if (response.ok) {
+        const ms = (await response.json()).duration;
+        return ms / MS_IN_DAY;
+    } else {
+        return 0;
+    }
 };
