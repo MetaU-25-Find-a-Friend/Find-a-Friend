@@ -13,7 +13,7 @@
     top: 0;
     padding: 1rem;
     box-sizing: border-box;
-    height: max-content;
+    height: min-content;
     max-height: 100vh;
     width: 30vw;
     display: flex;

@@ -1,14 +1,14 @@
 .placesListContainer {
-    height: 5rem;
     width: 100%;
-    overflow-y: scroll;
+    overflow: hidden;
     border-radius: 2rem;
     position: relative;
+    background-color: var(--tan-background);
+    overflow-y: scroll;
 }
 
 .placesList {
     width: 100%;
-    background-color: var(--tan-background);
     display: flex;
     flex-flow: column nowrap;
     justify-content: flex-start;
@@ -20,11 +20,6 @@
 
 .explanation {
     margin: 0;
-}
-
-.open {
-    height: stretch;
-    overflow-y: scroll;
 }
 
 .placesButton {
@@ -52,6 +47,17 @@
     font-size: 16px;
 }
 
+@keyframes slide-up {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 .feedbackContainer {
     position: sticky;
     bottom: 0;
@@ -65,6 +71,11 @@
     width: 100%;
     background-color: white;
     border-radius: 2rem;
+    animation-name: slide-up;
+    animation-duration: 1s;
+    animation-timing-function: ease;
+    animation-iteration-count: 1;
+    animation-fill-mode: both;
 }
 
 .feedbackHeader {

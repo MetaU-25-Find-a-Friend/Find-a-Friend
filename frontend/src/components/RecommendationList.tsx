@@ -130,20 +130,24 @@ const RecommendationList = ({
         return <Loading></Loading>;
     } else {
         return (
-            <div
-                className={`${styles.placesListContainer} ${nearbyPlaces.length === 0 ? "" : styles.open}`}>
+            <div className={styles.placesListContainer}>
                 <div className={styles.placesList}>
                     <button
                         className={styles.placesButton}
                         onClick={loadPlaces}>
                         {nearbyPlaces.length === 0 ? "Load places" : "Reload"}
                     </button>
-                    <p className={styles.explanation}>
-                        You're likely to find friends at these places nearby:
-                    </p>
-                    {nearbyPlaces.map((place) => (
-                        <PlaceComponent place={place}></PlaceComponent>
-                    ))}
+                    {nearbyPlaces.length > 0 && (
+                        <>
+                            <p className={styles.explanation}>
+                                You're likely to find friends at these places
+                                nearby:
+                            </p>
+                            {nearbyPlaces.map((place) => (
+                                <PlaceComponent place={place}></PlaceComponent>
+                            ))}
+                        </>
+                    )}
                 </div>
                 {nearbyPlaces.length > 0 && feedbackBox}
             </div>
