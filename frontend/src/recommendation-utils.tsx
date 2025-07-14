@@ -310,9 +310,15 @@ const angleBetweenInterestVectors = (v1: number[], v2: number[]) => {
         dotProduct += v1[i] * v2[i];
     }
 
+    // if the magnitude of both vectors is 0, return 0 for maximum similarity
+    if (m1 === 0 && m2 === 0) {
+        return 0;
+    }
+
     const denominator = Math.sqrt(m1) * Math.sqrt(m2);
 
     // theta = arccos((v1 . v2)/(|v1||v2|))
+    // or, if just one magnitude was 0, return pi / 2 for maximum difference
     return denominator === 0
         ? Math.PI / 2
         : Math.acos(dotProduct / denominator);
