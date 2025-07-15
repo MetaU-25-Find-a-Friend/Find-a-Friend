@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import type { PeopleCacheContext, CachedSuggestedProfile } from "../types";
 
+// suggested people, the friends and blocked users arrays used to calculate them, and functions to update them
 const PeopleContext = createContext<PeopleCacheContext>({
     peopleCache: new Map<number, CachedSuggestedProfile>(),
     setPeopleCache: (_: any) => {},
