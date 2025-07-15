@@ -106,7 +106,8 @@ const People = () => {
             cache.peopleCache.size === 0 ||
             lostBlocked.size > 0 ||
             lostFriends.size > 0 ||
-            new Date().valueOf() - cache.lastRefetch.valueOf() > 10 * MS_IN_MINUTE
+            new Date().valueOf() - cache.lastRefetch.valueOf() >
+                10 * MS_IN_MINUTE
         ) {
             const data = await getSuggestedPeople(user.id);
             const newCache = new Map();
@@ -285,7 +286,7 @@ const People = () => {
                             </p>
                         );
                     } else {
-                        return <></>;
+                        return <Fragment key={index}></Fragment>;
                     }
                 })}
             </div>
@@ -318,6 +319,7 @@ const People = () => {
                     .sort((a, b) => a.degree - b.degree)
                     .map((user) => (
                         <SuggestedCardComponent
+                            key={user.data.id}
                             user={user}></SuggestedCardComponent>
                     ))}
             </>
