@@ -1,3 +1,5 @@
+import type React from "react";
+
 /**
  * Represents displayed/editable user profile data
  */
@@ -147,13 +149,55 @@ export interface Message {
     read: boolean;
 }
 
+/**
+ * @property userId the user's id
+ * @property userName the user's full name
+ */
+export interface FriendPathNode {
+    userId: number;
+    userName: string;
+}
+/**
+ * @property data the suggested user's data
+ * @property degree a measure of the suggested user's closeness to the current user
+ * @property friendPath an array of all users through whom this suggestion was found from the current user
+ */
 export interface SuggestedProfile {
     data: AllUserData;
     degree: number;
-    friendPath: {
-        userId: number;
-        userName: string;
-    }[];
+    friendPath: FriendPathNode[];
+}
+
+/**
+ * @property data the suggested user's data
+ * @property degree a measure of the suggested user's closeness to the current user
+ * @property parent the immediate user through whom this suggestion was found
+ */
+export interface CachedSuggestedProfile {
+    data: AllUserData;
+    degree: number;
+    parent: FriendPathNode;
+}
+
+/**
+ * @property peopleCache maps the ids of suggested users to data about them
+ * @property setPeopleCache a function to update peopleCache
+ * @property friends the ids of the current user's friends at the time peopleCache was last updated
+ * @property setFriends a function to update friends
+ * @property blockedUsers the ids of users the current user had blocked at the time peopleCache was last updated
+ * @property setBlockedUsers a function to update blockedUsers
+ */
+export interface PeopleCacheContext {
+    peopleCache: Map<number, CachedSuggestedProfile>;
+    setPeopleCache: React.Dispatch<
+        React.SetStateAction<Map<number, CachedSuggestedProfile>>
+    >;
+    friends: number[];
+    setFriends: React.Dispatch<React.SetStateAction<number[]>>;
+    blockedUsers: number[];
+    setBlockedUsers: React.Dispatch<React.SetStateAction<number[]>>;
+    lastRefetch: Date;
+    setLastRefetch: React.Dispatch<React.SetStateAction<Date>>;
 }
 
 export interface ClusterData {
