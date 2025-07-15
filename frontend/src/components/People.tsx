@@ -120,12 +120,31 @@ const People = () => {
             return;
         }
 
+        // prepare to update based on current cache
         const updatedCache = new Map(cache.peopleCache);
 
         // if the user has gained friends, remove them from cache and add/update their connections
         if (gainedFriends.size > 0) {
             for (const newFriend of gainedFriends) {
                 updatedCache.delete(newFriend);
+
+                // get suggested people connected to this new friend
+                const data = await getSuggestedPeople(user.id, newFriend);
+
+                for (const suggestion of data) {
+                    // if the suggestion is not cached or has a closer connection through the new friend,
+                    // update the cache
+                    const existing = updatedCache.get(suggestion.data.id);
+                    if (!existing || suggestion.degree < existing.degree) {
+                        updatedCache.set(suggestion.data.id, {
+                            data: suggestion.data,
+                            degree: suggestion.degree,
+                            parent: suggestion.friendPath[
+                                suggestion.friendPath.length - 1
+                            ],
+                        });
+                    }
+                }
             }
 
             cache.setPeopleCache(updatedCache);
@@ -154,7 +173,7 @@ const People = () => {
             cache.setPeopleCache(updatedCache);
         }
 
-        // load suggestions display from cache
+        // once cache has been checked/updated, load suggestions display from cache
         const newSuggestions = Array() as SuggestedProfile[];
         for (const cacheValue of updatedCache.values()) {
             // reconstruct friend path by traversing parents of nodes in cache

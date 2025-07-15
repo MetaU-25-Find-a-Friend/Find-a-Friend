@@ -5,11 +5,10 @@ import { getAllData } from "./utils";
 /**
  *
  * @param id id of the current user
- * @param friends ids of all the current user's friends
- * @param blockedUsers ids of all users the current user has blocked
+ * @param connectedTo id of 1 friend to whom all returned suggestions must be connected
  * @returns an array of data on friends of friends etc. of the current user
  */
-export const getSuggestedPeople = async (id: number) => {
+export const getSuggestedPeople = async (id: number, connectedTo?: number) => {
     const result = Array() as SuggestedProfile[];
 
     const { friends, blockedUsers } = await getAllData(id);
@@ -20,13 +19,23 @@ export const getSuggestedPeople = async (id: number) => {
     // initialize record of processed friends (paths to them can't get any shorter)
     const processedFriends = Array() as number[];
 
-    for (const friend of friends) {
-        const friendData = await getAllData(friend);
+    if (!connectedTo) {
+        for (const friend of friends) {
+            const friendData = await getAllData(friend);
 
-        // push friend's data to the queue (they won't be added to result, but their friends etc. will be processed)
+            // push friend's data to the queue (they won't be added to result, but their friends etc. will be processed)
+            queue.push({
+                data: friendData,
+                degree: await getProximityOf(id, friend),
+                friendPath: Array(),
+            });
+        }
+    } else {
+        const friendData = await getAllData(connectedTo);
+
         queue.push({
             data: friendData,
-            degree: await getProximityOf(id, friend),
+            degree: await getProximityOf(id, connectedTo),
             friendPath: Array(),
         });
     }
