@@ -122,9 +122,22 @@ export interface PlaceRecUserData {
  * certain factors in a place's recommendation score
  */
 export interface WeightAdjustments {
-    distance: number;
-    numUsers: number;
-    pastVisits: number;
+    friendAdjustment?: number;
+    pastVisitAdjustment?: number;
+    countAdjustment?: number;
+    similarityAdjustment?: number;
+    distanceAdjustment?: number;
+}
+
+/**
+ * Represents the weights saved for a user for use in calculating their recommended places
+ */
+export interface Weights {
+    friendWeight: number;
+    pastVisitWeight: number;
+    countWeight: number;
+    similarityWeight: number;
+    distanceWeight: number;
 }
 
 export interface FriendRequest {

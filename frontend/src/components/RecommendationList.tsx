@@ -1,6 +1,10 @@
 import styles from "../css/RecommendationList.module.css";
-import { recommendPlaces, getNearbyPOIs } from "../recommendation-utils";
-import { useEffect, useState } from "react";
+import {
+    recommendPlaces,
+    getNearbyPOIs,
+    updateWeights,
+} from "../recommendation-utils";
+import { useState } from "react";
 import type { WeightAdjustments, PlaceRecData, UserGeohash } from "../types";
 import { useUser } from "../contexts/UserContext";
 import Loading from "./Loading";
@@ -34,27 +38,13 @@ const RecommendationList = ({
 
     const [loading, setLoading] = useState(false);
 
-    // user-prompted adjustments to algorithm weights
-    const [weightAdjustments, setWeightAdjustments] =
-        useState<WeightAdjustments>({
-            distance: 0,
-            numUsers: 0,
-            pastVisits: 0,
-        });
-
     const loadPlaces = () => {
         setLoading(true);
         // get all places nearby
         getNearbyPOIs(myLocation)
             .then((places) =>
                 // combine each place with data on users there and sort using algorithm
-                recommendPlaces(
-                    places,
-                    user!.id,
-                    myLocation,
-                    otherUsers,
-                    weightAdjustments,
-                ),
+                recommendPlaces(places, user!.id, myLocation, otherUsers),
             )
             .then((placesWithUsers) => {
                 // load data and display in list
@@ -68,18 +58,8 @@ const RecommendationList = ({
         weightName: keyof WeightAdjustments,
         increase: boolean,
     ) => {
-        setWeightAdjustments({
-            ...weightAdjustments,
-            [weightName]: weightAdjustments[weightName] + (increase ? 1 : -1),
-        });
+        updateWeights({ [weightName]: increase ? 1 : -1 }).then(loadPlaces);
     };
-
-    useEffect(() => {
-        // don't reload places on initial mount; only after user has provided feedback
-        if (nearbyPlaces.length > 0) {
-            loadPlaces();
-        }
-    }, [weightAdjustments]);
 
     // information on 1 recommended place
     const PlaceComponent = ({ place }: { place: PlaceRecData }) => (
@@ -105,22 +85,26 @@ const RecommendationList = ({
             </h3>
             <button
                 className={styles.leftButton}
-                onClick={() => handleFeedbackClick("distance", true)}>
+                onClick={() => handleFeedbackClick("distanceAdjustment", true)}>
                 <FontAwesomeIcon icon={faArrowDown}></FontAwesomeIcon> Closer
             </button>
             <button
                 className={styles.rightButton}
-                onClick={() => handleFeedbackClick("distance", false)}>
+                onClick={() =>
+                    handleFeedbackClick("distanceAdjustment", false)
+                }>
                 <FontAwesomeIcon icon={faArrowUp}></FontAwesomeIcon> Farther
             </button>
             <button
                 className={styles.leftButton}
-                onClick={() => handleFeedbackClick("numUsers", true)}>
+                onClick={() => handleFeedbackClick("countAdjustment", true)}>
                 <FontAwesomeIcon icon={faUsers}></FontAwesomeIcon> More popular
             </button>
             <button
                 className={styles.rightButton}
-                onClick={() => handleFeedbackClick("pastVisits", true)}>
+                onClick={() =>
+                    handleFeedbackClick("pastVisitAdjustment", true)
+                }>
                 <FontAwesomeIcon icon={faClock}></FontAwesomeIcon> In my history
             </button>
         </div>

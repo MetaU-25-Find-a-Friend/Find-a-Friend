@@ -2,11 +2,6 @@ import {
     GEOHASH_AT_PLACE_RES,
     MAX_PLACE_RESULTS,
     NEARBY_PLACES_RADIUS,
-    PAST_WEIGHT,
-    COUNT_WEIGHT,
-    DISTANCE_WEIGHT,
-    SIMILARITY_WEIGHT,
-    FRIEND_COUNT_WEIGHT,
     MS_IN_DAY,
     MS_IN_MINUTE,
 } from "./constants";
@@ -16,6 +11,7 @@ import type {
     Place,
     UserGeohash,
     PlaceRecUserData,
+    Weights,
     WeightAdjustments,
 } from "./types";
 import { decodeBase32, encodeBase32 } from "geohashing";
@@ -34,15 +30,16 @@ export const recommendPlaces = async (
     currentUser: number,
     currentLocation: string,
     activeUsers: UserGeohash[],
-    adjustments: WeightAdjustments,
 ) => {
     const result = Array() as PlaceRecData[];
 
-    // compile data on active users, their interests, and whether they are friends with the current user
-    const allUsersData = await getPlaceRecUserData(currentUser, activeUsers);
-
-    // get all past places the current user has visited
-    const userLocationHistory = await getUserLocationHistory();
+    // compile data on active users, their interests, and whether they are friends with the current user;
+    // all the user's past locations; and the weights representing the user's preferences
+    const [allUsersData, userLocationHistory, weights] = await Promise.all([
+        getPlaceRecUserData(currentUser, activeUsers),
+        getUserLocationHistory(),
+        getWeights(),
+    ]);
 
     // iterate over all nearby places, recording distance from the current user, how many other users are there, and how similar they are to the user
     for (const place of places) {
@@ -85,7 +82,7 @@ export const recommendPlaces = async (
                     },
                     score: 0,
                 },
-                adjustments,
+                weights,
             ),
         );
     }
@@ -200,6 +197,28 @@ export const areHashesClose = (hash1: string, hash2: string) => {
         hash1.slice(0, GEOHASH_AT_PLACE_RES) ===
         hash2.slice(0, GEOHASH_AT_PLACE_RES)
     );
+};
+
+const getWeights = async () => {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/weights`, {
+        credentials: "include",
+    });
+
+    return response.json();
+};
+
+export const updateWeights = async (adjustments: WeightAdjustments) => {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/weights`, {
+        method: "post",
+        mode: "cors",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(adjustments),
+    });
+
+    return response.ok;
 };
 
 const getPastVisitsStats = (
@@ -364,18 +383,14 @@ const getUserLocationHistory = async () => {
  * @param adjustments values by which to increase/decrease weights due to user feedback
  * @returns the same place data with a calculated score
  */
-const calculateScore = (
-    placeData: PlaceRecData,
-    adjustments: WeightAdjustments,
-) => {
+const calculateScore = (placeData: PlaceRecData, weights: Weights) => {
     return {
         ...placeData,
         score:
-            placeData.userData.friendCount * FRIEND_COUNT_WEIGHT +
-            placeData.visitScore * (PAST_WEIGHT + adjustments.pastVisits) +
-            placeData.userData.count * (COUNT_WEIGHT + adjustments.numUsers) -
-            placeData.userData.avgInterestAngle * SIMILARITY_WEIGHT +
-            placeData.geohashDistance *
-                (DISTANCE_WEIGHT + adjustments.distance),
+            placeData.userData.friendCount * weights.friendWeight +
+            placeData.visitScore * weights.pastVisitWeight +
+            placeData.userData.count * weights.countWeight -
+            placeData.userData.avgInterestAngle * weights.similarityWeight +
+            placeData.geohashDistance * weights.distanceWeight,
     };
 };

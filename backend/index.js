@@ -411,6 +411,70 @@ app.get("/user/geolocation/history", authenticate, async (req, res) => {
     res.json(history);
 });
 
+// get the user's saved recommendation weights or create a new record with the default weights
+app.get("/weights", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    const weights = await prisma.placeRecommendationWeights.findUnique({
+        where: {
+            userId: userId,
+        },
+    });
+
+    if (weights) {
+        return res.json(weights);
+    }
+
+    const newWeights = await prisma.placeRecommendationWeights.create({
+        data: {
+            userId: userId,
+        },
+    });
+
+    return res.json(newWeights);
+});
+
+app.post("/weights", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    if (
+        !req.body.friendAdjustment &&
+        !req.body.pastVisitAdjustment &&
+        !req.body.countAdjustment &&
+        !req.body.similarityAdjustment &&
+        !req.body.distanceAdjustment
+    ) {
+        return res
+            .status(400)
+            .send("At least one adjustment value must be provided");
+    }
+
+    await prisma.placeRecommendationWeights.update({
+        where: {
+            userId: userId,
+        },
+        data: {
+            friendWeight: {
+                increment: req.body.friendAdjustment ?? 0,
+            },
+            pastVisitWeight: {
+                increment: req.body.pastVisitAdjustment ?? 0,
+            },
+            countWeight: {
+                increment: req.body.countAdjustment ?? 0,
+            },
+            similarityWeight: {
+                increment: req.body.similarityAdjustment ?? 0,
+            },
+            distanceWeight: {
+                increment: req.body.distanceAdjustment ?? 0,
+            },
+        },
+    });
+
+    res.status(200).send("Weights updated");
+});
+
 // create a friend request from the logged-in user to another user
 app.post("/friend/:to", authenticate, async (req, res) => {
     const from = req.session.userId;

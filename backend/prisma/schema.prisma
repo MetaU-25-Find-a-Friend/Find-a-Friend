@@ -65,3 +65,13 @@ model Session {
   data String
   expiresAt DateTime
 }
+
+model PlaceRecommendationWeights {
+  id Int @id @default(autoincrement())
+  userId Int @unique
+  friendWeight Decimal @default(1)
+  pastVisitWeight Decimal @default(1)
+  countWeight Decimal @default(1)
+  similarityWeight Decimal @default(1)
+  distanceWeight Decimal @default(1)
+}
