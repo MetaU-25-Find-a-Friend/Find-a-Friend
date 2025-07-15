@@ -9,6 +9,8 @@ const PeopleContext = createContext<PeopleCacheContext>({
     setFriends: (_: any) => {},
     blockedUsers: Array(),
     setBlockedUsers: (_: any) => {},
+    lastRefetch: new Date(),
+    setLastRefetch: (_: any) => {},
 });
 
 const PeopleProvider = ({ children }: { children: any }) => {
@@ -20,6 +22,8 @@ const PeopleProvider = ({ children }: { children: any }) => {
 
     const [blockedUsers, setBlockedUsers] = useState(Array() as number[]);
 
+    const [lastRefetch, setLastRefetch] = useState(new Date());
+
     return (
         <PeopleContext.Provider
             value={{
@@ -29,6 +33,8 @@ const PeopleProvider = ({ children }: { children: any }) => {
                 setFriends,
                 blockedUsers,
                 setBlockedUsers,
+                lastRefetch,
+                setLastRefetch,
             }}>
             {children}
         </PeopleContext.Provider>

@@ -196,6 +196,8 @@ export interface PeopleCacheContext {
     setFriends: React.Dispatch<React.SetStateAction<number[]>>;
     blockedUsers: number[];
     setBlockedUsers: React.Dispatch<React.SetStateAction<number[]>>;
+    lastRefetch: Date;
+    setLastRefetch: React.Dispatch<React.SetStateAction<Date>>;
 }
 
 export interface ClusterData {

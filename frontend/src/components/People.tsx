@@ -21,6 +21,7 @@ import LoggedOut from "./LoggedOut";
 import Alert from "./Alert";
 import Loading from "./Loading";
 import { usePeople } from "../contexts/PeopleContext";
+import { MS_IN_MINUTE } from "../constants";
 
 /**
  *
@@ -99,12 +100,13 @@ const People = () => {
         cache.setFriends(friends);
         cache.setBlockedUsers(blockedUsers);
 
-        // if the cache is empty (initial state), the user has unblocked anyone, or the user has lost friends,
-        // completely refetch and calculate suggestions and add to cache
+        // if the cache is empty (initial state), the user has unblocked anyone, the user has lost friends,
+        // or the last refetch was over 10 minutes ago, completely refetch and calculate suggestions and add to cache
         if (
             cache.peopleCache.size === 0 ||
             lostBlocked.size > 0 ||
-            lostFriends.size > 0
+            lostFriends.size > 0 ||
+            new Date().valueOf() - cache.lastRefetch.valueOf() > 10 * MS_IN_MINUTE
         ) {
             const data = await getSuggestedPeople(user.id);
             const newCache = new Map();
@@ -118,7 +120,7 @@ const People = () => {
                 });
             }
             cache.setPeopleCache(newCache);
-
+            cache.setLastRefetch(new Date());
             // update display since we have all the data and signal to loadSuggestedPeople that
             // no more work is needed
             setSuggestions(data);

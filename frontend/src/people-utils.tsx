@@ -44,19 +44,6 @@ export const getSuggestedPeople = async (id: number, connectedTo?: number) => {
         // remove the oldest profile from the queue
         const user = queue.splice(0, 1)[0];
 
-        // if this user is already in result, check if this path is shorter and replace if so; otherwise do nothing with this user
-        const existingIndex = result.findIndex(
-            (element) => element.data.id === user.data.id,
-        );
-
-        if (existingIndex !== -1) {
-            if (result[existingIndex].degree > user.degree) {
-                result[existingIndex] = user;
-            } else {
-                continue;
-            }
-        }
-
         // if this user is already a friend of the current user and not seen, just add their friends to the queue
         if (friends.includes(user.data.id)) {
             if (!processedFriends.includes(user.data.id)) {
@@ -98,8 +85,20 @@ export const getSuggestedPeople = async (id: number, connectedTo?: number) => {
             continue;
         }
 
-        // if neither a friend nor in result, add this user to result and add their friends to the queue
-        result.push(user);
+        // if this user is already in result, check if this path is shorter and replace if so; otherwise do nothing with this user
+        const existingIndex = result.findIndex(
+            (element) => element.data.id === user.data.id,
+        );
+
+        if (existingIndex !== -1) {
+            if (result[existingIndex].degree > user.degree) {
+                result[existingIndex] = user;
+            } else {
+                continue;
+            }
+        } else {
+            result.push(user);
+        }
 
         for (const acquaintance of user.data.friends) {
             const acquaintanceData = await getAllData(acquaintance);
