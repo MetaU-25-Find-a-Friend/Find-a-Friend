@@ -31,6 +31,7 @@ const People = () => {
 
     const navigate = useNavigate();
 
+    // cached suggestions and the friends and blocked users as of the time they were calculated
     const cache = usePeople();
 
     // users at some degree of separation from the current user
@@ -76,9 +77,10 @@ const People = () => {
         setAlertText("Successfully blocked user.");
     };
 
-    const loadSuggestedPeople = async () => {
+    // check validity of cache and return a reference to the updated cache that should be used for loading
+    const updateCache = async () => {
         if (!user) {
-            return;
+            return null;
         }
 
         // get most up-to-date friends and blocked users
@@ -116,8 +118,11 @@ const People = () => {
                 });
             }
             cache.setPeopleCache(newCache);
+
+            // update display since we have all the data and signal to loadSuggestedPeople that
+            // no more work is needed
             setSuggestions(data);
-            return;
+            return null;
         }
 
         // prepare to update based on current cache
@@ -173,29 +178,42 @@ const People = () => {
             cache.setPeopleCache(updatedCache);
         }
 
-        // once cache has been checked/updated, load suggestions display from cache
-        const newSuggestions = Array() as SuggestedProfile[];
-        for (const cacheValue of updatedCache.values()) {
-            // reconstruct friend path by traversing parents of nodes in cache
-            // (not necessarily shortest paths, but valid ones)
-            const friendPath = Array() as FriendPathNode[];
+        return updatedCache;
+    };
 
-            let parentCache: FriendPathNode | undefined = cacheValue.parent;
-            while (parentCache) {
-                friendPath.splice(0, 0, {
-                    userId: parentCache.userId,
-                    userName: parentCache.userName,
-                });
-                parentCache = updatedCache.get(parentCache.userId)?.parent;
-            }
-
-            newSuggestions.push({
-                data: cacheValue.data,
-                degree: cacheValue.degree,
-                friendPath: friendPath,
-            });
+    // load data on people suggestions either from database or cache
+    const loadSuggestedPeople = async () => {
+        if (!user) {
+            return;
         }
-        setSuggestions(newSuggestions);
+
+        const updatedCache = await updateCache();
+
+        // once cache has been checked/updated, load suggestions display from cache if necessary
+        if (updatedCache) {
+            const newSuggestions = Array() as SuggestedProfile[];
+            for (const cacheValue of updatedCache.values()) {
+                // reconstruct friend path by traversing parents of nodes in cache
+                // (not necessarily shortest paths, but valid ones)
+                const friendPath = Array() as FriendPathNode[];
+
+                let parentCache: FriendPathNode | undefined = cacheValue.parent;
+                while (parentCache) {
+                    friendPath.splice(0, 0, {
+                        userId: parentCache.userId,
+                        userName: parentCache.userName,
+                    });
+                    parentCache = updatedCache.get(parentCache.userId)?.parent;
+                }
+
+                newSuggestions.push({
+                    data: cacheValue.data,
+                    degree: cacheValue.degree,
+                    friendPath: friendPath,
+                });
+            }
+            setSuggestions(newSuggestions);
+        }
     };
 
     // once logged-in user loads, load suggestions
