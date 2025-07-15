@@ -10,8 +10,13 @@ import {
 import { Fragment, useEffect, useState } from "react";
 import type { FriendPathNode, SuggestedProfile } from "../types";
 import { useUser } from "../contexts/UserContext";
-import { getSuggestedPeople } from "../people-utils";
-import { blockUser, getInterestName, sendFriendRequest } from "../utils";
+import { findChanges, getSuggestedPeople } from "../people-utils";
+import {
+    getAllData,
+    blockUser,
+    getInterestName,
+    sendFriendRequest,
+} from "../utils";
 import LoggedOut from "./LoggedOut";
 import Alert from "./Alert";
 import Loading from "./Loading";
@@ -26,7 +31,7 @@ const People = () => {
 
     const navigate = useNavigate();
 
-    const { peopleCache, setPeopleCache } = usePeople();
+    const cache = usePeople();
 
     // users at some degree of separation from the current user
     const [suggestions, setSuggestions] = useState<SuggestedProfile[]>(
@@ -41,7 +46,7 @@ const People = () => {
         const newSuggestions = suggestions;
 
         // iterate over cache, looking for immediate children of specified user
-        for (const cacheValue of peopleCache.values()) {
+        for (const cacheValue of cache.peopleCache.values()) {
             if (cacheValue.parent.userId === id) {
                 // if one is found, lower their degree in the suggestions list
                 const cacheValueIndex = newSuggestions.findIndex(
@@ -76,10 +81,31 @@ const People = () => {
             return;
         }
 
-        // if the cache is empty (initial state), fetch and calculate suggestions and add to cache
-        if (peopleCache.size === 0) {
+        // get most up-to-date friends and blocked users
+        const { friends, blockedUsers } = await getAllData(user.id);
+
+        // compare most recent friends and blocked to those used to load the current cache
+        const [lostFriends, gainedFriends] = findChanges(
+            cache.friends,
+            friends,
+        );
+        const [lostBlocked, gainedBlocked] = findChanges(
+            cache.blockedUsers,
+            blockedUsers,
+        );
+
+        cache.setFriends(friends);
+        cache.setBlockedUsers(blockedUsers);
+
+        // if the cache is empty (initial state), the user has unblocked anyone, or the user has lost friends,
+        // completely refetch and calculate suggestions and add to cache
+        if (
+            cache.peopleCache.size === 0 ||
+            lostBlocked.size > 0 ||
+            lostFriends.size > 0
+        ) {
             const data = await getSuggestedPeople(user.id);
-            const newCache = new Map(peopleCache);
+            const newCache = new Map();
             for (const suggestion of data) {
                 newCache.set(suggestion.data.id, {
                     data: suggestion.data,
@@ -89,16 +115,48 @@ const People = () => {
                     ],
                 });
             }
-            setPeopleCache(newCache);
+            cache.setPeopleCache(newCache);
             setSuggestions(data);
             return;
         }
 
-        // TODO: cache invalidation criteria and update logic here
+        const updatedCache = new Map(cache.peopleCache);
 
-        // otherwise, load suggestions from cache
+        // if the user has gained friends, remove them from cache and add/update their connections
+        if (gainedFriends.size > 0) {
+            for (const newFriend of gainedFriends) {
+                updatedCache.delete(newFriend);
+            }
+
+            cache.setPeopleCache(updatedCache);
+        }
+
+        // if the user has blocked anyone, remove them and anyone connected to them from cache
+        // (this is imperfect because a removed user could have had another connection that would allow them
+        // to remain in the suggestions)
+        if (gainedBlocked.size > 0) {
+            for (const newBlocked of gainedBlocked) {
+                updatedCache.delete(newBlocked);
+            }
+
+            for (const cacheValue of updatedCache.values()) {
+                let parentCache: FriendPathNode | undefined = cacheValue.parent;
+
+                while (parentCache) {
+                    if (gainedBlocked.has(parentCache.userId)) {
+                        updatedCache.delete(cacheValue.data.id);
+                        break;
+                    }
+                    parentCache = updatedCache.get(parentCache.userId)?.parent;
+                }
+            }
+
+            cache.setPeopleCache(updatedCache);
+        }
+
+        // load suggestions display from cache
         const newSuggestions = Array() as SuggestedProfile[];
-        for (const cacheValue of peopleCache.values()) {
+        for (const cacheValue of updatedCache.values()) {
             // reconstruct friend path by traversing parents of nodes in cache
             // (not necessarily shortest paths, but valid ones)
             const friendPath = Array() as FriendPathNode[];
@@ -109,7 +167,7 @@ const People = () => {
                     userId: parentCache.userId,
                     userName: parentCache.userName,
                 });
-                parentCache = peopleCache.get(parentCache.userId)?.parent;
+                parentCache = updatedCache.get(parentCache.userId)?.parent;
             }
 
             newSuggestions.push({

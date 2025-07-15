@@ -1,3 +1,5 @@
+import type React from "react";
+
 /**
  * Represents displayed/editable user profile data
  */
@@ -169,6 +171,10 @@ export interface PeopleCacheContext {
     setPeopleCache: React.Dispatch<
         React.SetStateAction<Map<number, CachedSuggestedProfile>>
     >;
+    friends: number[];
+    setFriends: React.Dispatch<React.SetStateAction<number[]>>;
+    blockedUsers: number[];
+    setBlockedUsers: React.Dispatch<React.SetStateAction<number[]>>;
 }
 
 export interface ClusterData {

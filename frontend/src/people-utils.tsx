@@ -5,16 +5,20 @@ import { getAllData } from "./utils";
 /**
  *
  * @param id id of the current user
+ * @param friends ids of all the current user's friends
+ * @param blockedUsers ids of all users the current user has blocked
  * @returns an array of data on friends of friends etc. of the current user
  */
 export const getSuggestedPeople = async (id: number) => {
     const result = Array() as SuggestedProfile[];
 
+    const { friends, blockedUsers } = await getAllData(id);
+
     // initialize search queue
     const queue = Array() as SuggestedProfile[];
 
-    // iterate over all friends of the current user
-    const { friends, blockedUsers } = await getAllData(id);
+    // initialize record of processed friends (paths to them can't get any shorter)
+    const processedFriends = Array() as number[];
 
     for (const friend of friends) {
         const friendData = await getAllData(friend);
@@ -31,76 +35,86 @@ export const getSuggestedPeople = async (id: number) => {
         // remove the oldest profile from the queue
         const user = queue.splice(0, 1)[0];
 
-        // if this user is already a friend of the current user, just add their friends to the queue
-        if (friends.includes(user.data.id)) {
-            for (const acquaintance of user.data.friends) {
-                const acquaintanceData = await getAllData(acquaintance);
-
-                // add acquaintance if they are not the current user, are not blocked by the current user, and haven't blocked the current user
-                if (
-                    acquaintance !== id &&
-                    !blockedUsers.includes(acquaintance) &&
-                    !acquaintanceData.blockedUsers.includes(id)
-                ) {
-                    queue.push({
-                        data: acquaintanceData,
-                        degree:
-                            user.degree +
-                            (await getProximityOf(user.data.id, acquaintance)),
-                        friendPath: [
-                            ...user.friendPath,
-                            {
-                                userId: user.data.id,
-                                userName:
-                                    user.data.firstName +
-                                    " " +
-                                    user.data.lastName,
-                            },
-                        ],
-                    });
-                }
-            }
-            continue;
-        }
-
-        // if this user is already in result, check if this path is shorter and replace if so; otherwise do nothing
+        // if this user is already in result, check if this path is shorter and replace if so; otherwise do nothing with this user
         const existingIndex = result.findIndex(
             (element) => element.data.id === user.data.id,
         );
+
         if (existingIndex !== -1) {
             if (result[existingIndex].degree > user.degree) {
                 result[existingIndex] = user;
+            } else {
+                continue;
             }
-        } else {
-            // if neither a friend nor in result, add this user to result and add their friends to the queue
-            result.push(user);
+        }
 
-            for (const acquaintance of user.data.friends) {
-                const acquaintanceData = await getAllData(acquaintance);
+        // if this user is already a friend of the current user and not seen, just add their friends to the queue
+        if (friends.includes(user.data.id)) {
+            if (!processedFriends.includes(user.data.id)) {
+                for (const acquaintance of user.data.friends) {
+                    const acquaintanceData = await getAllData(acquaintance);
 
-                // add acquaintance if they are not the current user, are not blocked by the current user, and haven't blocked the current user
-                if (
-                    acquaintance !== id &&
-                    !blockedUsers.includes(acquaintance) &&
-                    !acquaintanceData.blockedUsers.includes(id)
-                ) {
-                    queue.push({
-                        data: acquaintanceData,
-                        degree:
-                            user.degree +
-                            (await getProximityOf(user.data.id, acquaintance)),
-                        friendPath: [
-                            ...user.friendPath,
-                            {
-                                userId: user.data.id,
-                                userName:
-                                    user.data.firstName +
-                                    " " +
-                                    user.data.lastName,
-                            },
-                        ],
-                    });
+                    // add acquaintance if they are not the current user, are not blocked by the current user, and haven't blocked the current user
+                    if (
+                        acquaintance !== id &&
+                        !blockedUsers.includes(acquaintance) &&
+                        !acquaintanceData.blockedUsers.includes(id)
+                    ) {
+                        queue.push({
+                            data: acquaintanceData,
+                            degree:
+                                user.degree +
+                                (await getProximityOf(
+                                    user.data.id,
+                                    acquaintance,
+                                )),
+                            friendPath: [
+                                ...user.friendPath,
+                                {
+                                    userId: user.data.id,
+                                    userName:
+                                        user.data.firstName +
+                                        " " +
+                                        user.data.lastName,
+                                },
+                            ],
+                        });
+                    }
                 }
+
+                processedFriends.push(user.data.id);
+            }
+
+            // if friend was already processed, just continue
+            continue;
+        }
+
+        // if neither a friend nor in result, add this user to result and add their friends to the queue
+        result.push(user);
+
+        for (const acquaintance of user.data.friends) {
+            const acquaintanceData = await getAllData(acquaintance);
+
+            // add acquaintance if they are not the current user, are not blocked by the current user, and haven't blocked the current user
+            if (
+                acquaintance !== id &&
+                !blockedUsers.includes(acquaintance) &&
+                !acquaintanceData.blockedUsers.includes(id)
+            ) {
+                queue.push({
+                    data: acquaintanceData,
+                    degree:
+                        user.degree +
+                        (await getProximityOf(user.data.id, acquaintance)),
+                    friendPath: [
+                        ...user.friendPath,
+                        {
+                            userId: user.data.id,
+                            userName:
+                                user.data.firstName + " " + user.data.lastName,
+                        },
+                    ],
+                });
             }
         }
     }
@@ -159,4 +173,11 @@ const getFriendshipDuration = async (id1: number, id2: number) => {
     } else {
         return 0;
     }
+};
+
+export const findChanges = (oldArray: number[], newArray: number[]) => {
+    const oldSet = new Set(oldArray);
+    const newSet = new Set(newArray);
+
+    return [oldSet.difference(newSet), newSet.difference(oldSet)];
 };
