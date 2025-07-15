@@ -8,11 +8,7 @@ import {
     faUserCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { Fragment, useEffect, useState } from "react";
-import type {
-    CachedSuggestedProfile,
-    FriendPathNode,
-    SuggestedProfile,
-} from "../types";
+import type { FriendPathNode, SuggestedProfile } from "../types";
 import { useUser } from "../contexts/UserContext";
 import { getSuggestedPeople } from "../people-utils";
 import { blockUser, getInterestName, sendFriendRequest } from "../utils";
@@ -33,22 +29,22 @@ const People = () => {
     const { peopleCache, setPeopleCache } = usePeople();
 
     // users at some degree of separation from the current user
-    const [suggestions, setSuggestions] = useState<
-        SuggestedProfile[] | CachedSuggestedProfile[]
-    >(Array() as SuggestedProfile[]);
+    const [suggestions, setSuggestions] = useState<SuggestedProfile[]>(
+        Array() as SuggestedProfile[],
+    );
 
     // text shown in alert; null when alert is not showing
     const [alertText, setAlertText] = useState<string | null>(null);
 
     // boost profiles connected through the specified user
     const boostConnectionsOf = (id: number) => {
-        // const newSuggestions = suggestions;
-        // for (const profile of newSuggestions) {
-        //     if (profile.friendPath.find((node) => node.userId === id)) {
-        //         profile.degree -= 2;
-        //     }
-        // }
-        // setSuggestions(newSuggestions);
+        const newSuggestions = suggestions;
+        for (const profile of newSuggestions) {
+            if (profile.friendPath.find((node) => node.userId === id)) {
+                profile.degree -= 2;
+            }
+        }
+        setSuggestions(newSuggestions);
     };
 
     // when profile button is clicked, try to send friend request
@@ -94,9 +90,26 @@ const People = () => {
         // TODO: cache invalidation criteria and update logic here
 
         // otherwise, load suggestions from cache
-        const newSuggestions = Array() as CachedSuggestedProfile[];
+        const newSuggestions = Array() as SuggestedProfile[];
         for (const cacheValue of peopleCache.values()) {
-            newSuggestions.push(cacheValue);
+            // reconstruct friend path by traversing parents of nodes in cache
+            // (not necessarily shortest paths, but valid ones)
+            const friendPath = Array() as FriendPathNode[];
+
+            let parentCache: FriendPathNode | undefined = cacheValue.parent;
+            while (parentCache) {
+                friendPath.splice(0, 0, {
+                    userId: parentCache.userId,
+                    userName: parentCache.userName,
+                });
+                parentCache = peopleCache.get(parentCache.userId)?.parent;
+            }
+
+            newSuggestions.push({
+                data: cacheValue.data,
+                degree: cacheValue.degree,
+                friendPath: friendPath,
+            });
         }
         setSuggestions(newSuggestions);
     };
@@ -145,17 +158,13 @@ const People = () => {
         </div>
     );
 
-    const SuggestedCardComponent = ({
-        user,
-    }: {
-        user: SuggestedProfile | CachedSuggestedProfile;
-    }) => (
+    const SuggestedCardComponent = ({ user }: { user: SuggestedProfile }) => (
         <div
             className={styles.profile}
             key={user.data.id}>
-            {/* <PathComponent
+            <PathComponent
                 path={user.friendPath}
-                endName={user.data.firstName}></PathComponent> */}
+                endName={user.data.firstName}></PathComponent>
             <h3 className={styles.name}>
                 {user.data.firstName} {user.data.lastName}{" "}
                 <span className={styles.pronouns}>{user.data.pronouns}</span>
