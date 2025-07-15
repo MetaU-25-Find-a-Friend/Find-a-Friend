@@ -36,14 +36,21 @@ const People = () => {
     // text shown in alert; null when alert is not showing
     const [alertText, setAlertText] = useState<string | null>(null);
 
-    // boost profiles connected through the specified user
+    // boost profiles connected to the specified user
     const boostConnectionsOf = (id: number) => {
         const newSuggestions = suggestions;
-        for (const profile of newSuggestions) {
-            if (profile.friendPath.find((node) => node.userId === id)) {
-                profile.degree -= 2;
+
+        // iterate over cache, looking for immediate children of specified user
+        for (const cacheValue of peopleCache.values()) {
+            if (cacheValue.parent.userId === id) {
+                // if one is found, lower their degree in the suggestions list
+                const cacheValueIndex = newSuggestions.findIndex(
+                    (element) => element.data.id === cacheValue.data.id,
+                );
+                newSuggestions[cacheValueIndex].degree -= 2;
             }
         }
+
         setSuggestions(newSuggestions);
     };
 
