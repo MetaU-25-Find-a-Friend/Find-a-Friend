@@ -239,7 +239,7 @@ const getWeights = async () => {
         credentials: "include",
     });
 
-    return response.json();
+    return (await response.json()) as Weights;
 };
 
 /**
@@ -304,7 +304,7 @@ export const getAdjustment = (average: number, value: number) => {
 const getPastVisitsStats = (
     placeGeohash: string,
     locationHistory: PlaceHistory[],
-) => {
+): [number, number] => {
     let visitScore = 0;
     let numVisits = 0;
 
@@ -331,7 +331,7 @@ const getPastVisitsStats = (
  * @param users data on a group of users (here, users at a place)
  * @returns the average similarity of users to the current user and the number of friends of the current user among them
  */
-const getUsersStats = (users: PlaceRecUserData[]) => {
+const getUsersStats = (users: PlaceRecUserData[]): [number, number] => {
     // set initial values
     // interest angle starts at the least possible similarity to represent there being 0 users
     let avgInterestAngle = Math.PI / 2;
@@ -460,18 +460,32 @@ const getUserLocationHistory = async () => {
 /**
  *
  * @param placeData relevant data on a point of interest
- * @param weights the user's personalized weights and place types they've liked
+ * @param weights the user's personalized weights
  * @returns the same place data with a calculated score
  */
-const calculateScore = (placeData: PlaceRecData, weights: Weights) => {
+const calculateScore = (
+    placeData: PlaceRecData,
+    weights: Weights,
+): PlaceRecData => {
+    const friendScore = placeData.userData.friendCount * weights.friendWeight;
+    const visitScore = placeData.visitScore * weights.pastVisitWeight;
+    const countScore = placeData.userData.count * weights.countWeight;
+    const similarityScore =
+        placeData.userData.avgInterestAngle * weights.similarityWeight;
+    const distanceScore = placeData.geohashDistance * weights.distanceWeight;
+    const typeScore = (placeData.isLikedType ? 1 : 0) * weights.typeWeight;
+
+    // similarityScore increases as users are more different; 0 means most similar
+    const totalScore =
+        friendScore +
+        visitScore +
+        countScore -
+        similarityScore +
+        distanceScore +
+        typeScore;
+
     return {
         ...placeData,
-        score:
-            placeData.userData.friendCount * weights.friendWeight +
-            placeData.visitScore * weights.pastVisitWeight +
-            placeData.userData.count * weights.countWeight -
-            placeData.userData.avgInterestAngle * weights.similarityWeight +
-            placeData.geohashDistance * weights.distanceWeight +
-            (placeData.isLikedType ? 1 : 0) * weights.typeWeight,
+        score: totalScore,
     };
 };
