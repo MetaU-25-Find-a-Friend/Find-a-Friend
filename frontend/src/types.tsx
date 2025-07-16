@@ -1,6 +1,22 @@
 import type React from "react";
 
 /**
+ * User-entered data to create an account
+ */
+export interface SignupData {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+}
+
+export interface LoginData {
+    email: string;
+    password: string;
+}
+
+/**
  * Represents displayed/editable user profile data
  */
 export interface UserProfile {

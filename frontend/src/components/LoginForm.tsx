@@ -5,8 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import Alert from "./Alert";
 import { APP_TITLE } from "../constants";
+import type { LoginData } from "../types";
 
-// Form to log in to an existing account
+/**
+ *
+ * @returns A form that the user can submit to log in to their account
+ */
 const LoginForm = () => {
     // function to set the logged-in user
     const { setUser } = useUser();
@@ -15,8 +19,8 @@ const LoginForm = () => {
 
     const [alertText, setAlertText] = useState<string | null>(null);
 
-    // data entered in signup form
-    const [formData, setFormData] = useState({
+    // data entered in login form
+    const [formData, setFormData] = useState<LoginData>({
         email: "",
         password: "",
     });
@@ -48,41 +52,45 @@ const LoginForm = () => {
         });
     };
 
+    const inputForm = (
+        <form className={styles.form}>
+            <input
+                className={styles.input}
+                name="email"
+                placeholder="Email"
+                type="email"
+                onChange={handleInputChange}
+                required></input>
+            <input
+                className={styles.input}
+                name="password"
+                placeholder="Password"
+                type="password"
+                onChange={handleInputChange}
+                required></input>
+            <button
+                className={styles.button}
+                type="submit"
+                onClick={handleCreateAccount}>
+                Login
+            </button>
+            <hr className={styles.bar}></hr>
+            <button
+                className={styles.button}
+                type="button"
+                onClick={() => navigate("/signup")}>
+                Create new account
+            </button>
+        </form>
+    );
+
     return (
         <>
             <Alert
                 alertText={alertText}
                 setAlertText={setAlertText}></Alert>
             <h1 className={styles.title}>{APP_TITLE}</h1>
-            <form className={styles.form}>
-                <input
-                    className={styles.input}
-                    name="email"
-                    placeholder="Email"
-                    type="email"
-                    onChange={handleInputChange}
-                    required></input>
-                <input
-                    className={styles.input}
-                    name="password"
-                    placeholder="Password"
-                    type="password"
-                    onChange={handleInputChange}
-                    required></input>
-                <button
-                    className={styles.button}
-                    type="submit"
-                    onClick={handleCreateAccount}>
-                    Login
-                </button>
-                <hr className={styles.bar}></hr>
-                <button
-                    className={styles.button}
-                    type="button"
-                    onClick={() => navigate("/signup")}>
-                    Create new account
-                </button>
-            </form>
+            {inputForm}
         </>
     );
 };

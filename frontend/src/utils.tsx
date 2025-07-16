@@ -25,7 +25,7 @@ export const createAccount = async (accountData: {
     lastName: string;
     email: string;
     password: string;
-}) => {
+}): Promise<[boolean, string]> => {
     const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/signup`, {
         method: "post",
         mode: "cors",
@@ -49,7 +49,7 @@ export const createAccount = async (accountData: {
 export const login = async (enteredData: {
     email: string;
     password: string;
-}) => {
+}): Promise<[boolean, any]> => {
     const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/login`, {
         method: "post",
         mode: "cors",
