@@ -2,13 +2,11 @@ import {
     GEOHASH_AT_PLACE_RES,
     MAX_PLACE_RESULTS,
     NEARBY_PLACES_RADIUS,
-    PAST_WEIGHT,
-    COUNT_WEIGHT,
-    DISTANCE_WEIGHT,
-    SIMILARITY_WEIGHT,
-    FRIEND_COUNT_WEIGHT,
     MS_IN_DAY,
     MS_IN_MINUTE,
+    DELTA,
+    LIKED_WEIGHT_DECREASE,
+    LIKED_WEIGHT_INCREASE,
 } from "./constants";
 import type {
     PlaceHistory,
@@ -16,7 +14,9 @@ import type {
     Place,
     UserGeohash,
     PlaceRecUserData,
+    Weights,
     WeightAdjustments,
+    PlaceRecStats,
 } from "./types";
 import { decodeBase32, encodeBase32 } from "geohashing";
 import { getAllData } from "./utils";
@@ -34,15 +34,24 @@ export const recommendPlaces = async (
     currentUser: number,
     currentLocation: string,
     activeUsers: UserGeohash[],
-    adjustments: WeightAdjustments,
-) => {
+): Promise<[PlaceRecStats, PlaceRecData[]]> => {
     const result = Array() as PlaceRecData[];
 
-    // compile data on active users, their interests, and whether they are friends with the current user
-    const allUsersData = await getPlaceRecUserData(currentUser, activeUsers);
+    const stats = {
+        avgFriendCount: 0,
+        avgVisitScore: 0,
+        avgCount: 0,
+        avgUserSimilarity: 0,
+        avgDistance: 0,
+    };
 
-    // get all past places the current user has visited
-    const userLocationHistory = await getUserLocationHistory();
+    // compile data on active users, their interests, and whether they are friends with the current user;
+    // all the user's past locations; and the weights representing the user's preferences
+    const [allUsersData, userLocationHistory, weights] = await Promise.all([
+        getPlaceRecUserData(currentUser, activeUsers),
+        getUserLocationHistory(),
+        getWeights(),
+    ]);
 
     // iterate over all nearby places, recording distance from the current user, how many other users are there, and how similar they are to the user
     for (const place of places) {
@@ -50,6 +59,11 @@ export const recommendPlaces = async (
         const placeGeohash = encodeBase32(
             place.location.latitude,
             place.location.longitude,
+        );
+
+        const geohashDistance = numSameCharacters(
+            placeGeohash,
+            currentLocation,
         );
 
         // use only users at this place
@@ -66,18 +80,18 @@ export const recommendPlaces = async (
             userLocationHistory,
         );
 
+        const isLikedType = weights.likedTypes.includes(place.primaryType);
+
         // calculate place's recommendation score given this data and push the final data object to result
         result.push(
             calculateScore(
                 {
                     place: place,
                     geohash: placeGeohash,
-                    geohashDistance: numSameCharacters(
-                        placeGeohash,
-                        currentLocation,
-                    ),
+                    geohashDistance: geohashDistance,
                     numVisits: numVisits,
                     visitScore: visitScore,
+                    isLikedType: isLikedType,
                     userData: {
                         count: userDataAtPlace.length,
                         avgInterestAngle: avgInterestAngle,
@@ -85,13 +99,27 @@ export const recommendPlaces = async (
                     },
                     score: 0,
                 },
-                adjustments,
+                weights,
             ),
         );
+
+        stats.avgFriendCount += friendCount;
+        stats.avgVisitScore += visitScore;
+        stats.avgCount += userDataAtPlace.length;
+        stats.avgUserSimilarity += avgInterestAngle;
+        stats.avgDistance += geohashDistance;
+    }
+
+    if (places.length > 0) {
+        stats.avgFriendCount /= places.length;
+        stats.avgVisitScore /= places.length;
+        stats.avgCount /= places.length;
+        stats.avgUserSimilarity /= places.length;
+        stats.avgDistance /= places.length;
     }
 
     // sort results by score
-    return result.sort((a, b) => b.score - a.score);
+    return [stats, result.sort((a, b) => b.score - a.score)];
 };
 
 /**
@@ -134,7 +162,7 @@ export const getNearbyPOIs = async (hash: string) => {
                 "Content-Type": "application/json",
                 "X-Goog-Api-Key": import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
                 "X-Goog-FieldMask":
-                    "places.displayName,places.formattedAddress,places.location",
+                    "places.displayName,places.formattedAddress,places.location,places.primaryType",
             },
             body: JSON.stringify({
                 includedTypes: [
@@ -202,10 +230,81 @@ export const areHashesClose = (hash1: string, hash2: string) => {
     );
 };
 
+/**
+ *
+ * @returns the logged-in user's personalized recommendation weights, or default 1s if not yet calculated
+ */
+const getWeights = async () => {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/weights`, {
+        credentials: "include",
+    });
+
+    return (await response.json()) as Weights;
+};
+
+/**
+ *
+ * @param adjustments numbers by which to adjust some or all of the user's recommendation weights
+ * @returns true if the weights were updated; false if the given data was invalid
+ */
+export const updateWeights = async (adjustments: WeightAdjustments) => {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/weights`, {
+        method: "post",
+        mode: "cors",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(adjustments),
+    });
+
+    return response.ok;
+};
+
+/**
+ *
+ * @param type the type of a liked place
+ * @returns true if the type was added to the user's liked types; false if the type has already been added or the request was invalid
+ */
+export const addLikedType = async (type: string) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/weights/types/${type}`,
+        {
+            method: "post",
+            mode: "cors",
+            credentials: "include",
+        },
+    );
+
+    return response.ok;
+};
+
+/**
+ * @param average the average of a field value across all PlaceRecData
+ * @param value that field value for a specific place
+ * @returns the number by which to adjust the weight for that value, given that the place has been liked
+ */
+export const getAdjustment = (average: number, value: number) => {
+    if (Math.abs(value - average) < DELTA) {
+        return 0;
+    } else if (value < average) {
+        return LIKED_WEIGHT_DECREASE;
+    } else {
+        return LIKED_WEIGHT_INCREASE;
+    }
+};
+
+/**
+ *
+ * @param placeGeohash the geohashed location of a place
+ * @param locationHistory a user's entire past location history
+ * @returns the number of times the user has likely visited this place and
+ * a weighted score based on the duration and recency of these visits
+ */
 const getPastVisitsStats = (
     placeGeohash: string,
     locationHistory: PlaceHistory[],
-) => {
+): [number, number] => {
     let visitScore = 0;
     let numVisits = 0;
 
@@ -232,7 +331,7 @@ const getPastVisitsStats = (
  * @param users data on a group of users (here, users at a place)
  * @returns the average similarity of users to the current user and the number of friends of the current user among them
  */
-const getUsersStats = (users: PlaceRecUserData[]) => {
+const getUsersStats = (users: PlaceRecUserData[]): [number, number] => {
     // set initial values
     // interest angle starts at the least possible similarity to represent there being 0 users
     let avgInterestAngle = Math.PI / 2;
@@ -361,21 +460,32 @@ const getUserLocationHistory = async () => {
 /**
  *
  * @param placeData relevant data on a point of interest
- * @param adjustments values by which to increase/decrease weights due to user feedback
+ * @param weights the user's personalized weights
  * @returns the same place data with a calculated score
  */
 const calculateScore = (
     placeData: PlaceRecData,
-    adjustments: WeightAdjustments,
-) => {
+    weights: Weights,
+): PlaceRecData => {
+    const friendScore = placeData.userData.friendCount * weights.friendWeight;
+    const visitScore = placeData.visitScore * weights.pastVisitWeight;
+    const countScore = placeData.userData.count * weights.countWeight;
+    const similarityScore =
+        placeData.userData.avgInterestAngle * weights.similarityWeight;
+    const distanceScore = placeData.geohashDistance * weights.distanceWeight;
+    const typeScore = (placeData.isLikedType ? 1 : 0) * weights.typeWeight;
+
+    // similarityScore increases as users are more different; 0 means most similar
+    const totalScore =
+        friendScore +
+        visitScore +
+        countScore -
+        similarityScore +
+        distanceScore +
+        typeScore;
+
     return {
         ...placeData,
-        score:
-            placeData.userData.friendCount * FRIEND_COUNT_WEIGHT +
-            placeData.visitScore * (PAST_WEIGHT + adjustments.pastVisits) +
-            placeData.userData.count * (COUNT_WEIGHT + adjustments.numUsers) -
-            placeData.userData.avgInterestAngle * SIMILARITY_WEIGHT +
-            placeData.geohashDistance *
-                (DISTANCE_WEIGHT + adjustments.distance),
+        score: totalScore,
     };
 };

@@ -59,31 +59,6 @@ export const NEARBY_PLACES_RADIUS = 5000;
 export const MAX_PLACE_RESULTS = 10;
 
 /**
- * Weight of average present user similarity in place recommendation algorithm
- */
-export const SIMILARITY_WEIGHT = 1;
-
-/**
- * Weight of present user count in place recommendation algorithm
- */
-export const COUNT_WEIGHT = 1;
-
-/**
- * Weight of present friend count in place recommendation algorithm
- */
-export const FRIEND_COUNT_WEIGHT = 1;
-
-/**
- * Weight of distance in place recommendation algorithm
- */
-export const DISTANCE_WEIGHT = 1;
-
-/**
- * Weight of number of past visits to the place in place recommendation algorithm
- */
-export const PAST_WEIGHT = 1;
-
-/**
  * Number of messages returned from each query
  */
 export const MESSAGES_PER_PAGE = 10;
@@ -102,3 +77,18 @@ export const MS_IN_DAY = 24 * 60 * 60 * 1000;
  * The number of milliseconds in a minute
  */
 export const MS_IN_MINUTE = 60 * 1000;
+
+/**
+ * The margin of error allowed when determining whether two decimals are approximately equal
+ */
+export const DELTA = 1e-4;
+
+/**
+ * The amount by which to increase the weight of a value that a liked place is above average in
+ */
+export const LIKED_WEIGHT_INCREASE = 0.5;
+
+/**
+ * The negative amount by which to decrease the weight of a value that a liked place is below average in
+ */
+export const LIKED_WEIGHT_DECREASE = -0.5;
