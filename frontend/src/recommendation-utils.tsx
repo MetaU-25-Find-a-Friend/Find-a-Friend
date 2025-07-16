@@ -80,6 +80,8 @@ export const recommendPlaces = async (
             userLocationHistory,
         );
 
+        const isLikedType = weights.likedTypes.includes(place.primaryType);
+
         // calculate place's recommendation score given this data and push the final data object to result
         result.push(
             calculateScore(
@@ -89,6 +91,7 @@ export const recommendPlaces = async (
                     geohashDistance: geohashDistance,
                     numVisits: numVisits,
                     visitScore: visitScore,
+                    isLikedType: isLikedType,
                     userData: {
                         count: userDataAtPlace.length,
                         avgInterestAngle: avgInterestAngle,
@@ -159,7 +162,7 @@ export const getNearbyPOIs = async (hash: string) => {
                 "Content-Type": "application/json",
                 "X-Goog-Api-Key": import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
                 "X-Goog-FieldMask":
-                    "places.displayName,places.formattedAddress,places.location",
+                    "places.displayName,places.formattedAddress,places.location,places.primaryType",
             },
             body: JSON.stringify({
                 includedTypes: [
@@ -254,6 +257,24 @@ export const updateWeights = async (adjustments: WeightAdjustments) => {
         },
         body: JSON.stringify(adjustments),
     });
+
+    return response.ok;
+};
+
+/**
+ *
+ * @param type the type of a liked place
+ * @returns true if the type was added to the user's liked types; false if the type has already been added or the request was invalid
+ */
+export const addLikedType = async (type: string) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/weights/types/${type}`,
+        {
+            method: "post",
+            mode: "cors",
+            credentials: "include",
+        },
+    );
 
     return response.ok;
 };
@@ -439,7 +460,7 @@ const getUserLocationHistory = async () => {
 /**
  *
  * @param placeData relevant data on a point of interest
- * @param adjustments values by which to increase/decrease weights due to user feedback
+ * @param weights the user's personalized weights and place types they've liked
  * @returns the same place data with a calculated score
  */
 const calculateScore = (placeData: PlaceRecData, weights: Weights) => {
@@ -450,6 +471,7 @@ const calculateScore = (placeData: PlaceRecData, weights: Weights) => {
             placeData.visitScore * weights.pastVisitWeight +
             placeData.userData.count * weights.countWeight -
             placeData.userData.avgInterestAngle * weights.similarityWeight +
-            placeData.geohashDistance * weights.distanceWeight,
+            placeData.geohashDistance * weights.distanceWeight +
+            (placeData.isLikedType ? 1 : 0) * weights.typeWeight,
     };
 };

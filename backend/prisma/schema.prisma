@@ -74,4 +74,6 @@ model PlaceRecommendationWeights {
   countWeight Decimal @default(1)
   similarityWeight Decimal @default(1)
   distanceWeight Decimal @default(1)
+  typeWeight Decimal @default(1)
+  likedTypes String[] @default([])
 }

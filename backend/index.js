@@ -434,6 +434,7 @@ app.get("/weights", authenticate, async (req, res) => {
     return res.json(newWeights);
 });
 
+// update the recommendation weights for the logged-in user
 app.post("/weights", authenticate, async (req, res) => {
     const userId = req.session.userId;
 
@@ -442,7 +443,8 @@ app.post("/weights", authenticate, async (req, res) => {
         !req.body.pastVisitAdjustment &&
         !req.body.countAdjustment &&
         !req.body.similarityAdjustment &&
-        !req.body.distanceAdjustment
+        !req.body.distanceAdjustment &&
+        !req.body.typeAdjustment
     ) {
         return res
             .status(400)
@@ -469,10 +471,52 @@ app.post("/weights", authenticate, async (req, res) => {
             distanceWeight: {
                 increment: req.body.distanceAdjustment ?? 0,
             },
+            typeWeight: {
+                increment: req.body.typeAdjustment ?? 0,
+            },
         },
     });
 
     res.status(200).send("Weights updated");
+});
+
+// add a place type to the user's liked types
+app.post("/weights/types/:newType", authenticate, async (req, res) => {
+    const userId = req.session.userId;
+
+    const newType = req.params.newType;
+
+    const existing = await prisma.placeRecommendationWeights.findUnique({
+        where: {
+            userId: userId,
+        },
+        select: {
+            likedTypes: true,
+        },
+    });
+
+    if (!existing) {
+        return res
+            .status(404)
+            .send("Weights for user have not yet been initialized");
+    }
+
+    if (existing.likedTypes.includes(newType)) {
+        return res.status(409).send("Type already liked");
+    }
+
+    await prisma.placeRecommendationWeights.update({
+        where: {
+            userId: userId,
+        },
+        data: {
+            likedTypes: {
+                push: req.params.newType,
+            },
+        },
+    });
+
+    res.status(200).send("Types updated");
 });
 
 // create a friend request from the logged-in user to another user

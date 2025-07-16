@@ -5,6 +5,7 @@ import {
     updateWeights,
     areHashesClose,
     getAdjustment,
+    addLikedType,
 } from "../recommendation-utils";
 import { useState, useRef } from "react";
 import type {
@@ -24,6 +25,7 @@ import {
     faThumbsUp,
     faUsers,
 } from "@fortawesome/free-solid-svg-icons";
+import { LIKED_WEIGHT_INCREASE } from "../constants";
 
 interface RecommendationListProps {
     myLocation: string;
@@ -89,30 +91,38 @@ const RecommendationList = ({
     };
 
     // when the user likes a recommendation, increase/decrease weights for factors it was above/below average in
-    const handleLikeClick = (place: PlaceRecData) => {
+    const handleLikeClick = async (place: PlaceRecData) => {
         if (placesStats) {
-            updateWeights({
-                friendAdjustment: getAdjustment(
-                    placesStats.avgFriendCount,
-                    place.userData.friendCount,
-                ),
-                pastVisitAdjustment: getAdjustment(
-                    placesStats.avgVisitScore,
-                    place.visitScore,
-                ),
-                countAdjustment: getAdjustment(
-                    placesStats.avgCount,
-                    place.userData.count,
-                ),
-                similarityAdjustment: getAdjustment(
-                    -placesStats.avgUserSimilarity,
-                    -place.userData.avgInterestAngle,
-                ),
-                distanceAdjustment: getAdjustment(
-                    placesStats.avgDistance,
-                    place.geohashDistance,
-                ),
-            }).then(loadPlaces);
+            await Promise.all([
+                updateWeights({
+                    friendAdjustment: getAdjustment(
+                        placesStats.avgFriendCount,
+                        place.userData.friendCount,
+                    ),
+                    pastVisitAdjustment: getAdjustment(
+                        placesStats.avgVisitScore,
+                        place.visitScore,
+                    ),
+                    countAdjustment: getAdjustment(
+                        placesStats.avgCount,
+                        place.userData.count,
+                    ),
+                    similarityAdjustment: getAdjustment(
+                        -placesStats.avgUserSimilarity,
+                        -place.userData.avgInterestAngle,
+                    ),
+                    distanceAdjustment: getAdjustment(
+                        placesStats.avgDistance,
+                        place.geohashDistance,
+                    ),
+                    typeAdjustment: place.isLikedType
+                        ? LIKED_WEIGHT_INCREASE
+                        : 0,
+                }),
+                addLikedType(place.place.primaryType),
+            ]);
+
+            loadPlaces();
         }
     };
 

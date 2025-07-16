@@ -68,6 +68,7 @@ export interface Place {
         latitude: number;
         longitude: number;
     };
+    primaryType: string;
 }
 
 /**
@@ -90,6 +91,7 @@ export interface PlaceHistory {
  * @property numVisits the number of times the user has visited this place in the past
  * @property visitScore a weighted score based on the recency and duration of past visits;
  * increases with higher relevance to the user
+ * @property isLikedType true if the place's primary type is one the user has liked in the past
  * @property userData holds information on the number of other users at this place
  * @property score the final weighted score combining all of this information
  */
@@ -99,6 +101,7 @@ export interface PlaceRecData {
     geohashDistance: number;
     numVisits: number;
     visitScore: number;
+    isLikedType: boolean;
     userData: {
         count: number;
         avgInterestAngle: number;
@@ -127,6 +130,7 @@ export interface WeightAdjustments {
     countAdjustment?: number;
     similarityAdjustment?: number;
     distanceAdjustment?: number;
+    typeAdjustment?: number;
 }
 
 /**
@@ -141,7 +145,7 @@ export interface PlaceRecStats {
 }
 
 /**
- * Represents the weights saved for a user for use in calculating their recommended places
+ * Represents the weights and liked place types saved for a user for use in calculating their recommended places
  */
 export interface Weights {
     friendWeight: number;
@@ -149,6 +153,8 @@ export interface Weights {
     countWeight: number;
     similarityWeight: number;
     distanceWeight: number;
+    typeWeight: number;
+    likedTypes: string[];
 }
 
 export interface FriendRequest {
