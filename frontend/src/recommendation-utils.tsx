@@ -4,6 +4,9 @@ import {
     NEARBY_PLACES_RADIUS,
     MS_IN_DAY,
     MS_IN_MINUTE,
+    DELTA,
+    LIKED_WEIGHT_DECREASE,
+    LIKED_WEIGHT_INCREASE,
 } from "./constants";
 import type {
     PlaceHistory,
@@ -224,6 +227,10 @@ export const areHashesClose = (hash1: string, hash2: string) => {
     );
 };
 
+/**
+ *
+ * @returns the logged-in user's personalized recommendation weights, or default 1s if not yet calculated
+ */
 const getWeights = async () => {
     const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/weights`, {
         credentials: "include",
@@ -232,6 +239,11 @@ const getWeights = async () => {
     return response.json();
 };
 
+/**
+ *
+ * @param adjustments numbers by which to adjust some or all of the user's recommendation weights
+ * @returns true if the weights were updated; false if the given data was invalid
+ */
 export const updateWeights = async (adjustments: WeightAdjustments) => {
     const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/weights`, {
         method: "post",
@@ -246,6 +258,28 @@ export const updateWeights = async (adjustments: WeightAdjustments) => {
     return response.ok;
 };
 
+/**
+ * @param average the average of a field value across all PlaceRecData
+ * @param value that field value for a specific place
+ * @returns the number by which to adjust the weight for that value, given that the place has been liked
+ */
+export const getAdjustment = (average: number, value: number) => {
+    if (Math.abs(value - average) < DELTA) {
+        return 0;
+    } else if (value < average) {
+        return LIKED_WEIGHT_DECREASE;
+    } else {
+        return LIKED_WEIGHT_INCREASE;
+    }
+};
+
+/**
+ *
+ * @param placeGeohash the geohashed location of a place
+ * @param locationHistory a user's entire past location history
+ * @returns the number of times the user has likely visited this place and
+ * a weighted score based on the duration and recency of these visits
+ */
 const getPastVisitsStats = (
     placeGeohash: string,
     locationHistory: PlaceHistory[],

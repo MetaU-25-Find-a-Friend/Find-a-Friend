@@ -4,6 +4,7 @@ import {
     getNearbyPOIs,
     updateWeights,
     areHashesClose,
+    getAdjustment,
 } from "../recommendation-utils";
 import { useState, useRef } from "react";
 import type {
@@ -23,11 +24,6 @@ import {
     faThumbsUp,
     faUsers,
 } from "@fortawesome/free-solid-svg-icons";
-import {
-    DELTA,
-    LIKED_WEIGHT_DECREASE,
-    LIKED_WEIGHT_INCREASE,
-} from "../constants";
 
 interface RecommendationListProps {
     myLocation: string;
@@ -52,10 +48,12 @@ const RecommendationList = ({
     // the myLocation value last used to calculate nearbyPlaces
     const lastLocation = useRef("");
 
+    // averages for some place data values; compared against liked places' values to determine how to adjust weights
     const [placesStats, setPlacesStats] = useState<PlaceRecStats | null>(null);
 
     const [loading, setLoading] = useState(false);
 
+    // load places, compile relevant data on them, and sort them by recommendation score
     const loadPlaces = async () => {
         setLoading(true);
 
@@ -115,17 +113,6 @@ const RecommendationList = ({
                     place.geohashDistance,
                 ),
             }).then(loadPlaces);
-        }
-    };
-
-    // calculate how to adjust a weight by comparing a place's value to the overall average
-    const getAdjustment = (average: number, value: number) => {
-        if (Math.abs(value - average) < DELTA) {
-            return 0;
-        } else if (value < average) {
-            return LIKED_WEIGHT_DECREASE;
-        } else {
-            return LIKED_WEIGHT_INCREASE;
         }
     };
 

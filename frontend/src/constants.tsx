@@ -78,8 +78,17 @@ export const MS_IN_DAY = 24 * 60 * 60 * 1000;
  */
 export const MS_IN_MINUTE = 60 * 1000;
 
+/**
+ * The margin of error allowed when determining whether two decimals are approximately equal
+ */
 export const DELTA = 1e-4;
 
+/**
+ * The amount by which to increase the weight of a value that a liked place is above average in
+ */
 export const LIKED_WEIGHT_INCREASE = 0.5;
 
+/**
+ * The negative amount by which to decrease the weight of a value that a liked place is below average in
+ */
 export const LIKED_WEIGHT_DECREASE = -0.5;

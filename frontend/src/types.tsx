@@ -83,15 +83,15 @@ export interface PlaceHistory {
 
 /**
  * Represents data on a place and the users at that place in relation to the current user
- *
- * geohashDistance is the resolution up to which this place and the current user are in the same hash box:
- * as it increases, the place is closer
- *
- * visitScore increases with the recency and duration of the user's past visits to the place
- *
- * userData contains information about users found to be at the place:
- * count is the number of users, avgInterestAngle is inversely related to their average similarity to the current user,
- * and friendCount is the number of friends at the place
+ * @property place the place itself as returned from the Places API
+ * @property geohash the place's location
+ * @property geohashDistance the number of characters this place's geohash has in common with the current user's;
+ * increases with closeness to the user
+ * @property numVisits the number of times the user has visited this place in the past
+ * @property visitScore a weighted score based on the recency and duration of past visits;
+ * increases with higher relevance to the user
+ * @property userData holds information on the number of other users at this place
+ * @property score the final weighted score combining all of this information
  */
 export interface PlaceRecData {
     place: Place;
@@ -129,6 +129,9 @@ export interface WeightAdjustments {
     distanceAdjustment?: number;
 }
 
+/**
+ * The average values of certain place recommendation factors for a list of nearby places
+ */
 export interface PlaceRecStats {
     avgFriendCount: number;
     avgVisitScore: number;
