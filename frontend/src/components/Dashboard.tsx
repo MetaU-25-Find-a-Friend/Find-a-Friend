@@ -234,16 +234,23 @@ const Dashboard = () => {
         return <LoggedOut></LoggedOut>;
     } else {
         return (
-            <main className={styles.grid}>
-                <Modal
-                    userData={modalData}
-                    setUserData={setModalData}></Modal>
-                {friendRequestsSection}
-                {messagesSection}
-                {titleAndProfileSection}
-                {peopleSection}
-                {mapSection}
-            </main>
+            <>
+                <div className={styles.backgroundContainer}>
+                    <div className={styles.leftPanel}></div>
+                    <div className={styles.centerPanel}></div>
+                    <div className={styles.rightPanel}></div>
+                </div>
+                <main className={styles.grid}>
+                    <Modal
+                        userData={modalData}
+                        setUserData={setModalData}></Modal>
+                    {friendRequestsSection}
+                    {messagesSection}
+                    {titleAndProfileSection}
+                    {peopleSection}
+                    {mapSection}
+                </main>
+            </>
         );
     }
 };
