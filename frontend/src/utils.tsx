@@ -91,8 +91,7 @@ export const getProfile = async (id: number) => {
     if (!response.ok) {
         return null;
     } else {
-        const json = await response.json();
-        return json as UserProfile;
+        return (await response.json()) as UserProfile;
     }
 };
 
@@ -133,16 +132,20 @@ export const getInterestName = (id: number) => {
     return interests[id];
 };
 
-export const getAllData = async (userId: number) => {
+/**
+ *
+ * @param id id of the user whose data to fetch
+ * @returns all stored data on the user
+ */
+export const getAllData = async (id: number) => {
     const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/user/details/${userId}`,
+        `${import.meta.env.VITE_SERVER_URL}/user/details/${id}`,
         {
             credentials: "include",
         },
     );
 
-    const json = (await response.json()) as AllUserData;
-    return json;
+    return (await response.json()) as AllUserData;
 };
 
 /**
@@ -197,9 +200,7 @@ export const getOtherUserGeohashes = async () => {
         },
     );
 
-    const otherUsers = await response.json();
-
-    return otherUsers;
+    return (await response.json()) as UserGeohash[];
 };
 
 /**
@@ -245,10 +246,13 @@ export const isGeoHashWithinMi = (
     const firstIndexWithGreaterRadius = GEOHASH_RADII.findIndex(
         (element) => element.radius >= radius,
     );
+
+    // if the given radius was greater than all known radii, return null
     if (firstIndexWithGreaterRadius === -1) {
         return null;
     }
 
+    // otherwise, save the resolution associated with the smallest radius we can use to narrow results down
     const res = GEOHASH_RADII[firstIndexWithGreaterRadius].res;
 
     let possiblyWithin = false;
@@ -315,56 +319,79 @@ export const getIncomingFriendRequests = async () => {
         credentials: "include",
     });
 
-    const json = (await response.json()) as FriendRequest[];
-    return json;
+    return (await response.json()) as FriendRequest[];
 };
 
 /**
  *
  * @param from id of the user whom the request is from
+ * @returns true if the request was found and accepted; false otherwise
  */
 export const acceptFriendRequest = async (from: number) => {
-    await fetch(`${import.meta.env.VITE_SERVER_URL}/friend/accept/${from}`, {
-        method: "post",
-        mode: "cors",
-        credentials: "include",
-    });
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/friend/accept/${from}`,
+        {
+            method: "post",
+            mode: "cors",
+            credentials: "include",
+        },
+    );
+
+    return response.ok;
 };
 
 /**
  *
  * @param from id of the user whom the request is from
+ * @returns true if the request was found and declined; false otherwise
  */
 export const declineFriendRequest = async (from: number) => {
-    await fetch(`${import.meta.env.VITE_SERVER_URL}/friend/decline/${from}`, {
-        method: "post",
-        mode: "cors",
-        credentials: "include",
-    });
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/friend/decline/${from}`,
+        {
+            method: "post",
+            mode: "cors",
+            credentials: "include",
+        },
+    );
+
+    return response.ok;
 };
 
 /**
  *
  * @param id id of the user to block; if this is a friend, the friend relationship will be removed
+ * @returns true if the user was successfully blocked; false otherwise
  */
 export const blockUser = async (id: number) => {
-    await fetch(`${import.meta.env.VITE_SERVER_URL}/block/${id}`, {
-        method: "post",
-        mode: "cors",
-        credentials: "include",
-    });
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/block/${id}`,
+        {
+            method: "post",
+            mode: "cors",
+            credentials: "include",
+        },
+    );
+
+    return response.ok;
 };
 
 /**
  *
  * @param id id of the currently blocked user to unblock
+ * @returns true if the user was successfully unblocked; false otherwise
  */
 export const unblockUser = async (id: number) => {
-    await fetch(`${import.meta.env.VITE_SERVER_URL}/unblock/${id}`, {
-        method: "post",
-        mode: "cors",
-        credentials: "include",
-    });
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/unblock/${id}`,
+        {
+            method: "post",
+            mode: "cors",
+            credentials: "include",
+        },
+    );
+
+    return response.ok;
 };
 
 /**
@@ -389,7 +416,10 @@ export const getMessagesBetween = async (id: number, cursor: number) => {
  * @param text text of the message
  * @returns an array: first element is true for success; second element is the new message or error message
  */
-export const sendMessage = async (to: number, text: string) => {
+export const sendMessage = async (
+    to: number,
+    text: string,
+): Promise<[boolean, any]> => {
     const response = await fetch(
         `${import.meta.env.VITE_SERVER_URL}/messages/${to}`,
         {
