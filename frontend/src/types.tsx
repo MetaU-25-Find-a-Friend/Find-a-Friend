@@ -129,6 +129,14 @@ export interface WeightAdjustments {
     distanceAdjustment?: number;
 }
 
+export interface PlaceRecStats {
+    avgFriendCount: number;
+    avgVisitScore: number;
+    avgCount: number;
+    avgUserSimilarity: number;
+    avgDistance: number;
+}
+
 /**
  * Represents the weights saved for a user for use in calculating their recommended places
  */

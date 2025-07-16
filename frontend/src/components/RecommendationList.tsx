@@ -5,7 +5,12 @@ import {
     updateWeights,
 } from "../recommendation-utils";
 import { useState } from "react";
-import type { WeightAdjustments, PlaceRecData, UserGeohash } from "../types";
+import type {
+    WeightAdjustments,
+    PlaceRecData,
+    UserGeohash,
+    PlaceRecStats,
+} from "../types";
 import { useUser } from "../contexts/UserContext";
 import Loading from "./Loading";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,6 +18,7 @@ import {
     faArrowDown,
     faArrowUp,
     faClock,
+    faThumbsUp,
     faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 
@@ -36,6 +42,8 @@ const RecommendationList = ({
     // array of places combined with data on the number of users there and their similarity to the current user
     const [nearbyPlaces, setNearbyPlaces] = useState(Array() as PlaceRecData[]);
 
+    const [placesStats, setPlacesStats] = useState<PlaceRecStats | null>(null);
+
     const [loading, setLoading] = useState(false);
 
     const loadPlaces = () => {
@@ -46,9 +54,10 @@ const RecommendationList = ({
                 // combine each place with data on users there and sort using algorithm
                 recommendPlaces(places, user!.id, myLocation, otherUsers),
             )
-            .then((placesWithUsers) => {
+            .then(([stats, recommendations]) => {
                 // load data and display in list
-                setNearbyPlaces(placesWithUsers);
+                setNearbyPlaces(recommendations);
+                setPlacesStats(stats);
                 setLoading(false);
             });
     };
@@ -61,10 +70,43 @@ const RecommendationList = ({
         updateWeights({ [weightName]: increase ? 1 : -1 }).then(loadPlaces);
     };
 
+    // when the user likes a recommendation, increase weights for factors it was above average in
+    const handleLikeClick = (place: PlaceRecData) => {
+        if (placesStats) {
+            updateWeights({
+                friendAdjustment:
+                    place.userData.friendCount > placesStats.avgFriendCount
+                        ? 0.5
+                        : 0,
+                pastVisitAdjustment:
+                    place.visitScore > placesStats.avgVisitScore ? 0.5 : 0,
+                countAdjustment:
+                    place.userData.count > placesStats.avgCount ? 0.5 : 0,
+                similarityAdjustment:
+                    place.userData.avgInterestAngle <
+                    placesStats.avgUserSimilarity
+                        ? 0.5
+                        : 0,
+                distanceAdjustment:
+                    place.geohashDistance > placesStats.avgDistance ? 0.5 : 0,
+            }).then(loadPlaces);
+        }
+    };
+
     // information on 1 recommended place
     const PlaceComponent = ({ place }: { place: PlaceRecData }) => (
         <div className={styles.place}>
-            <h6 className={styles.placeName}>{place.place.displayName.text}</h6>
+            <div className={styles.nameContainer}>
+                <h6 className={styles.placeName}>
+                    {place.place.displayName.text}
+                </h6>
+                <button
+                    className={styles.likeButton}
+                    onClick={() => handleLikeClick(place)}>
+                    <FontAwesomeIcon icon={faThumbsUp}></FontAwesomeIcon>
+                </button>
+            </div>
+
             <p className={styles.placeAddress}>
                 {place.place.formattedAddress}
             </p>

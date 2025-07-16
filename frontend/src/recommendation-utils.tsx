@@ -13,6 +13,7 @@ import type {
     PlaceRecUserData,
     Weights,
     WeightAdjustments,
+    PlaceRecStats,
 } from "./types";
 import { decodeBase32, encodeBase32 } from "geohashing";
 import { getAllData } from "./utils";
@@ -30,8 +31,16 @@ export const recommendPlaces = async (
     currentUser: number,
     currentLocation: string,
     activeUsers: UserGeohash[],
-) => {
+): Promise<[PlaceRecStats, PlaceRecData[]]> => {
     const result = Array() as PlaceRecData[];
+
+    const stats = {
+        avgFriendCount: 0,
+        avgVisitScore: 0,
+        avgCount: 0,
+        avgUserSimilarity: 0,
+        avgDistance: 0,
+    };
 
     // compile data on active users, their interests, and whether they are friends with the current user;
     // all the user's past locations; and the weights representing the user's preferences
@@ -47,6 +56,11 @@ export const recommendPlaces = async (
         const placeGeohash = encodeBase32(
             place.location.latitude,
             place.location.longitude,
+        );
+
+        const geohashDistance = numSameCharacters(
+            placeGeohash,
+            currentLocation,
         );
 
         // use only users at this place
@@ -69,10 +83,7 @@ export const recommendPlaces = async (
                 {
                     place: place,
                     geohash: placeGeohash,
-                    geohashDistance: numSameCharacters(
-                        placeGeohash,
-                        currentLocation,
-                    ),
+                    geohashDistance: geohashDistance,
                     numVisits: numVisits,
                     visitScore: visitScore,
                     userData: {
@@ -85,10 +96,24 @@ export const recommendPlaces = async (
                 weights,
             ),
         );
+
+        stats.avgFriendCount += friendCount;
+        stats.avgVisitScore += visitScore;
+        stats.avgCount += userDataAtPlace.length;
+        stats.avgUserSimilarity += avgInterestAngle;
+        stats.avgDistance += geohashDistance;
+    }
+
+    if (places.length > 0) {
+        stats.avgFriendCount /= places.length;
+        stats.avgVisitScore /= places.length;
+        stats.avgCount /= places.length;
+        stats.avgUserSimilarity /= places.length;
+        stats.avgDistance /= places.length;
     }
 
     // sort results by score
-    return result.sort((a, b) => b.score - a.score);
+    return [stats, result.sort((a, b) => b.score - a.score)];
 };
 
 /**
