@@ -21,6 +21,11 @@ import {
     faThumbsUp,
     faUsers,
 } from "@fortawesome/free-solid-svg-icons";
+import {
+    DELTA,
+    LIKED_WEIGHT_DECREASE,
+    LIKED_WEIGHT_INCREASE,
+} from "../constants";
 
 interface RecommendationListProps {
     myLocation: string;
@@ -70,26 +75,42 @@ const RecommendationList = ({
         updateWeights({ [weightName]: increase ? 1 : -1 }).then(loadPlaces);
     };
 
-    // when the user likes a recommendation, increase weights for factors it was above average in
+    // when the user likes a recommendation, increase/decrease weights for factors it was above/below average in
     const handleLikeClick = (place: PlaceRecData) => {
         if (placesStats) {
             updateWeights({
-                friendAdjustment:
-                    place.userData.friendCount > placesStats.avgFriendCount
-                        ? 0.5
-                        : 0,
-                pastVisitAdjustment:
-                    place.visitScore > placesStats.avgVisitScore ? 0.5 : 0,
-                countAdjustment:
-                    place.userData.count > placesStats.avgCount ? 0.5 : 0,
-                similarityAdjustment:
-                    place.userData.avgInterestAngle <
-                    placesStats.avgUserSimilarity
-                        ? 0.5
-                        : 0,
-                distanceAdjustment:
-                    place.geohashDistance > placesStats.avgDistance ? 0.5 : 0,
+                friendAdjustment: getAdjustment(
+                    placesStats.avgFriendCount,
+                    place.userData.friendCount,
+                ),
+                pastVisitAdjustment: getAdjustment(
+                    placesStats.avgVisitScore,
+                    place.visitScore,
+                ),
+                countAdjustment: getAdjustment(
+                    placesStats.avgCount,
+                    place.userData.count,
+                ),
+                similarityAdjustment: getAdjustment(
+                    -placesStats.avgUserSimilarity,
+                    -place.userData.avgInterestAngle,
+                ),
+                distanceAdjustment: getAdjustment(
+                    placesStats.avgDistance,
+                    place.geohashDistance,
+                ),
             }).then(loadPlaces);
+        }
+    };
+
+    // calculate how to adjust a weight by comparing a place's value to the overall average
+    const getAdjustment = (average: number, value: number) => {
+        if (Math.abs(value - average) < DELTA) {
+            return 0;
+        } else if (value < average) {
+            return LIKED_WEIGHT_DECREASE;
+        } else {
+            return LIKED_WEIGHT_INCREASE;
         }
     };
 
