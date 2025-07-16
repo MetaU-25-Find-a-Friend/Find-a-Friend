@@ -3,13 +3,15 @@ import {
     recommendPlaces,
     getNearbyPOIs,
     updateWeights,
+    areHashesClose,
 } from "../recommendation-utils";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import type {
     WeightAdjustments,
     PlaceRecData,
     UserGeohash,
     PlaceRecStats,
+    Place,
 } from "../types";
 import { useUser } from "../contexts/UserContext";
 import Loading from "./Loading";
@@ -47,24 +49,37 @@ const RecommendationList = ({
     // array of places combined with data on the number of users there and their similarity to the current user
     const [nearbyPlaces, setNearbyPlaces] = useState(Array() as PlaceRecData[]);
 
+    // the myLocation value last used to calculate nearbyPlaces
+    const lastLocation = useRef("");
+
     const [placesStats, setPlacesStats] = useState<PlaceRecStats | null>(null);
 
     const [loading, setLoading] = useState(false);
 
-    const loadPlaces = () => {
+    const loadPlaces = async () => {
         setLoading(true);
-        // get all places nearby
-        getNearbyPOIs(myLocation)
-            .then((places) =>
-                // combine each place with data on users there and sort using algorithm
-                recommendPlaces(places, user!.id, myLocation, otherUsers),
-            )
-            .then(([stats, recommendations]) => {
-                // load data and display in list
-                setNearbyPlaces(recommendations);
-                setPlacesStats(stats);
-                setLoading(false);
-            });
+
+        // get nearby points of interest
+        let places: Place[];
+
+        // if myLocation has not changed (or lastLocation is empty), reuse the places we already have
+        if (areHashesClose(myLocation, lastLocation.current)) {
+            places = nearbyPlaces.map((placeRecData) => placeRecData.place);
+        } else {
+            places = await getNearbyPOIs(myLocation);
+            lastLocation.current = myLocation;
+        }
+        // combine each place with data on users there and sort using algorithm
+        const [stats, recommendations] = await recommendPlaces(
+            places,
+            user!.id,
+            myLocation,
+            otherUsers,
+        );
+
+        setNearbyPlaces(recommendations);
+        setPlacesStats(stats);
+        setLoading(false);
     };
 
     // update weight adjustments (and trigger reload) when the user clicks a feedback button
