@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, Fragment } from "react";
 import styles from "../css/Modal.module.css";
 import Alert from "./Alert";
 import type { AllUserData } from "../types";
@@ -99,20 +99,15 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
     // text entered in the box that shows if the user is a friend
     const [messageText, setMessageText] = useState("");
 
-    // reference to text box
-    const inputRef = useRef<HTMLInputElement | null>(null);
-
     // send message in text box
     const handleSendClick = async () => {
         if (userData && messageText) {
             const [success, _] = await sendMessage(userData.id, messageText);
             if (!success) {
-                setAlertText("Something went wrong.");
+                setAlertText("Message failed to send. Please try again later.");
             } else {
                 setAlertText("Message sent.");
-                if (inputRef.current) {
-                    inputRef.current.value = "";
-                }
+                setMessageText("");
             }
         }
     };
@@ -130,8 +125,8 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                 <input
                     type="text"
                     className={styles.input}
+                    value={messageText}
                     onChange={(event) => setMessageText(event.target.value)}
-                    ref={inputRef}
                     placeholder="New message"></input>
                 <button
                     className={styles.sendButton}
@@ -208,6 +203,23 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
     );
 
     if (userData && currentUserData) {
+        // if this user is blocked, only show unblock button; otherwise, show block button and friend button or message textbox
+        const friendsOrBlockedActions = currentUserData.blockedUsers.includes(
+            userData.id,
+        ) ? (
+            alreadyBlockedDisplay
+        ) : currentUserData!.friends.includes(userData.id) ? (
+            <>
+                {notBlockedDisplay}
+                {alreadyFriendsDisplay}
+            </>
+        ) : (
+            <>
+                {notBlockedDisplay}
+                {notFriendsDisplay}
+            </>
+        );
+
         return (
             <div
                 ref={overlayRef}
@@ -237,7 +249,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                                     </p>
                                 );
                             } else {
-                                return <></>;
+                                return <Fragment key={index}></Fragment>;
                             }
                         })}
                     </div>
@@ -245,12 +257,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                     {userData.id !== user?.id && (
                         <>
                             <hr className={styles.bar}></hr>
-                            {currentUserData.friends.includes(userData.id)
-                                ? alreadyFriendsDisplay
-                                : notFriendsDisplay}
-                            {currentUserData.blockedUsers.includes(userData.id)
-                                ? alreadyBlockedDisplay
-                                : notBlockedDisplay}
+                            {friendsOrBlockedActions}
                         </>
                     )}
                 </div>
