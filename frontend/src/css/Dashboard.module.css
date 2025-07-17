@@ -38,6 +38,7 @@
     background-color: #e0f7f9;
     animation-name: slide-left;
     animation-duration: 1s;
+    animation-delay: 0.5s;
     animation-timing-function: ease;
     animation-iteration-count: 1;
     animation-fill-mode: both;
@@ -76,26 +77,54 @@
 
 .userMenu {
     position: absolute;
-    top: 100%;
+    top: 120%;
     background-color: var(--tan-background);
     padding: 1rem;
-    width: 50%;
+    width: fit-content;
     border-radius: 2rem;
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;
-    align-items: flex-start;
+    align-items: flex-end;
     gap: 1rem;
     padding: 2rem 1rem;
     box-sizing: border-box;
+    animation-duration: 0.5s;
+    animation-timing-function: ease;
+    animation-iteration-count: 1;
+    animation-fill-mode: both;
+}
+
+@keyframes slide-down {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slide-up {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-100%);
+        opacity: 0;
+        display: none;
+    }
 }
 
 .visible {
     display: flex;
+    animation-name: slide-down;
 }
 
 .invisible {
-    display: none;
+    animation-name: slide-up;
 }
 
 .userMenuItem {
@@ -127,6 +156,12 @@
     margin: 0;
 }
 
+.emptyMessage {
+    font-size: 20px;
+    margin: 0;
+    text-align: center;
+}
+
 .messagesContainer {
     display: flex;
     flex-flow: column nowrap;
@@ -141,13 +176,13 @@
 
 .previews {
     width: 100%;
-    max-height: calc(100vh - 10rem);
+    height: calc(100vh - 10rem);
     overflow-x: hidden;
     overflow-y: scroll;
     display: flex;
     flex-flow: column nowrap;
     gap: 1rem;
-    padding: 1rem;
+    padding: 0 1rem;
     box-sizing: border-box;
 }
 
