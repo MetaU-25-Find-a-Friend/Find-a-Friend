@@ -140,6 +140,7 @@ const EditProfile = () => {
             <section className={styles.interestsContainer}>
                 {formData.interests.map((value, index, array) => (
                     <div
+                        key={index}
                         className={styles.interest}
                         onClick={() => {
                             // toggle whether a 0 or 1 is associated with this interest's index

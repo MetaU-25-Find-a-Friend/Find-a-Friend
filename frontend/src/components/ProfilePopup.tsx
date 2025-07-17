@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import styles from "../css/ProfilePopup.module.css";
 import type { AllUserData } from "../types";
 import { getInterestName } from "../utils";
@@ -34,7 +35,7 @@ const ProfilePopup = ({ userData }: ProfilePopupProps) => {
                             </p>
                         );
                     } else {
-                        return <></>;
+                        return <Fragment key={index}></Fragment>;
                     }
                 })}
             </div>
