@@ -55,8 +55,8 @@ const SignupForm = () => {
         });
     };
 
-    const inputForm = (
-        <form className={styles.form}>
+    const infoInputs = (
+        <>
             <input
                 className={styles.input}
                 name="firstName"
@@ -78,6 +78,11 @@ const SignupForm = () => {
                 type="email"
                 onChange={handleInputChange}
                 required></input>
+        </>
+    );
+
+    const passwordInputs = (
+        <>
             <input
                 className={styles.input}
                 name="password"
@@ -92,12 +97,20 @@ const SignupForm = () => {
                 type="password"
                 onChange={handleInputChange}
                 required></input>
-            <button
-                className={styles.button}
-                type="submit"
-                onClick={handleCreateAccount}>
-                Create Account
-            </button>
+        </>
+    );
+
+    const submitButton = (
+        <button
+            className={styles.button}
+            type="submit"
+            onClick={handleCreateAccount}>
+            Create Account
+        </button>
+    );
+
+    const linkToLogin = (
+        <>
             <hr className={styles.bar}></hr>
             <button
                 className={styles.button}
@@ -105,7 +118,7 @@ const SignupForm = () => {
                 onClick={() => navigate("/login")}>
                 Login to existing account
             </button>
-        </form>
+        </>
     );
 
     return (
@@ -114,7 +127,12 @@ const SignupForm = () => {
                 alertText={alertText}
                 setAlertText={setAlertText}></Alert>
             <h1 className={styles.title}>{APP_TITLE}</h1>
-            {inputForm}
+            <form className={styles.form}>
+                {infoInputs}
+                {passwordInputs}
+                {submitButton}
+                {linkToLogin}
+            </form>
         </>
     );
 };

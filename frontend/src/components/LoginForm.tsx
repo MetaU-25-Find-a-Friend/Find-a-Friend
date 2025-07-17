@@ -52,8 +52,8 @@ const LoginForm = () => {
         });
     };
 
-    const inputForm = (
-        <form className={styles.form}>
+    const inputs = (
+        <>
             <input
                 className={styles.input}
                 name="email"
@@ -68,12 +68,20 @@ const LoginForm = () => {
                 type="password"
                 onChange={handleInputChange}
                 required></input>
-            <button
-                className={styles.button}
-                type="submit"
-                onClick={handleCreateAccount}>
-                Login
-            </button>
+        </>
+    );
+
+    const submitButton = (
+        <button
+            className={styles.button}
+            type="submit"
+            onClick={handleCreateAccount}>
+            Login
+        </button>
+    );
+
+    const linkToSignup = (
+        <>
             <hr className={styles.bar}></hr>
             <button
                 className={styles.button}
@@ -81,7 +89,7 @@ const LoginForm = () => {
                 onClick={() => navigate("/signup")}>
                 Create new account
             </button>
-        </form>
+        </>
     );
 
     return (
@@ -90,7 +98,11 @@ const LoginForm = () => {
                 alertText={alertText}
                 setAlertText={setAlertText}></Alert>
             <h1 className={styles.title}>{APP_TITLE}</h1>
-            {inputForm}
+            <form className={styles.form}>
+                {inputs}
+                {submitButton}
+                {linkToSignup}
+            </form>
         </>
     );
 };
