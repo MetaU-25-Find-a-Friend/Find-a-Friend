@@ -74,8 +74,12 @@ const People = () => {
 
     // when profile button is clicked, block user
     const handleBlockClick = async (id: number) => {
-        await blockUser(id);
-        setAlertText("Successfully blocked user.");
+        const success = await blockUser(id);
+        setAlertText(
+            success
+                ? "Successfully blocked user."
+                : "An error occurred while trying to block this user. Please try again later.",
+        );
     };
 
     // check validity of cache and return a reference to the updated cache that should be used for loading

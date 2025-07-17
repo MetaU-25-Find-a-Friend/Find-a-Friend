@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, Fragment } from "react";
 import styles from "../css/Modal.module.css";
 import Alert from "./Alert";
 import type { AllUserData } from "../types";
@@ -81,42 +81,50 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
     // block user when button is clicked
     const handleBlockClick = async () => {
         if (userData) {
-            await blockUser(userData.id);
-            setAlertText("Successfully blocked user.");
-            await loadCurrentUserData();
+            const success = await blockUser(userData.id);
+            if (success) {
+                setAlertText("Successfully blocked user.");
+                await loadCurrentUserData();
+            } else {
+                setAlertText(
+                    "An error occurred while trying to block this user. Please try again later.",
+                );
+            }
         }
     };
 
     // unblock user when button is clicked
     const handleUnblockClick = async () => {
         if (userData) {
-            await unblockUser(userData.id);
-            setAlertText("Successfully unblocked user.");
-            await loadCurrentUserData();
+            const success = await unblockUser(userData.id);
+            if (success) {
+                setAlertText("Successfully unblocked user.");
+                await loadCurrentUserData();
+            } else {
+                setAlertText(
+                    "An error occurred while trying to unblock this user. Please try again later.",
+                );
+            }
         }
     };
 
     // text entered in the box that shows if the user is a friend
     const [messageText, setMessageText] = useState("");
 
-    // reference to text box
-    const inputRef = useRef<HTMLInputElement | null>(null);
-
     // send message in text box
     const handleSendClick = async () => {
-        if (userData && messageText) {
+        if (userData && messageText.trim()) {
             const [success, _] = await sendMessage(userData.id, messageText);
             if (!success) {
-                setAlertText("Something went wrong.");
+                setAlertText("Message failed to send. Please try again later.");
             } else {
                 setAlertText("Message sent.");
-                if (inputRef.current) {
-                    inputRef.current.value = "";
-                }
+                setMessageText("");
             }
         }
     };
 
+    // shows textbox to message the friend
     const alreadyFriendsDisplay = (
         <>
             <div className={styles.infoContainer}>
@@ -130,8 +138,8 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                 <input
                     type="text"
                     className={styles.input}
+                    value={messageText}
                     onChange={(event) => setMessageText(event.target.value)}
-                    ref={inputRef}
                     placeholder="New message"></input>
                 <button
                     className={styles.sendButton}
@@ -145,6 +153,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
         </>
     );
 
+    // shows button to friend request the user
     const notFriendsDisplay = (
         <>
             <div className={styles.infoContainer}>
@@ -164,6 +173,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
         </>
     );
 
+    // shows button to unblock the user
     const alreadyBlockedDisplay = (
         <>
             <div className={styles.infoContainer}>
@@ -186,6 +196,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
         </>
     );
 
+    // shows button to block the user
     const notBlockedDisplay = (
         <>
             <div className={styles.infoContainer}>
@@ -208,6 +219,23 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
     );
 
     if (userData && currentUserData) {
+        // if this user is blocked, only show unblock button; otherwise, show block button and friend button or message textbox
+        const friendsOrBlockedActions = currentUserData.blockedUsers.includes(
+            userData.id,
+        ) ? (
+            alreadyBlockedDisplay
+        ) : currentUserData.friends.includes(userData.id) ? (
+            <>
+                {notBlockedDisplay}
+                {alreadyFriendsDisplay}
+            </>
+        ) : (
+            <>
+                {notBlockedDisplay}
+                {notFriendsDisplay}
+            </>
+        );
+
         return (
             <div
                 ref={overlayRef}
@@ -237,7 +265,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                                     </p>
                                 );
                             } else {
-                                return <></>;
+                                return <Fragment key={index}></Fragment>;
                             }
                         })}
                     </div>
@@ -245,12 +273,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                     {userData.id !== user?.id && (
                         <>
                             <hr className={styles.bar}></hr>
-                            {currentUserData.friends.includes(userData.id)
-                                ? alreadyFriendsDisplay
-                                : notFriendsDisplay}
-                            {currentUserData.blockedUsers.includes(userData.id)
-                                ? alreadyBlockedDisplay
-                                : notBlockedDisplay}
+                            {friendsOrBlockedActions}
                         </>
                     )}
                 </div>

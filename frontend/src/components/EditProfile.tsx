@@ -56,7 +56,9 @@ const EditProfile = () => {
             if (success) {
                 setAlertText("Successfully updated profile.");
             } else {
-                setAlertText("Something went wrong.");
+                setAlertText(
+                    "An error occurred while updating your profile. Please try again later.",
+                );
             }
         });
     };
@@ -71,6 +73,107 @@ const EditProfile = () => {
             });
         }
     }, [user]);
+
+    const nameInputs = (
+        <>
+            <label className={`${styles.label} ${styles.firstHalf}`}>
+                First name
+                <input
+                    className={styles.input}
+                    name="firstName"
+                    type="text"
+                    placeholder="Jane"
+                    defaultValue={formData.firstName}
+                    onChange={handleInputChange}></input>
+            </label>
+            <label className={`${styles.label} ${styles.lastHalf}`}>
+                Last name
+                <input
+                    className={styles.input}
+                    name="lastName"
+                    type="text"
+                    placeholder="Doe"
+                    defaultValue={formData.lastName}
+                    onChange={handleInputChange}></input>
+            </label>
+        </>
+    );
+
+    const detailsInputs = (
+        <>
+            <label className={`${styles.label} ${styles.firstHalf}`}>
+                Pronouns
+                <input
+                    className={styles.input}
+                    name="pronouns"
+                    type="text"
+                    placeholder="she/her, they/them, etc."
+                    defaultValue={formData.pronouns}
+                    onChange={handleInputChange}></input>
+            </label>
+            <label className={`${styles.label} ${styles.lastHalf}`}>
+                Age
+                <input
+                    className={styles.input}
+                    name="age"
+                    type="number"
+                    placeholder="18"
+                    defaultValue={formData.age}
+                    onChange={handleInputChange}></input>
+            </label>
+            <label className={styles.label}>
+                Major
+                <input
+                    className={styles.input}
+                    name="major"
+                    type="text"
+                    placeholder="English"
+                    defaultValue={formData.major}
+                    onChange={handleInputChange}></input>
+            </label>
+        </>
+    );
+
+    const interestsInput = (
+        <label className={styles.label}>
+            Interests
+            <section className={styles.interestsContainer}>
+                {formData.interests.map((value, index, array) => (
+                    <div
+                        key={index}
+                        className={styles.interest}
+                        onClick={() => {
+                            // toggle whether a 0 or 1 is associated with this interest's index
+                            setFormData({
+                                ...formData,
+                                interests: array.with(
+                                    index,
+                                    array[index] === 1 ? 0 : 1,
+                                ),
+                            });
+                        }}>
+                        <FontAwesomeIcon
+                            icon={
+                                value === 1 ? faCheckCircle : faPlus
+                            }></FontAwesomeIcon>
+                        {getInterestName(index)}
+                    </div>
+                ))}
+            </section>
+        </label>
+    );
+
+    const bioInput = (
+        <label className={styles.label}>
+            Bio
+            <textarea
+                className={styles.input}
+                name="bio"
+                placeholder="About me..."
+                defaultValue={formData.bio}
+                onChange={handleInputChange}></textarea>
+        </label>
+    );
 
     if (!user) {
         return <LoggedOut></LoggedOut>;
@@ -88,94 +191,10 @@ const EditProfile = () => {
                 </button>
                 <form className={styles.form}>
                     <h2 className={styles.formTitle}>Edit Profile</h2>
-                    <label className={`${styles.label} ${styles.firstHalf}`}>
-                        First name
-                        <input
-                            className={styles.input}
-                            name="firstName"
-                            type="text"
-                            placeholder="Jane"
-                            defaultValue={formData.firstName}
-                            onChange={handleInputChange}></input>
-                    </label>
-                    <label className={`${styles.label} ${styles.lastHalf}`}>
-                        Last name
-                        <input
-                            className={styles.input}
-                            name="lastName"
-                            type="text"
-                            placeholder="Doe"
-                            defaultValue={formData.lastName}
-                            onChange={handleInputChange}></input>
-                    </label>
-                    <label className={`${styles.label} ${styles.firstHalf}`}>
-                        Pronouns
-                        <input
-                            className={styles.input}
-                            name="pronouns"
-                            type="text"
-                            placeholder="she/her, they/them, etc."
-                            defaultValue={formData.pronouns}
-                            onChange={handleInputChange}></input>
-                    </label>
-                    <label className={`${styles.label} ${styles.lastHalf}`}>
-                        Age
-                        <input
-                            className={styles.input}
-                            name="age"
-                            type="number"
-                            placeholder="18"
-                            defaultValue={formData.age}
-                            onChange={handleInputChange}></input>
-                    </label>
-                    <label className={styles.label}>
-                        Major
-                        <input
-                            className={styles.input}
-                            name="major"
-                            type="text"
-                            placeholder="English"
-                            defaultValue={formData.major}
-                            onChange={handleInputChange}></input>
-                    </label>
-                    <label className={styles.label}>
-                        Interests
-                        <section className={styles.interestsContainer}>
-                            {formData.interests.map((value, index, array) => (
-                                <div
-                                    className={styles.interest}
-                                    onClick={() => {
-                                        // toggle whether a 0 or 1 is associated with this interest's index
-                                        setFormData({
-                                            ...formData,
-                                            interests: array.map((v, i) => {
-                                                if (i === index) {
-                                                    return value === 1 ? 0 : 1;
-                                                } else {
-                                                    return v;
-                                                }
-                                            }),
-                                        });
-                                    }}>
-                                    <FontAwesomeIcon
-                                        icon={
-                                            value === 1 ? faCheckCircle : faPlus
-                                        }></FontAwesomeIcon>
-                                    {getInterestName(index)}
-                                </div>
-                            ))}
-                        </section>
-                    </label>
-
-                    <label className={styles.label}>
-                        Bio
-                        <textarea
-                            className={styles.input}
-                            name="bio"
-                            placeholder="About me..."
-                            defaultValue={formData.bio}
-                            onChange={handleInputChange}></textarea>
-                    </label>
+                    {nameInputs}
+                    {detailsInputs}
+                    {interestsInput}
+                    {bioInput}
                     <button
                         className={styles.button}
                         type="submit"
