@@ -26,22 +26,20 @@ const ClusteredMarkers = ({ users, setModalData }: ClusteredMarkerProps) => {
 
     return (
         <>
-            {clusters.map((cluster) => {
-                if (cluster.userIds.length === 1) {
-                    return (
-                        <MapMarker
-                            id={cluster.userIds[0]}
-                            location={cluster.geohash}
-                            setModalData={setModalData}></MapMarker>
-                    );
-                } else {
-                    return (
-                        <MapCluster
-                            cluster={cluster}
-                            setModalData={setModalData}></MapCluster>
-                    );
-                }
-            })}
+            {clusters.map((cluster) =>
+                cluster.userIds.length === 1 ? (
+                    <MapMarker
+                        id={cluster.userIds[0]}
+                        key={cluster.userIds[0]}
+                        location={cluster.geohash}
+                        setModalData={setModalData}></MapMarker>
+                ) : (
+                    <MapCluster
+                        key={cluster.userIds.join(".")}
+                        cluster={cluster}
+                        setModalData={setModalData}></MapCluster>
+                ),
+            )}
         </>
     );
 };

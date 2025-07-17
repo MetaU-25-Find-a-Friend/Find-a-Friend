@@ -41,6 +41,12 @@
     font-size: inherit;
     width: fit-content;
     border-radius: 2rem;
+    transition: background-color 0.25s ease;
+}
+
+.button:hover {
+    color: white;
+    background-color: var(--teal-accent);
 }
 
 .bar {

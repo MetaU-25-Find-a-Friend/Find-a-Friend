@@ -4,6 +4,7 @@ import type { AllUserData, ClusterData } from "../types";
 import { geoHashToLatLng, getAllData } from "../utils";
 import React, { useEffect, useRef, useState } from "react";
 import ProfilePopup from "./ProfilePopup";
+import { createPortal } from "react-dom";
 
 interface MapClusterProps {
     cluster: ClusterData;
@@ -52,6 +53,43 @@ const MapCluster = ({ cluster, setModalData }: MapClusterProps) => {
         setUsersInCluster(result);
     }, []);
 
+    // displays profile popups for each clustered user in a vertical list
+    const popupsDisplay = (
+        <div className={styles.popupList}>
+            {usersInCluster.map((user) => (
+                <ProfilePopup
+                    key={user.id}
+                    userData={user}></ProfilePopup>
+            ))}
+        </div>
+    );
+
+    // allows for choosing which clustered user's profile to view in the modal
+    const picker = createPortal(
+        <div
+            className={styles.overlay}
+            ref={overlayRef}
+            onClick={handleOverlayClick}>
+            <div className={styles.picker}>
+                <p className={styles.pickerText}>
+                    Choose which user's profile to view:
+                </p>
+                {usersInCluster.map((user) => (
+                    <div
+                        key={user.id}
+                        className={styles.userOption}
+                        onClick={() => {
+                            setModalData(user);
+                            setShowingPicker(false);
+                        }}>
+                        {user.firstName} {user.lastName}
+                    </div>
+                ))}
+            </div>
+        </div>,
+        document.body,
+    );
+
     return (
         <>
             <AdvancedMarker position={geoHashToLatLng(cluster.geohash)}>
@@ -59,38 +97,10 @@ const MapCluster = ({ cluster, setModalData }: MapClusterProps) => {
                     className={styles.cluster}
                     onClick={handleClusterClick}>
                     <p className={styles.number}>{cluster.userIds.length}</p>
-                    <div className={styles.popupList}>
-                        {usersInCluster.map((user) => (
-                            <ProfilePopup
-                                key={user.id}
-                                userData={user}></ProfilePopup>
-                        ))}
-                    </div>
+                    {popupsDisplay}
                 </div>
             </AdvancedMarker>
-            {showingPicker && (
-                <div
-                    className={styles.overlay}
-                    ref={overlayRef}
-                    onClick={handleOverlayClick}>
-                    <div className={styles.picker}>
-                        <p className={styles.pickerText}>
-                            Choose which user's profile to view:
-                        </p>
-                        {usersInCluster.map((user) => (
-                            <div
-                                key={user.id}
-                                className={styles.userOption}
-                                onClick={() => {
-                                    setModalData(user);
-                                    setShowingPicker(false);
-                                }}>
-                                {user.firstName} {user.lastName}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
+            {showingPicker && picker}
         </>
     );
 };

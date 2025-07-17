@@ -1,6 +1,25 @@
 import type React from "react";
 
 /**
+ * Represents user-entered data to create an account
+ */
+export interface SignupData {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+}
+
+/**
+ * Represents user-entered credentials to log in to an account
+ */
+export interface LoginData {
+    email: string;
+    password: string;
+}
+
+/**
  * Represents displayed/editable user profile data
  */
 export interface UserProfile {
@@ -13,6 +32,9 @@ export interface UserProfile {
     bio?: string;
 }
 
+/**
+ * Represents all the data stored in the user table, including the user's friends and blocked users
+ */
 export interface AllUserData {
     id: number;
     firstName: string;
@@ -39,9 +61,12 @@ export interface SavedUser {
  */
 export interface SavedUserContext {
     user: SavedUser | null;
-    setUser: (value: SavedUser) => void;
+    setUser: React.Dispatch<React.SetStateAction<SavedUser | null>>;
 }
 
+/**
+ * Represents the user's current location
+ */
 export interface UserLocation {
     id: number;
     userId: number;
@@ -49,6 +74,9 @@ export interface UserLocation {
     longitude: number;
 }
 
+/**
+ * Represents a user's geohashed location
+ */
 export interface UserGeohash {
     id?: number;
     userId: number;
@@ -134,7 +162,7 @@ export interface WeightAdjustments {
 }
 
 /**
- * The average values of certain place recommendation factors for a list of nearby places
+ * Represents the average values of certain place recommendation factors for a list of nearby places
  */
 export interface PlaceRecStats {
     avgFriendCount: number;
@@ -157,12 +185,18 @@ export interface Weights {
     likedTypes: string[];
 }
 
+/**
+ * Represents a friend request
+ */
 export interface FriendRequest {
     id: number;
     fromUser: number;
     toUser: number;
 }
 
+/**
+ * Represents a friend request combined with data on the originating user
+ */
 export interface FriendRequestWithProfile {
     id: number;
     fromUser: number;
@@ -170,6 +204,9 @@ export interface FriendRequestWithProfile {
     toUser: number;
 }
 
+/**
+ * Represents a message
+ */
 export interface Message {
     id: number;
     fromUser: number;
@@ -230,11 +267,17 @@ export interface PeopleCacheContext {
     setLastRefetch: React.Dispatch<React.SetStateAction<Date>>;
 }
 
+/**
+ * Represents 1 or more users at a certain location
+ */
 export interface ClusterData {
     geohash: string;
     userIds: number[];
 }
 
+/**
+ * Represents data on unread messages from a certain friend
+ */
 export interface MessagesPreview {
     friendId: number;
     friendName: string;

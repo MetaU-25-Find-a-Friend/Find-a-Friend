@@ -598,6 +598,20 @@ app.post("/friend/accept/:from", async (req, res) => {
 
     const from = parseInt(req.params.from);
 
+    const friendRequest = await prisma.friendRequest.findFirst({
+        where: {
+            fromUser: from,
+            toUser: to,
+        },
+        select: {
+            id: true,
+        },
+    });
+
+    if (!friendRequest) {
+        return res.status(404).send("Request not found");
+    }
+
     await prisma.user.update({
         where: {
             id: from,
@@ -619,19 +633,10 @@ app.post("/friend/accept/:from", async (req, res) => {
             },
         },
     });
-    const { id } = await prisma.friendRequest.findFirst({
-        where: {
-            fromUser: from,
-            toUser: to,
-        },
-        select: {
-            id: true,
-        },
-    });
 
     await prisma.friendRequest.update({
         where: {
-            id: id,
+            id: friendRequest.id,
         },
         data: {
             acceptedAt: new Date(),
@@ -647,7 +652,7 @@ app.post("/friend/decline/:from", async (req, res) => {
 
     const from = parseInt(req.params.from);
 
-    const { id } = await prisma.friendRequest.findFirst({
+    const friendRequest = await prisma.friendRequest.findFirst({
         where: {
             fromUser: from,
             toUser: to,
@@ -657,9 +662,13 @@ app.post("/friend/decline/:from", async (req, res) => {
         },
     });
 
+    if (!friendRequest) {
+        return res.status(404).send("Request not found");
+    }
+
     await prisma.friendRequest.delete({
         where: {
-            id: id,
+            id: friendRequest.id,
         },
     });
 
@@ -704,6 +713,19 @@ app.post("/block/:id", authenticate, async (req, res) => {
 
     const toBlock = parseInt(req.params.id);
 
+    const userToBlock = await prisma.user.findUnique({
+        where: {
+            id: toBlock,
+        },
+        select: {
+            friends: true,
+        },
+    });
+
+    if (!userToBlock) {
+        return res.status(404).send("User to block not found");
+    }
+
     // add to blocked users array
     await prisma.user.update({
         where: {
@@ -738,16 +760,7 @@ app.post("/block/:id", authenticate, async (req, res) => {
             },
         });
 
-        const { friends: blockedUserFriends } = await prisma.user.findUnique({
-            where: {
-                id: toBlock,
-            },
-            select: {
-                friends: true,
-            },
-        });
-
-        const updatedBlockedUserFriends = blockedUserFriends.filter(
+        const updatedBlockedUserFriends = userToBlock.friends.filter(
             (element) => element !== userId,
         );
         await prisma.user.update({
@@ -800,6 +813,10 @@ app.post("/unblock/:id", authenticate, async (req, res) => {
             blockedUsers: true,
         },
     });
+
+    if (!blockedUsers.includes(toUnblock)) {
+        return res.status(400).send("User was not blocked");
+    }
 
     const updatedBlocked = blockedUsers.filter(
         (element) => element !== toUnblock,

@@ -13,7 +13,12 @@ const PeopleContext = createContext<PeopleCacheContext>({
     setLastRefetch: (_: any) => {},
 });
 
-const PeopleProvider = ({ children }: { children: any }) => {
+/**
+ *
+ * @param children the rest of the site
+ * @returns A context provider that saves cached people you may know suggestions
+ */
+const PeopleProvider = ({ children }: { children: React.ReactNode }) => {
     const [peopleCache, setPeopleCache] = useState(
         new Map<number, CachedSuggestedProfile>(),
     );

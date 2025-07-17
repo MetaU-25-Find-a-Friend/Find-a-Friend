@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
 import type { SavedUser, SavedUserContext } from "../types";
 
 // current user and function to update available to all components
@@ -7,9 +7,12 @@ const UserContext = createContext<SavedUserContext>({
     setUser: (_: any) => {},
 });
 
-// Handles checking whether user is logged in and providing context to components
-// @ts-ignore
-const UserProvider = ({ children }) => {
+/**
+ *
+ * @param children the rest of the site
+ * @returns A context provider that checks whether the user is logged in and provides their data to the site if so
+ */
+const UserProvider = ({ children }: { children: React.ReactNode }) => {
     // current user
     const [user, setUser] = useState<SavedUser | null>(null);
 
