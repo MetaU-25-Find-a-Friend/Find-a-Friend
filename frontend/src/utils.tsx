@@ -11,6 +11,10 @@ import type {
 import { GEOHASH_RADII } from "./constants";
 import { areHashesClose } from "./recommendation-utils";
 
+/*
+ ** ACCOUNT + PROFILE UTILS
+ */
+
 /**
  *
  * @param accountData name, email, and password for new account
@@ -148,6 +152,10 @@ export const getAllData = async (id: number) => {
     return (await response.json()) as AllUserData;
 };
 
+/*
+ ** LOCATION + GEOHASHING UTILS
+ */
+
 /**
  *
  * @param hash the geohash of the logged-in user's new location
@@ -218,15 +226,6 @@ export const geoHashToLatLng = (hash: string) => {
 
 /**
  *
- * @param miles a distance in miles
- * @returns the number of meters equivalent to the given distance
- */
-const milesToMeters = (miles: number) => {
-    return miles * 1609.34;
-};
-
-/**
- *
  * @param center a geohash (the center of a circle of radius miles)
  * @param hash another geohash
  * @param radius a radius less than or equal to one in GEOHASH_RADII (in miles)
@@ -291,6 +290,47 @@ export const isGeoHashWithinMi = (
 
     return distance <= radiusMeters;
 };
+
+/**
+ *
+ * @param miles a distance in miles
+ * @returns the number of meters equivalent to the given distance
+ */
+const milesToMeters = (miles: number) => {
+    return miles * 1609.34;
+};
+
+/**
+ *
+ * @param userData an array of data on users and their locations
+ * @returns an array of clusters: locations with 1 or more users present and the array of their user ids
+ */
+export const findClusters = (userData: UserGeohash[]) => {
+    const result = Array() as ClusterData[];
+
+    for (const user of userData) {
+        // check for an existing cluster at this user's location
+        const existingCluster = result.find((cluster) =>
+            areHashesClose(cluster.geohash, user.geohash),
+        );
+        if (existingCluster) {
+            // if one exists, add this user
+            existingCluster.userIds.push(user.userId);
+        } else {
+            // otherwise, create a new cluster at this user's location
+            result.push({
+                geohash: user.geohash,
+                userIds: [user.userId],
+            });
+        }
+    }
+
+    return result;
+};
+
+/*
+ ** FRIENDING + BLOCKING UTILS
+ */
 
 /**
  *
@@ -394,6 +434,10 @@ export const unblockUser = async (id: number) => {
     return response.ok;
 };
 
+/*
+ ** MESSAGING UTILS
+ */
+
 /**
  * @param id id of the other user
  * @param cursor id of the oldest message already returned or -1 to retrieve newest messages
@@ -440,34 +484,6 @@ export const sendMessage = async (
     } else {
         return [false, await response.text()];
     }
-};
-
-/**
- *
- * @param userData an array of data on users and their locations
- * @returns an array of clusters: locations with 1 or more users present and the array of their user ids
- */
-export const findClusters = (userData: UserGeohash[]) => {
-    const result = Array() as ClusterData[];
-
-    for (const user of userData) {
-        // check for an existing cluster at this user's location
-        const existingCluster = result.find((cluster) =>
-            areHashesClose(cluster.geohash, user.geohash),
-        );
-        if (existingCluster) {
-            // if one exists, add this user
-            existingCluster.userIds.push(user.userId);
-        } else {
-            // otherwise, create a new cluster at this user's location
-            result.push({
-                geohash: user.geohash,
-                userIds: [user.userId],
-            });
-        }
-    }
-
-    return result;
 };
 
 /**
