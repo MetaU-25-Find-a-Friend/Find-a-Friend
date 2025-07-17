@@ -81,18 +81,30 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
     // block user when button is clicked
     const handleBlockClick = async () => {
         if (userData) {
-            await blockUser(userData.id);
-            setAlertText("Successfully blocked user.");
-            await loadCurrentUserData();
+            const success = await blockUser(userData.id);
+            if (success) {
+                setAlertText("Successfully blocked user.");
+                await loadCurrentUserData();
+            } else {
+                setAlertText(
+                    "An error occurred while trying to block this user. Please try again later.",
+                );
+            }
         }
     };
 
     // unblock user when button is clicked
     const handleUnblockClick = async () => {
         if (userData) {
-            await unblockUser(userData.id);
-            setAlertText("Successfully unblocked user.");
-            await loadCurrentUserData();
+            const success = await unblockUser(userData.id);
+            if (success) {
+                setAlertText("Successfully unblocked user.");
+                await loadCurrentUserData();
+            } else {
+                setAlertText(
+                    "An error occurred while trying to unblock this user. Please try again later.",
+                );
+            }
         }
     };
 
@@ -101,7 +113,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
 
     // send message in text box
     const handleSendClick = async () => {
-        if (userData && messageText) {
+        if (userData && messageText.trim()) {
             const [success, _] = await sendMessage(userData.id, messageText);
             if (!success) {
                 setAlertText("Message failed to send. Please try again later.");
@@ -112,6 +124,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
         }
     };
 
+    // shows textbox to message the friend
     const alreadyFriendsDisplay = (
         <>
             <div className={styles.infoContainer}>
@@ -140,6 +153,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
         </>
     );
 
+    // shows button to friend request the user
     const notFriendsDisplay = (
         <>
             <div className={styles.infoContainer}>
@@ -159,6 +173,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
         </>
     );
 
+    // shows button to unblock the user
     const alreadyBlockedDisplay = (
         <>
             <div className={styles.infoContainer}>
@@ -181,6 +196,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
         </>
     );
 
+    // shows button to block the user
     const notBlockedDisplay = (
         <>
             <div className={styles.infoContainer}>
@@ -208,7 +224,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
             userData.id,
         ) ? (
             alreadyBlockedDisplay
-        ) : currentUserData!.friends.includes(userData.id) ? (
+        ) : currentUserData.friends.includes(userData.id) ? (
             <>
                 {notBlockedDisplay}
                 {alreadyFriendsDisplay}
