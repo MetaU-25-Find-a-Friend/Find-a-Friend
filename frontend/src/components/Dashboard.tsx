@@ -102,41 +102,65 @@ const Dashboard = () => {
     };
 
     // show originating user's profile when their name is clicked in a friend request
-    const handleFriendNameClick = (_: React.MouseEvent, data: AllUserData) => {
+    const handleFriendNameClick = (data: AllUserData) => {
         setModalData(data);
     };
+
+    const FriendRequestComponent = ({
+        request,
+    }: {
+        request: FriendRequestWithProfile;
+    }) => (
+        <div className={styles.friendRequest}>
+            <p className={styles.friendText}>
+                From{" "}
+                <span
+                    className={styles.friendName}
+                    onClick={() => handleFriendNameClick(request.fromUserData)}>
+                    {request.fromUserData.firstName}{" "}
+                    {request.fromUserData.lastName}
+                </span>
+            </p>
+            <button
+                className={styles.friendButton}
+                onClick={() => handleAcceptFriend(request.fromUser)}>
+                Accept
+            </button>
+            <button
+                className={styles.friendButton}
+                onClick={() => handleDeclineFriend(request.fromUser)}>
+                Decline
+            </button>
+        </div>
+    );
 
     const friendRequestsSection = (
         <div className={styles.friendContainer}>
             <h2 className={styles.sectionHeader}>Friend Requests</h2>
             {friendRequests.map((request) => (
-                <div className={styles.friendRequest}>
-                    <p className={styles.friendText}>
-                        From{" "}
-                        <span
-                            className={styles.friendName}
-                            onClick={(event) =>
-                                handleFriendNameClick(
-                                    event,
-                                    request.fromUserData,
-                                )
-                            }>
-                            {request.fromUserData.firstName}{" "}
-                            {request.fromUserData.lastName}
-                        </span>
-                    </p>
-                    <button
-                        className={styles.friendButton}
-                        onClick={() => handleAcceptFriend(request.fromUser)}>
-                        Accept
-                    </button>
-                    <button
-                        className={styles.friendButton}
-                        onClick={() => handleDeclineFriend(request.fromUser)}>
-                        Decline
-                    </button>
-                </div>
+                <FriendRequestComponent
+                    request={request}></FriendRequestComponent>
             ))}
+        </div>
+    );
+
+    const MessageComponent = ({ preview }: { preview: MessagesPreview }) => (
+        <div
+            key={preview.friendId}
+            className={styles.messagesPreview}>
+            <p className={styles.previewText}>
+                {preview.latestUnread}
+                {preview.unreadCount > 1 && (
+                    <span className={styles.tealText}>
+                        {" "}
+                        and {preview.unreadCount - 1} more
+                    </span>
+                )}
+            </p>
+            <p className={styles.previewName}>
+                from{" "}
+                <span className={styles.tealText}>{preview.friendName}</span>
+            </p>
         </div>
     );
 
@@ -145,25 +169,7 @@ const Dashboard = () => {
             <h2 className={styles.sectionHeader}>Messages</h2>
             <div className={styles.previews}>
                 {unreadMessages.map((preview) => (
-                    <div
-                        key={preview.friendId}
-                        className={styles.messagesPreview}>
-                        <p className={styles.previewText}>
-                            {preview.latestUnread}
-                            {preview.unreadCount > 1 && (
-                                <span className={styles.tealText}>
-                                    {" "}
-                                    and {preview.unreadCount - 1} more
-                                </span>
-                            )}
-                        </p>
-                        <p className={styles.previewName}>
-                            from{" "}
-                            <span className={styles.tealText}>
-                                {preview.friendName}
-                            </span>
-                        </p>
-                    </div>
+                    <MessageComponent preview={preview}></MessageComponent>
                 ))}
             </div>
 
@@ -230,7 +236,7 @@ const Dashboard = () => {
         </button>
     );
 
-    if (user === null) {
+    if (!user) {
         return <LoggedOut></LoggedOut>;
     } else {
         return (
