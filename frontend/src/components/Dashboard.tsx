@@ -42,7 +42,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
 
     // whether to show profile menu
-    const [showingMenu, setShowingMenu] = useState(false);
+    const [showingMenu, setShowingMenu] = useState(true);
 
     // user data to show in modal; null when modal is hidden
     const [modalData, setModalData] = useState<AllUserData | null>(null);
@@ -137,11 +137,17 @@ const Dashboard = () => {
     const friendRequestsSection = (
         <div className={styles.friendContainer}>
             <h2 className={styles.sectionHeader}>Friend Requests</h2>
-            {friendRequests.map((request) => (
-                <FriendRequestComponent
-                    key={request.id}
-                    request={request}></FriendRequestComponent>
-            ))}
+            {friendRequests.length > 0 ? (
+                friendRequests.map((request) => (
+                    <FriendRequestComponent
+                        key={request.id}
+                        request={request}></FriendRequestComponent>
+                ))
+            ) : (
+                <p className={styles.emptyMessage}>
+                    No incoming friend requests.
+                </p>
+            )}
         </div>
     );
 
@@ -169,17 +175,39 @@ const Dashboard = () => {
         <div className={styles.messagesContainer}>
             <h2 className={styles.sectionHeader}>Messages</h2>
             <div className={styles.previews}>
-                {unreadMessages.map((preview) => (
-                    <MessageComponent
-                        key={preview.friendId}
-                        preview={preview}></MessageComponent>
-                ))}
+                {unreadMessages.length > 0 ? (
+                    unreadMessages.map((preview) => (
+                        <MessageComponent
+                            key={preview.friendId}
+                            preview={preview}></MessageComponent>
+                    ))
+                ) : (
+                    <p className={styles.emptyMessage}>No unread messages.</p>
+                )}
             </div>
 
             <button
                 className={styles.navButton}
                 onClick={() => navigate("/messages")}>
                 To Messages{" "}
+                <FontAwesomeIcon icon={faArrowRightLong}></FontAwesomeIcon>
+            </button>
+        </div>
+    );
+
+    const userOptionsMenu = (
+        <div
+            className={`${styles.userMenu} ${showingMenu ? styles.visible : styles.invisible}`}>
+            <button
+                className={styles.userMenuItem}
+                onClick={() => navigate("/editprofile")}>
+                Edit profile{" "}
+                <FontAwesomeIcon icon={faArrowRightLong}></FontAwesomeIcon>
+            </button>
+            <button
+                className={styles.userMenuItem}
+                onClick={handleLogout}>
+                Logout{" "}
                 <FontAwesomeIcon icon={faArrowRightLong}></FontAwesomeIcon>
             </button>
         </div>
@@ -202,20 +230,7 @@ const Dashboard = () => {
                     color="var(--teal-accent)"
                     size="lg"></FontAwesomeIcon>
             </div>
-            <div
-                className={`${styles.userMenu} ${showingMenu ? styles.visible : styles.invisible}`}>
-                <button
-                    className={styles.userMenuItem}
-                    onClick={() => navigate("/editprofile")}>
-                    Edit profile{" "}
-                    <FontAwesomeIcon icon={faArrowRightLong}></FontAwesomeIcon>
-                </button>
-                <button
-                    className={styles.userMenuItem}
-                    onClick={handleLogout}>
-                    Logout
-                </button>
-            </div>
+            {userOptionsMenu}
         </div>
     );
 
@@ -239,20 +254,27 @@ const Dashboard = () => {
         </button>
     );
 
-    if (user === null) {
+    if (!user) {
         return <LoggedOut></LoggedOut>;
     } else {
         return (
-            <main className={styles.grid}>
-                <Modal
-                    userData={modalData}
-                    setUserData={setModalData}></Modal>
-                {friendRequestsSection}
-                {messagesSection}
-                {titleAndProfileSection}
-                {peopleSection}
-                {mapSection}
-            </main>
+            <>
+                <div className={styles.backgroundContainer}>
+                    <div className={styles.leftPanel}></div>
+                    <div className={styles.centerPanel}></div>
+                    <div className={styles.rightPanel}></div>
+                </div>
+                <main className={styles.grid}>
+                    <Modal
+                        userData={modalData}
+                        setUserData={setModalData}></Modal>
+                    {friendRequestsSection}
+                    {messagesSection}
+                    {titleAndProfileSection}
+                    {peopleSection}
+                    {mapSection}
+                </main>
+            </>
         );
     }
 };
