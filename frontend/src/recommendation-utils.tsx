@@ -72,7 +72,7 @@ export const recommendPlaces = async (
         );
 
         // get the average similarity of users at the place to the current user and the number of their friends there
-        const [avgInterestAngle, friendCount] = getUsersStats(userDataAtPlace);
+        const [avgSimilarity, friendCount] = getUsersStats(userDataAtPlace);
 
         // calculate past visit score based on the recency and duration of each visit
         const [numVisits, visitScore] = getPastVisitsStats(
@@ -94,7 +94,7 @@ export const recommendPlaces = async (
                     isLikedType: isLikedType,
                     userData: {
                         count: userDataAtPlace.length,
-                        avgInterestAngle: avgInterestAngle,
+                        avgSimilarity: avgSimilarity,
                         friendCount: friendCount,
                     },
                     score: 0,
@@ -106,7 +106,7 @@ export const recommendPlaces = async (
         stats.avgFriendCount += friendCount;
         stats.avgVisitScore += visitScore;
         stats.avgCount += userDataAtPlace.length;
-        stats.avgUserSimilarity += avgInterestAngle;
+        stats.avgUserSimilarity += avgSimilarity;
         stats.avgDistance += geohashDistance;
     }
 
@@ -333,23 +333,23 @@ const getPastVisitsStats = (
  */
 const getUsersStats = (users: PlaceRecUserData[]): [number, number] => {
     // set initial values
-    let avgInterestAngle = 0;
+    let avgSimilarity = 0;
     let friendCount = 0;
 
     if (users.length > 0) {
-        // iterate over users, adding to sum of angles and checking friend status
+        // iterate over users, adding to sum of cosine scores and checking friend status
         for (const user of users) {
-            avgInterestAngle += user.interestAngle;
+            avgSimilarity += user.similarity;
             if (user.friend) {
                 friendCount++;
             }
         }
 
         // divide to complete average calculation
-        avgInterestAngle /= users.length;
+        avgSimilarity /= users.length;
     }
 
-    return [avgInterestAngle, friendCount];
+    return [avgSimilarity, friendCount];
 };
 
 /**
@@ -377,7 +377,7 @@ const getPlaceRecUserData = async (
             id: user.userId,
             geohash: user.geohash,
             friend: currentUserFriends.includes(user.userId),
-            interestAngle: angleBetweenInterestVectors(
+            similarity: cosBetweenInterestVectors(
                 currentUserInterests,
                 otherUserInterests,
             ),
@@ -393,7 +393,7 @@ const getPlaceRecUserData = async (
  * @param v2 another interest array (all values 0 or 1)
  * @returns the cosine of the acute angle between v1 and v2 in radians; this will be in the range [0, 1]
  */
-const angleBetweenInterestVectors = (v1: number[], v2: number[]) => {
+const cosBetweenInterestVectors = (v1: number[], v2: number[]) => {
     // initialize running totals
     let m1 = 0;
     let m2 = 0;
@@ -469,7 +469,7 @@ const calculateScore = (
     const visitScore = placeData.visitScore * weights.pastVisitWeight;
     const countScore = placeData.userData.count * weights.countWeight;
     const similarityScore =
-        placeData.userData.avgInterestAngle * weights.similarityWeight;
+        placeData.userData.avgSimilarity * weights.similarityWeight;
     const distanceScore = placeData.geohashDistance * weights.distanceWeight;
     const typeScore = (placeData.isLikedType ? 1 : 0) * weights.typeWeight;
 

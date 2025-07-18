@@ -132,7 +132,7 @@ export interface PlaceRecData {
     isLikedType: boolean;
     userData: {
         count: number;
-        avgInterestAngle: number;
+        avgSimilarity: number;
         friendCount: number;
     };
     score: number;
@@ -145,7 +145,7 @@ export interface PlaceRecUserData {
     id: number;
     geohash: string;
     friend: boolean;
-    interestAngle: number;
+    similarity: number;
 }
 
 /**

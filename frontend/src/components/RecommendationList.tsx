@@ -109,7 +109,7 @@ const RecommendationList = ({
                     ),
                     similarityAdjustment: getAdjustment(
                         placesStats.avgUserSimilarity,
-                        place.userData.avgInterestAngle,
+                        place.userData.avgSimilarity,
                     ),
                     distanceAdjustment: getAdjustment(
                         placesStats.avgDistance,
@@ -141,7 +141,7 @@ const RecommendationList = ({
             </div>
 
             <p className={styles.placeAddress}>
-                {place.place.formattedAddress} {place.userData.avgInterestAngle}
+                {place.place.formattedAddress}
             </p>
             <p className={styles.userList}>
                 {place.userData.count}{" "}
