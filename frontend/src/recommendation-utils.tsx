@@ -398,29 +398,31 @@ const getPlaceRecUserData = async (
  * @returns the acute angle between v1 and v2 in radians; this will be in the range [0, pi/2]
  */
 const angleBetweenInterestVectors = (v1: number[], v2: number[]) => {
+    // initialize running totals
     let m1 = 0;
     let m2 = 0;
     let dotProduct = 0;
 
+    // add an extra dimension to each vector so that their magnitudes can never be 0
+    // (avoids dividing by 0 issue while preserving angle)
+    const v1PlusDim = [...v1, 1];
+    const v2PlusDim = [...v2, 1];
+
     // calculate magnitude^2 for both vectors and their dot product
-    for (let i = 0; i < v1.length; i++) {
-        m1 += v1[i];
-        m2 += v2[i];
-        dotProduct += v1[i] * v2[i];
+    for (let i = 0; i < v1PlusDim.length; i++) {
+        // add to the running sum of vector components
+        m1 += v1PlusDim[i];
+        m2 += v2PlusDim[i];
+
+        // add to the dot product by multiplying components at this position
+        dotProduct += v1PlusDim[i] * v2PlusDim[i];
     }
 
-    // if the magnitude of both vectors is 0, return 0 for maximum similarity
-    if (m1 === 0 && m2 === 0) {
-        return 0;
-    }
-
+    // complete magnitude calculation by taking square roots, and multiply together
     const denominator = Math.sqrt(m1) * Math.sqrt(m2);
 
     // theta = arccos((v1 . v2)/(|v1||v2|))
-    // or, if just one magnitude was 0, return pi / 2 for maximum difference
-    return denominator === 0
-        ? Math.PI / 2
-        : Math.acos(dotProduct / denominator);
+    return Math.acos(dotProduct / denominator);
 };
 
 /**
