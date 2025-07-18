@@ -1,5 +1,9 @@
 import { MS_IN_DAY } from "./constants";
-import type { SuggestedProfile } from "./types";
+import type {
+    CachedSuggestedProfile,
+    FriendPathNode,
+    SuggestedProfile,
+} from "./types";
 import { getAllData } from "./utils";
 
 /**
@@ -188,4 +192,57 @@ export const findChanges = (oldArray: number[], newArray: number[]) => {
     const newSet = new Set(newArray);
 
     return [oldSet.difference(newSet), newSet.difference(oldSet)];
+};
+
+/**
+ *
+ * @param cache the cache of suggested people to update
+ * @param suggestions 1 or more new suggested people to add to the cache
+ */
+export const addSuggestionsToCache = (
+    cache: Map<number, CachedSuggestedProfile>,
+    ...suggestions: SuggestedProfile[]
+) => {
+    // iterate over provided suggestions
+    for (const suggestion of suggestions) {
+        // add each to the cache, using their user id as the key
+        cache.set(suggestion.data.id, {
+            data: suggestion.data,
+            degree: suggestion.degree,
+            parent: suggestion.friendPath[suggestion.friendPath.length - 1],
+        });
+    }
+};
+
+/**
+ *
+ * @param cache the cache of suggested people to update
+ * @param users a set of user ids; these users and any cached suggestions who are connected to the current user
+ * through them will be removed from the cache
+ */
+export const removeConnectionsFromCache = (
+    cache: Map<number, CachedSuggestedProfile>,
+    users: Set<number>,
+) => {
+    // remove each user themselves from the cache
+    for (const user of users) {
+        cache.delete(user);
+    }
+
+    // iterate over all cached users
+    for (const cacheValue of cache.values()) {
+        // find the cached user's parent
+        let parentCache: FriendPathNode | undefined = cacheValue.parent;
+
+        // trace the path of parents back to a friend of the current user
+        // (who would not be in the suggestions, so the loop will stop)
+        while (parentCache) {
+            // if a given user to remove is found in this path, remove the cached user as well
+            if (users.has(parentCache.userId)) {
+                cache.delete(cacheValue.data.id);
+                break;
+            }
+            parentCache = cache.get(parentCache.userId)?.parent;
+        }
+    }
 };

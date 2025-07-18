@@ -10,7 +10,12 @@ import {
 import { Fragment, useEffect, useState } from "react";
 import type { FriendPathNode, SuggestedProfile } from "../types";
 import { useUser } from "../contexts/UserContext";
-import { findChanges, getSuggestedPeople } from "../people-utils";
+import {
+    addSuggestionsToCache,
+    findChanges,
+    getSuggestedPeople,
+    removeConnectionsFromCache,
+} from "../people-utils";
 import {
     getAllData,
     blockUser,
@@ -104,26 +109,17 @@ const People = () => {
         cache.setFriends(friends);
         cache.setBlockedUsers(blockedUsers);
 
-        // if the cache is empty (initial state), the user has unblocked anyone, the user has lost friends,
+        // if the cache is empty (initial state), the user has unblocked anyone,
         // or the last refetch was over 10 minutes ago, completely refetch and calculate suggestions and add to cache
         if (
             cache.peopleCache.size === 0 ||
             lostBlocked.size > 0 ||
-            lostFriends.size > 0 ||
             new Date().valueOf() - cache.lastRefetch.valueOf() >
                 10 * MS_IN_MINUTE
         ) {
             const data = await getSuggestedPeople(user.id);
             const newCache = new Map();
-            for (const suggestion of data) {
-                newCache.set(suggestion.data.id, {
-                    data: suggestion.data,
-                    degree: suggestion.degree,
-                    parent: suggestion.friendPath[
-                        suggestion.friendPath.length - 1
-                    ],
-                });
-            }
+            addSuggestionsToCache(newCache, ...data);
             cache.setPeopleCache(newCache);
             cache.setLastRefetch(new Date());
             // update display since we have all the data and signal to loadSuggestedPeople that
@@ -148,13 +144,7 @@ const People = () => {
                     // update the cache
                     const existing = updatedCache.get(suggestion.data.id);
                     if (!existing || suggestion.degree < existing.degree) {
-                        updatedCache.set(suggestion.data.id, {
-                            data: suggestion.data,
-                            degree: suggestion.degree,
-                            parent: suggestion.friendPath[
-                                suggestion.friendPath.length - 1
-                            ],
-                        });
+                        addSuggestionsToCache(updatedCache, suggestion);
                     }
                 }
             }
@@ -162,26 +152,12 @@ const People = () => {
             cache.setPeopleCache(updatedCache);
         }
 
-        // if the user has blocked anyone, remove them and anyone connected to them from cache
-        // (this is imperfect because a removed user could have had another connection that would allow them
-        // to remain in the suggestions)
-        if (gainedBlocked.size > 0) {
-            for (const newBlocked of gainedBlocked) {
-                updatedCache.delete(newBlocked);
-            }
-
-            for (const cacheValue of updatedCache.values()) {
-                let parentCache: FriendPathNode | undefined = cacheValue.parent;
-
-                while (parentCache) {
-                    if (gainedBlocked.has(parentCache.userId)) {
-                        updatedCache.delete(cacheValue.data.id);
-                        break;
-                    }
-                    parentCache = updatedCache.get(parentCache.userId)?.parent;
-                }
-            }
-
+        // if the user has blocked or unfriended anyone, remove them and anyone connected to them from cache
+        if (gainedBlocked.size > 0 || lostFriends.size > 0) {
+            removeConnectionsFromCache(
+                updatedCache,
+                gainedBlocked.union(lostFriends),
+            );
             cache.setPeopleCache(updatedCache);
         }
 
