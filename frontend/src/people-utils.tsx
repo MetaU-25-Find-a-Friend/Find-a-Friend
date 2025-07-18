@@ -1,4 +1,4 @@
-import { MS_IN_DAY } from "./constants";
+import { MS_IN_DAY, MS_IN_MINUTE } from "./constants";
 import type {
     CachedSuggestedProfile,
     FriendPathNode,
@@ -243,6 +243,88 @@ export const removeConnectionsFromCache = (
                 break;
             }
             parentCache = cache.get(parentCache.userId)?.parent;
+        }
+    }
+};
+
+/**
+ *
+ * @param cache the current cache of suggested people
+ * @param cachedSuggestion the suggestion in the cache whose friend path to find
+ * @returns an array of the path through friends of friends (who are in the cache)
+ * that connects the given suggestion to the current user
+ */
+export const findFriendPath = (
+    cache: Map<number, CachedSuggestedProfile>,
+    cachedSuggestion: CachedSuggestedProfile,
+) => {
+    // initialize empty path
+    const friendPath: FriendPathNode[] = [];
+
+    // find the cached user's parent
+    let parentCache: FriendPathNode | undefined = cachedSuggestion.parent;
+
+    // follow the path of parents back to a friend of the current user
+    while (parentCache) {
+        // add each parent/friend to the resulting path
+        friendPath.splice(0, 0, {
+            userId: parentCache.userId,
+            userName: parentCache.userName,
+        });
+
+        parentCache = cache.get(parentCache.userId)?.parent;
+    }
+
+    return friendPath;
+};
+
+/**
+ *
+ * @param cacheSize the size of the current cache map
+ * @param numLostBlocked the number of users no longer blocked since the cache was loaded
+ * @param lastRefetch the time of the last full cache refetch
+ * @returns true if the cache needs to be fully refetched; false otherwise
+ */
+export const isCacheInvalid = (
+    cacheSize: number,
+    numLostBlocked: number,
+    lastRefetch: Date,
+) => {
+    // the cache is invalid if it is empty, the current user has unblocked anyone, or it has
+    // been 10 minutes since the last cache refetch
+    return (
+        cacheSize === 0 ||
+        numLostBlocked > 0 ||
+        new Date().valueOf() - lastRefetch.valueOf() > 10 * MS_IN_MINUTE
+    );
+};
+
+/**
+ *
+ * @param cache the cache of suggested people to update
+ * @param currentUser the current user's id
+ * @param newFriends the ids of the current user's new friends whose connections to add to the cache
+ */
+export const addConnectionsToCache = async (
+    cache: Map<number, CachedSuggestedProfile>,
+    currentUser: number,
+    newFriends: Set<number>,
+) => {
+    // iterate over all new friends
+    for (const user of newFriends) {
+        // remove the friend themself from the cache
+        cache.delete(user);
+
+        // get and iterate over suggested people connected to this new friend
+        const data = await getSuggestedPeople(currentUser, user);
+
+        for (const suggestion of data) {
+            // if the suggestion is not already cached or has a closer connection through the new friend,
+            // update the cache
+            const existing = cache.get(suggestion.data.id);
+            if (!existing || suggestion.degree < existing.degree) {
+                addSuggestionsToCache(cache, suggestion);
+            }
         }
     }
 };

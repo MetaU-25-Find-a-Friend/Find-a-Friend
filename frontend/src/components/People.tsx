@@ -11,9 +11,12 @@ import { Fragment, useEffect, useState } from "react";
 import type { FriendPathNode, SuggestedProfile } from "../types";
 import { useUser } from "../contexts/UserContext";
 import {
+    addConnectionsToCache,
     addSuggestionsToCache,
     findChanges,
+    findFriendPath,
     getSuggestedPeople,
+    isCacheInvalid,
     removeConnectionsFromCache,
 } from "../people-utils";
 import {
@@ -26,7 +29,6 @@ import LoggedOut from "./LoggedOut";
 import Alert from "./Alert";
 import Loading from "./Loading";
 import { usePeople } from "../contexts/PeopleContext";
-import { MS_IN_MINUTE } from "../constants";
 
 /**
  *
@@ -109,19 +111,23 @@ const People = () => {
         cache.setFriends(friends);
         cache.setBlockedUsers(blockedUsers);
 
-        // if the cache is empty (initial state), the user has unblocked anyone,
-        // or the last refetch was over 10 minutes ago, completely refetch and calculate suggestions and add to cache
+        // check if the cache needs to be completely refetched
         if (
-            cache.peopleCache.size === 0 ||
-            lostBlocked.size > 0 ||
-            new Date().valueOf() - cache.lastRefetch.valueOf() >
-                10 * MS_IN_MINUTE
+            isCacheInvalid(
+                cache.peopleCache.size,
+                lostBlocked.size,
+                cache.lastRefetch,
+            )
         ) {
+            // get most up-to-date data
             const data = await getSuggestedPeople(user.id);
+
+            // initialize and fill new cache
             const newCache = new Map();
             addSuggestionsToCache(newCache, ...data);
             cache.setPeopleCache(newCache);
             cache.setLastRefetch(new Date());
+
             // update display since we have all the data and signal to loadSuggestedPeople that
             // no more work is needed
             setSuggestions(data);
@@ -131,23 +137,9 @@ const People = () => {
         // prepare to update based on current cache
         const updatedCache = new Map(cache.peopleCache);
 
-        // if the user has gained friends, remove them from cache and add/update their connections
+        // if the user has gained friends, update the cache with their connections
         if (gainedFriends.size > 0) {
-            for (const newFriend of gainedFriends) {
-                updatedCache.delete(newFriend);
-
-                // get suggested people connected to this new friend
-                const data = await getSuggestedPeople(user.id, newFriend);
-
-                for (const suggestion of data) {
-                    // if the suggestion is not cached or has a closer connection through the new friend,
-                    // update the cache
-                    const existing = updatedCache.get(suggestion.data.id);
-                    if (!existing || suggestion.degree < existing.degree) {
-                        addSuggestionsToCache(updatedCache, suggestion);
-                    }
-                }
-            }
+            await addConnectionsToCache(updatedCache, user.id, gainedFriends);
 
             cache.setPeopleCache(updatedCache);
         }
@@ -158,6 +150,7 @@ const People = () => {
                 updatedCache,
                 gainedBlocked.union(lostFriends),
             );
+
             cache.setPeopleCache(updatedCache);
         }
 
@@ -176,18 +169,7 @@ const People = () => {
         if (updatedCache) {
             const newSuggestions = Array() as SuggestedProfile[];
             for (const cacheValue of updatedCache.values()) {
-                // reconstruct friend path by traversing parents of nodes in cache
-                // (not necessarily shortest paths, but valid ones)
-                const friendPath = Array() as FriendPathNode[];
-
-                let parentCache: FriendPathNode | undefined = cacheValue.parent;
-                while (parentCache) {
-                    friendPath.splice(0, 0, {
-                        userId: parentCache.userId,
-                        userName: parentCache.userName,
-                    });
-                    parentCache = updatedCache.get(parentCache.userId)?.parent;
-                }
+                const friendPath = findFriendPath(updatedCache, cacheValue);
 
                 newSuggestions.push({
                     data: cacheValue.data,
