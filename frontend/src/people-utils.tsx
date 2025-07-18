@@ -27,7 +27,8 @@ export const getSuggestedPeople = async (id: number, connectedTo?: number) => {
     // initialize search queue
     const queue: SuggestedProfile[] = [];
 
-    // initialize record of processed friends (paths to them can't get any shorter)
+    // initialize record of processed friends
+    // (we only process them once as the paths to them can't get any shorter)
     const processedFriends = Array() as number[];
 
     if (!connectedTo) {
@@ -63,13 +64,14 @@ export const getSuggestedPeople = async (id: number, connectedTo?: number) => {
         // remove the oldest profile from the queue
         const user = queue.shift()!;
 
-        // if this user is already a friend of the current user and not seen, just add their friends to the queue
+        // check if this user is a friend of the current user
         if (friends.includes(user.data.id)) {
+            // if the friend has not been processed yet, try to add all their friends to the queue
             if (!processedFriends.includes(user.data.id)) {
                 for (const acquaintance of user.data.friends) {
                     const acquaintanceData = await getAllData(acquaintance);
 
-                    // add acquaintance if they are not the current user, are not blocked by the current user, and haven't blocked the current user
+                    // if this acquaintance is an allowed suggestion, add them to the queue
                     if (
                         canAddAcquaintance(
                             acquaintance,
@@ -95,32 +97,42 @@ export const getSuggestedPeople = async (id: number, connectedTo?: number) => {
                     }
                 }
 
+                // mark this friend as processed
                 processedFriends.push(user.data.id);
             }
 
-            // if friend was already processed, just continue
+            // stop any further processing for the friend (existing friends aren't valid suggestions)
             continue;
         }
 
-        // if this user is already in result, check if this path is shorter and replace if so; otherwise do nothing with this user
+        // check if this user has already been found
         const existingIndex = result.findIndex(
             (element) => element.data.id === user.data.id,
         );
 
         if (existingIndex !== -1) {
+            // if the new path to this user is shorter than the found one,
+            // update their place in result with the new path instead;
+            // otherwise, stop processing the duplicate user
             if (result[existingIndex].degree > user.degree) {
                 result[existingIndex] = user;
             } else {
                 continue;
             }
         } else {
+            // if this user has not already been found, add them to result
             result.push(user);
         }
 
+        // the user reaches this point if they are not already a friend of the current user and
+        // either not in result or in result but represent a shorter path that we now need to
+        // update all their connections with as well
+
+        // iterate over friends of the user being processed
         for (const acquaintance of user.data.friends) {
             const acquaintanceData = await getAllData(acquaintance);
 
-            // add acquaintance if they are not the current user, are not blocked by the current user, and haven't blocked the current user
+            // if this acquaintance is an allowed suggestion, add them to the queue
             if (
                 canAddAcquaintance(
                     acquaintance,
