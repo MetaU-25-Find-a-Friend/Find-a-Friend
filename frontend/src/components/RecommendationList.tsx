@@ -42,10 +42,11 @@ const RecommendationList = ({
     myLocation,
     otherUsers,
 }: RecommendationListProps) => {
+    // the logged-in user
     const { user } = useUser();
 
     // array of places combined with data on the number of users there and their similarity to the current user
-    const [nearbyPlaces, setNearbyPlaces] = useState(Array() as PlaceRecData[]);
+    const [nearbyPlaces, setNearbyPlaces] = useState<PlaceRecData[]>([]);
 
     // the myLocation value last used to calculate nearbyPlaces
     const lastLocation = useRef("");
@@ -62,13 +63,15 @@ const RecommendationList = ({
         // get nearby points of interest
         let places: Place[];
 
-        // if myLocation has not changed (or lastLocation is empty), reuse the places we already have
+        // if myLocation has not changed (and lastLocation isn't empty), reuse the places we already have
         if (areHashesClose(myLocation, lastLocation.current)) {
             places = nearbyPlaces.map((placeRecData) => placeRecData.place);
         } else {
+            // otherwise, fetch places from the Google Maps API and update lastLocation
             places = await getNearbyPOIs(myLocation);
             lastLocation.current = myLocation;
         }
+
         // combine each place with data on users there and sort using algorithm
         const [stats, recommendations] = await recommendPlaces(
             places,
@@ -77,12 +80,16 @@ const RecommendationList = ({
             otherUsers,
         );
 
+        // load places into display
         setNearbyPlaces(recommendations);
+
+        // save averages of place data fields
         setPlacesStats(stats);
+
         setLoading(false);
     };
 
-    // update weight adjustments (and trigger reload) when the user clicks a feedback button
+    // increase or decrease the relevant weight (and trigger reload) when the user clicks a feedback button
     const handleFeedbackClick = (
         weightName: keyof WeightAdjustments,
         increase: boolean,
@@ -93,6 +100,7 @@ const RecommendationList = ({
     // when the user likes a recommendation, increase/decrease weights for factors it was above/below average in
     const handleLikeClick = async (place: PlaceRecData) => {
         if (placesStats) {
+            // update weights and add the type of this place to liked types
             await Promise.all([
                 updateWeights({
                     friendAdjustment: getAdjustment(
@@ -108,8 +116,8 @@ const RecommendationList = ({
                         place.userData.count,
                     ),
                     similarityAdjustment: getAdjustment(
-                        -placesStats.avgUserSimilarity,
-                        -place.userData.avgInterestAngle,
+                        placesStats.avgUserSimilarity,
+                        place.userData.avgSimilarity,
                     ),
                     distanceAdjustment: getAdjustment(
                         placesStats.avgDistance,
@@ -122,6 +130,7 @@ const RecommendationList = ({
                 addLikedType(place.place.primaryType),
             ]);
 
+            // reload places display
             loadPlaces();
         }
     };
