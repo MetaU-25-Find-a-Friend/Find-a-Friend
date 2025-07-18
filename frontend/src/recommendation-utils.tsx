@@ -167,9 +167,9 @@ const getPastVisitsStats = (
     let visitScore = 0;
     let numVisits = 0;
 
-    // iterate over all entries in user's history
+    // iterate over all locations in user's history
     for (const history of locationHistory) {
-        // if the entry is at this place, add its weighted visit score
+        // if the past visit was to this place, add to the place's visit count and weighted visit score
         if (areHashesClose(placeGeohash, history.geohash)) {
             const daysSinceVisit =
                 (new Date().valueOf() - new Date(history.timestamp).valueOf()) /
@@ -227,11 +227,12 @@ const getPlaceRecUserData = async (
     const { friends: currentUserFriends, interests: currentUserInterests } =
         await getAllData(currentUser);
 
+    // iterate over all other users
     for (const user of activeUsers) {
-        // get other user's interests
+        // get the other user's interests
         const { interests: otherUserInterests } = await getAllData(user.userId);
 
-        // check friendship and calculate similarity to the current user
+        // check friendship with and calculate similarity to the current user
         result.push({
             id: user.userId,
             geohash: user.geohash,
@@ -434,8 +435,12 @@ export const getAdjustment = (average: number, value: number) => {
  * @returns MAX_PLACE_RESULTS nearby points of interest
  */
 export const getNearbyPOIs = async (hash: string) => {
+    // decode the user's location to use as the center of the search circle
     const { lat, lng } = decodeBase32(hash);
 
+    // fetch places, including their name, address, coordinates, and primary type (e.g. "restaurant");
+    // their primary or additional types must be present in includedTypes, and they must be within
+    // the specified circle centered on the user
     const response = await fetch(
         "https://places.googleapis.com/v1/places:searchNearby",
         {
