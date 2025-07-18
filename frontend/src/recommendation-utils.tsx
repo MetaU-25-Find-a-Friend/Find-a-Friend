@@ -333,14 +333,10 @@ const getPastVisitsStats = (
  */
 const getUsersStats = (users: PlaceRecUserData[]): [number, number] => {
     // set initial values
-    // interest angle starts at the least possible similarity to represent there being 0 users
-    let avgInterestAngle = Math.PI / 2;
+    let avgInterestAngle = 0;
     let friendCount = 0;
 
     if (users.length > 0) {
-        // if there are users in the group, set angle to 0 to prepare for incrementing
-        avgInterestAngle = 0;
-
         // iterate over users, adding to sum of angles and checking friend status
         for (const user of users) {
             avgInterestAngle += user.interestAngle;
@@ -395,7 +391,7 @@ const getPlaceRecUserData = async (
  *
  * @param v1 one interest array (all values 0 or 1)
  * @param v2 another interest array (all values 0 or 1)
- * @returns the acute angle between v1 and v2 in radians; this will be in the range [0, pi/2]
+ * @returns the cosine of the acute angle between v1 and v2 in radians; this will be in the range [0, 1]
  */
 const angleBetweenInterestVectors = (v1: number[], v2: number[]) => {
     // initialize running totals
@@ -421,8 +417,8 @@ const angleBetweenInterestVectors = (v1: number[], v2: number[]) => {
     // complete magnitude calculation by taking square roots, and multiply together
     const denominator = Math.sqrt(m1) * Math.sqrt(m2);
 
-    // theta = arccos((v1 . v2)/(|v1||v2|))
-    return Math.acos(dotProduct / denominator);
+    // cos(theta) = (v1 . v2)/(|v1||v2|)
+    return dotProduct / denominator;
 };
 
 /**
@@ -477,11 +473,10 @@ const calculateScore = (
     const distanceScore = placeData.geohashDistance * weights.distanceWeight;
     const typeScore = (placeData.isLikedType ? 1 : 0) * weights.typeWeight;
 
-    // similarityScore increases as users are more different; 0 means most similar
     const totalScore =
         friendScore +
         visitScore +
-        countScore -
+        countScore +
         similarityScore +
         distanceScore +
         typeScore;
