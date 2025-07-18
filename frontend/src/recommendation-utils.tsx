@@ -22,6 +22,10 @@ import { decodeBase32, encodeBase32 } from "geohashing";
 import { getAllData } from "./utils";
 
 /**
+ ** MAIN RECOMMENDATION FUNCTION + HELPER FUNCTIONS
+ */
+
+/**
  *
  * @param places array of nearby places (from Google Maps Places API) to be scored and sorted
  * @param currentUser id of the current user
@@ -125,178 +129,6 @@ export const recommendPlaces = async (
 
     // sort results by score
     return [stats, result.sort((a, b) => b.score - a.score)];
-};
-
-/**
- *
- * @param hash the geohash of the location where the user stayed for a significant amount of time
- * @returns true if the location and/or duration was recorded; false if update failed
- */
-export const addPastGeohash = async (hash: string) => {
-    const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/user/geolocation/history`,
-        {
-            method: "post",
-            mode: "cors",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-                geohash: hash,
-            }),
-        },
-    );
-
-    return response.ok;
-};
-
-/**
- * Perform a Google Maps Places API (New) Nearby Search for places of interest near the user
- * @param hash the geohash of the user's current location
- * @returns MAX_PLACE_RESULTS nearby points of interest
- */
-export const getNearbyPOIs = async (hash: string) => {
-    const { lat, lng } = decodeBase32(hash);
-
-    const response = await fetch(
-        "https://places.googleapis.com/v1/places:searchNearby",
-        {
-            method: "post",
-            headers: {
-                "Content-Type": "application/json",
-                "X-Goog-Api-Key": import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-                "X-Goog-FieldMask":
-                    "places.displayName,places.formattedAddress,places.location,places.primaryType",
-            },
-            body: JSON.stringify({
-                includedTypes: [
-                    "museum",
-                    "performing_arts_theater",
-                    "library",
-                    "amusement_park",
-                    "aquarium",
-                    "botanical_garden",
-                    "bowling_alley",
-                    "comedy_club",
-                    "community_center",
-                    "concert_hall",
-                    "convention_center",
-                    "cultural_center",
-                    "dance_hall",
-                    "event_venue",
-                    "garden",
-                    "internet_cafe",
-                    "karaoke",
-                    "marina",
-                    "movie_theater",
-                    "national_park",
-                    "night_club",
-                    "park",
-                    "planetarium",
-                    "skateboard_park",
-                    "state_park",
-                    "tourist_attraction",
-                    "video_arcade",
-                    "water_park",
-                    "wildlife_park",
-                    "wildlife_refuge",
-                    "zoo",
-                    "restaurant",
-                ],
-                maxResultCount: MAX_PLACE_RESULTS,
-                locationRestriction: {
-                    circle: {
-                        center: {
-                            latitude: lat,
-                            longitude: lng,
-                        },
-                        radius: NEARBY_PLACES_RADIUS,
-                    },
-                },
-            }),
-        },
-    );
-
-    const places = await response.json();
-    return places.places;
-};
-
-/**
- *
- * @param hash1
- * @param hash2
- * @returns true if the geohashes are within meters of each other; false if not
- */
-export const areHashesClose = (hash1: string, hash2: string) => {
-    return (
-        hash1.slice(0, GEOHASH_AT_PLACE_RES) ===
-        hash2.slice(0, GEOHASH_AT_PLACE_RES)
-    );
-};
-
-/**
- *
- * @returns the logged-in user's personalized recommendation weights, or default 1s if not yet calculated
- */
-const getWeights = async () => {
-    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/weights`, {
-        credentials: "include",
-    });
-
-    return (await response.json()) as Weights;
-};
-
-/**
- *
- * @param adjustments numbers by which to adjust some or all of the user's recommendation weights
- * @returns true if the weights were updated; false if the given data was invalid
- */
-export const updateWeights = async (adjustments: WeightAdjustments) => {
-    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/weights`, {
-        method: "post",
-        mode: "cors",
-        credentials: "include",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(adjustments),
-    });
-
-    return response.ok;
-};
-
-/**
- *
- * @param type the type of a liked place
- * @returns true if the type was added to the user's liked types; false if the type has already been added or the request was invalid
- */
-export const addLikedType = async (type: string) => {
-    const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/weights/types/${type}`,
-        {
-            method: "post",
-            mode: "cors",
-            credentials: "include",
-        },
-    );
-
-    return response.ok;
-};
-
-/**
- * @param average the average of a field value across all PlaceRecData
- * @param value that field value for a specific place
- * @returns the number by which to adjust the weight for that value, given that the place has been liked
- */
-export const getAdjustment = (average: number, value: number) => {
-    if (Math.abs(value - average) < DELTA) {
-        return 0;
-    } else if (value < average) {
-        return LIKED_WEIGHT_DECREASE;
-    } else {
-        return LIKED_WEIGHT_INCREASE;
-    }
 };
 
 /**
@@ -484,6 +316,18 @@ const getUserLocationHistory = async () => {
 
 /**
  *
+ * @returns the logged-in user's personalized recommendation weights, or default 1s if not yet calculated
+ */
+const getWeights = async () => {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/weights`, {
+        credentials: "include",
+    });
+
+    return (await response.json()) as Weights;
+};
+
+/**
+ *
  * @param placeData relevant data on a point of interest
  * @param weights the user's personalized weights
  * @returns the same place data with a calculated score
@@ -512,4 +356,172 @@ const calculateScore = (
         ...placeData,
         score: totalScore,
     };
+};
+
+/**
+ ** WEIGHT ADJUSTMENT AND LIKED TYPES FUNCTIONS
+ */
+
+/**
+ *
+ * @param adjustments numbers by which to adjust some or all of the user's recommendation weights
+ * @returns true if the weights were updated; false if the given data was invalid
+ */
+export const updateWeights = async (adjustments: WeightAdjustments) => {
+    const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/weights`, {
+        method: "post",
+        mode: "cors",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(adjustments),
+    });
+
+    return response.ok;
+};
+
+/**
+ *
+ * @param type the type of a liked place
+ * @returns true if the type was added to the user's liked types; false if the type has already been added or the request was invalid
+ */
+export const addLikedType = async (type: string) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/weights/types/${type}`,
+        {
+            method: "post",
+            mode: "cors",
+            credentials: "include",
+        },
+    );
+
+    return response.ok;
+};
+
+/**
+ * @param average the average of a field value across all PlaceRecData
+ * @param value that field value for a specific place
+ * @returns the number by which to adjust the weight for that value, given that the place has been liked
+ */
+export const getAdjustment = (average: number, value: number) => {
+    if (Math.abs(value - average) < DELTA) {
+        return 0;
+    } else if (value < average) {
+        return LIKED_WEIGHT_DECREASE;
+    } else {
+        return LIKED_WEIGHT_INCREASE;
+    }
+};
+
+/**
+ ** MISC. EXPORTS
+ */
+
+/**
+ * Perform a Google Maps Places API (New) Nearby Search for places of interest near the user
+ * @param hash the geohash of the user's current location
+ * @returns MAX_PLACE_RESULTS nearby points of interest
+ */
+export const getNearbyPOIs = async (hash: string) => {
+    const { lat, lng } = decodeBase32(hash);
+
+    const response = await fetch(
+        "https://places.googleapis.com/v1/places:searchNearby",
+        {
+            method: "post",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Goog-Api-Key": import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+                "X-Goog-FieldMask":
+                    "places.displayName,places.formattedAddress,places.location,places.primaryType",
+            },
+            body: JSON.stringify({
+                includedTypes: [
+                    "museum",
+                    "performing_arts_theater",
+                    "library",
+                    "amusement_park",
+                    "aquarium",
+                    "botanical_garden",
+                    "bowling_alley",
+                    "comedy_club",
+                    "community_center",
+                    "concert_hall",
+                    "convention_center",
+                    "cultural_center",
+                    "dance_hall",
+                    "event_venue",
+                    "garden",
+                    "internet_cafe",
+                    "karaoke",
+                    "marina",
+                    "movie_theater",
+                    "national_park",
+                    "night_club",
+                    "park",
+                    "planetarium",
+                    "skateboard_park",
+                    "state_park",
+                    "tourist_attraction",
+                    "video_arcade",
+                    "water_park",
+                    "wildlife_park",
+                    "wildlife_refuge",
+                    "zoo",
+                    "restaurant",
+                ],
+                maxResultCount: MAX_PLACE_RESULTS,
+                locationRestriction: {
+                    circle: {
+                        center: {
+                            latitude: lat,
+                            longitude: lng,
+                        },
+                        radius: NEARBY_PLACES_RADIUS,
+                    },
+                },
+            }),
+        },
+    );
+
+    const places = await response.json();
+    return places.places;
+};
+
+/**
+ *
+ * @param hash the geohash of the location where the user stayed for a significant amount of time
+ * @returns true if the location and/or duration was recorded; false if update failed
+ */
+export const addPastGeohash = async (hash: string) => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/user/geolocation/history`,
+        {
+            method: "post",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                geohash: hash,
+            }),
+        },
+    );
+
+    return response.ok;
+};
+
+/**
+ *
+ * @param hash1
+ * @param hash2
+ * @returns true if the geohashes are within meters of each other; false if not
+ */
+export const areHashesClose = (hash1: string, hash2: string) => {
+    return (
+        hash1.slice(0, GEOHASH_AT_PLACE_RES) ===
+        hash2.slice(0, GEOHASH_AT_PLACE_RES)
+    );
 };
