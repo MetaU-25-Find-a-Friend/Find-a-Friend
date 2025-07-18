@@ -1,5 +1,6 @@
 import { MS_IN_DAY, MS_IN_MINUTE } from "./constants";
 import type {
+    AllUserData,
     CachedSuggestedProfile,
     FriendPathNode,
     SuggestedProfile,
@@ -17,40 +18,50 @@ import { getAllData } from "./utils";
  * @returns an array of data on friends of friends etc. of the current user
  */
 export const getSuggestedPeople = async (id: number, connectedTo?: number) => {
-    const result = Array() as SuggestedProfile[];
+    // initialize array to store suggestions
+    const result: SuggestedProfile[] = [];
 
+    // get the current user's friends and blocked users
     const { friends, blockedUsers } = await getAllData(id);
 
     // initialize search queue
-    const queue = Array() as SuggestedProfile[];
+    const queue: SuggestedProfile[] = [];
 
     // initialize record of processed friends (paths to them can't get any shorter)
     const processedFriends = Array() as number[];
 
     if (!connectedTo) {
+        // if no one friend is specified, start queue with all of the user's friends
         for (const friend of friends) {
             const friendData = await getAllData(friend);
 
-            // push friend's data to the queue (they won't be added to result, but their friends etc. will be processed)
-            queue.push({
-                data: friendData,
-                degree: await getProximityOf(id, friend),
-                friendPath: Array(),
-            });
+            // push friend's data to the queue
+            // (they won't be added to result, but their friends etc. will be processed)
+            addToQueue(
+                queue,
+                friendData,
+                await getProximityOf(id, friend),
+                0,
+                [],
+            );
         }
     } else {
+        // if connectedTo is given, only add that friend to the queue
         const friendData = await getAllData(connectedTo);
 
-        queue.push({
-            data: friendData,
-            degree: await getProximityOf(id, connectedTo),
-            friendPath: Array(),
-        });
+        addToQueue(
+            queue,
+            friendData,
+            await getProximityOf(id, connectedTo),
+            0,
+            [],
+        );
     }
 
+    // continue BFS until queue is empty
     while (queue.length > 0) {
         // remove the oldest profile from the queue
-        const user = queue.splice(0, 1)[0];
+        const user = queue.shift()!;
 
         // if this user is already a friend of the current user and not seen, just add their friends to the queue
         if (friends.includes(user.data.id)) {
@@ -60,29 +71,27 @@ export const getSuggestedPeople = async (id: number, connectedTo?: number) => {
 
                     // add acquaintance if they are not the current user, are not blocked by the current user, and haven't blocked the current user
                     if (
-                        acquaintance !== id &&
-                        !blockedUsers.includes(acquaintance) &&
-                        !acquaintanceData.blockedUsers.includes(id)
+                        canAddAcquaintance(
+                            acquaintance,
+                            id,
+                            blockedUsers,
+                            acquaintanceData.blockedUsers,
+                        )
                     ) {
-                        queue.push({
-                            data: acquaintanceData,
-                            degree:
-                                user.degree +
-                                (await getProximityOf(
-                                    user.data.id,
-                                    acquaintance,
-                                )),
-                            friendPath: [
-                                ...user.friendPath,
-                                {
-                                    userId: user.data.id,
-                                    userName:
-                                        user.data.firstName +
-                                        " " +
-                                        user.data.lastName,
-                                },
-                            ],
-                        });
+                        addToQueue(
+                            queue,
+                            acquaintanceData,
+                            await getProximityOf(user.data.id, acquaintance),
+                            user.degree,
+                            user.friendPath,
+                            {
+                                userId: user.data.id,
+                                userName:
+                                    user.data.firstName +
+                                    " " +
+                                    user.data.lastName,
+                            },
+                        );
                     }
                 }
 
@@ -113,29 +122,81 @@ export const getSuggestedPeople = async (id: number, connectedTo?: number) => {
 
             // add acquaintance if they are not the current user, are not blocked by the current user, and haven't blocked the current user
             if (
-                acquaintance !== id &&
-                !blockedUsers.includes(acquaintance) &&
-                !acquaintanceData.blockedUsers.includes(id)
+                canAddAcquaintance(
+                    acquaintance,
+                    id,
+                    blockedUsers,
+                    acquaintanceData.blockedUsers,
+                )
             ) {
-                queue.push({
-                    data: acquaintanceData,
-                    degree:
-                        user.degree +
-                        (await getProximityOf(user.data.id, acquaintance)),
-                    friendPath: [
-                        ...user.friendPath,
-                        {
-                            userId: user.data.id,
-                            userName:
-                                user.data.firstName + " " + user.data.lastName,
-                        },
-                    ],
-                });
+                addToQueue(
+                    queue,
+                    acquaintanceData,
+                    await getProximityOf(user.data.id, acquaintance),
+                    user.degree,
+                    user.friendPath,
+                    {
+                        userId: user.data.id,
+                        userName:
+                            user.data.firstName + " " + user.data.lastName,
+                    },
+                );
             }
         }
     }
 
     return result;
+};
+
+/**
+ *
+ * @param acquaintance the id of the acquaintance being checked
+ * @param currentUser the current user's id
+ * @param blocked the array of users that the current user has blocked
+ * @param acquaintanceBlocked the array of users that the acquaintance has blocked
+ * @returns true if the acquaintance is a valid suggestion; false otherwise
+ */
+const canAddAcquaintance = (
+    acquaintance: number,
+    currentUser: number,
+    blocked: number[],
+    acquaintanceBlocked: number[],
+) => {
+    // the acquaintance can be suggested if they are not the current user, are not blocked by the current user,
+    // and have not blocked the current user
+    return (
+        acquaintance !== currentUser &&
+        !blocked.includes(acquaintance) &&
+        !acquaintanceBlocked.includes(currentUser)
+    );
+};
+
+/**
+ *
+ * @param queue the current search queue
+ * @param data full data for the user to add
+ * @param degree the distance of the connection from the user to add to their parent
+ * @param parentDegree the distance of the connection from the parent to the current user
+ * @param parentPath the path to the parent
+ * @param parent the parent's id and name
+ */
+const addToQueue = (
+    queue: SuggestedProfile[],
+    data: AllUserData,
+    degree: number,
+    parentDegree: number,
+    parentPath: FriendPathNode[],
+    parent?: FriendPathNode,
+) => {
+    // if parent is provided (i.e. user to add is not a friend of the current user), append them to parentPath
+    const friendPath = parent ? [...parentPath, parent] : [...parentPath];
+
+    // add the user to the queue with their updated degree and path
+    queue.push({
+        data: data,
+        degree: parentDegree + degree,
+        friendPath: friendPath,
+    });
 };
 
 /**
