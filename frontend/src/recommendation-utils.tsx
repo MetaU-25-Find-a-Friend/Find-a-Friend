@@ -290,7 +290,12 @@ const cosBetweenInterestVectors = (v1: number[], v2: number[]) => {
 const numSameCharacters = (string1: string, string2: string) => {
     let i = 0;
 
-    while (string1.charAt(i) === string2.charAt(i)) {
+    // continue incrementing i until a difference in the strings is found or a string ends
+    while (
+        i < string1.length &&
+        i < string2.length &&
+        string1.charAt(i) === string2.charAt(i)
+    ) {
         i++;
     }
 
@@ -336,6 +341,7 @@ const calculateScore = (
     placeData: PlaceRecData,
     weights: Weights,
 ): PlaceRecData => {
+    // multiply relevant data value by the user's weight for that factor
     const friendScore = placeData.userData.friendCount * weights.friendWeight;
     const visitScore = placeData.visitScore * weights.pastVisitWeight;
     const countScore = placeData.userData.count * weights.countWeight;
@@ -344,6 +350,7 @@ const calculateScore = (
     const distanceScore = placeData.geohashDistance * weights.distanceWeight;
     const typeScore = (placeData.isLikedType ? 1 : 0) * weights.typeWeight;
 
+    // add factor scores together and return alongside rest of given data
     const totalScore =
         friendScore +
         visitScore +
@@ -406,10 +413,13 @@ export const addLikedType = async (type: string) => {
  */
 export const getAdjustment = (average: number, value: number) => {
     if (Math.abs(value - average) < DELTA) {
+        // if value is approximately average, don't change the weight
         return 0;
     } else if (value < average) {
+        // if value is below average, decrease the weight
         return LIKED_WEIGHT_DECREASE;
     } else {
+        // if value is above average, increase the weight
         return LIKED_WEIGHT_INCREASE;
     }
 };
@@ -515,11 +525,12 @@ export const addPastGeohash = async (hash: string) => {
 
 /**
  *
- * @param hash1
- * @param hash2
+ * @param hash1 a geohashed location
+ * @param hash2 another geohashed location
  * @returns true if the geohashes are within meters of each other; false if not
  */
 export const areHashesClose = (hash1: string, hash2: string) => {
+    // compare most significant portions of the two geohashes
     return (
         hash1.slice(0, GEOHASH_AT_PLACE_RES) ===
         hash2.slice(0, GEOHASH_AT_PLACE_RES)
