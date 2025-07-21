@@ -34,9 +34,7 @@ const People = () => {
     const cache = usePeople();
 
     // users at some degree of separation from the current user
-    const [suggestions, setSuggestions] = useState<SuggestedProfile[]>(
-        Array() as SuggestedProfile[],
-    );
+    const [suggestions, setSuggestions] = useState<SuggestedProfile[]>([]);
 
     // text shown in alert; null when alert is not showing
     const [alertText, setAlertText] = useState<string | null>(null);
@@ -159,7 +157,7 @@ const People = () => {
 
         // once cache has been checked/updated, load suggestions display from cache if necessary
         if (updatedCache) {
-            const newSuggestions = Array() as SuggestedProfile[];
+            const newSuggestions: SuggestedProfile[] = [];
             for (const cacheValue of updatedCache.values()) {
                 const friendPath = findFriendPath(updatedCache, cacheValue);
 

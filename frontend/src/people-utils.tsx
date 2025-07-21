@@ -29,7 +29,7 @@ export const getSuggestedPeople = async (id: number, connectedTo?: number) => {
 
     // initialize record of processed friends
     // (we only process them once as the paths to them can't get any shorter)
-    const processedFriends = Array() as number[];
+    const processedFriends: number[] = [];
 
     if (!connectedTo) {
         // if no one friend is specified, start queue with all of the user's friends
