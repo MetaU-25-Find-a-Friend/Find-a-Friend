@@ -1,27 +1,31 @@
 import { useNavigate } from "react-router-dom";
 import styles from "../css/People.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-    faArrowLeftLong,
-    faArrowsLeftRight,
-    faDiagramProject,
-    faUserCheck,
-} from "@fortawesome/free-solid-svg-icons";
-import { Fragment, useEffect, useState } from "react";
-import type { FriendPathNode, SuggestedProfile } from "../types";
+import { faArrowLeftLong } from "@fortawesome/free-solid-svg-icons";
+import { useEffect, useState } from "react";
+import type { SuggestedProfile } from "../types";
 import { useUser } from "../contexts/UserContext";
-import { findChanges, getSuggestedPeople } from "../people-utils";
+import {
+    addConnectionsToCache,
+    addSuggestionsToCache,
+    findChanges,
+    findFriendPath,
+    getSuggestedPeople,
+    isCacheInvalid,
+    removeConnectionsFromCache,
+} from "../people-utils";
 import {
     getAllData,
     blockUser,
-    getInterestName,
     sendFriendRequest,
+    getFriendRequestAlert,
+    getBlockAlert,
 } from "../utils";
 import LoggedOut from "./LoggedOut";
 import Alert from "./Alert";
 import Loading from "./Loading";
 import { usePeople } from "../contexts/PeopleContext";
-import { MS_IN_MINUTE } from "../constants";
+import PeopleCard from "./PeopleCard";
 
 /**
  *
@@ -36,16 +40,14 @@ const People = () => {
     const cache = usePeople();
 
     // users at some degree of separation from the current user
-    const [suggestions, setSuggestions] = useState<SuggestedProfile[]>(
-        Array() as SuggestedProfile[],
-    );
+    const [suggestions, setSuggestions] = useState<SuggestedProfile[]>([]);
 
     // text shown in alert; null when alert is not showing
     const [alertText, setAlertText] = useState<string | null>(null);
 
     // boost profiles connected to the specified user
     const boostConnectionsOf = (id: number) => {
-        const newSuggestions = suggestions;
+        const newSuggestions = [...suggestions];
 
         // iterate over cache, looking for immediate children of specified user
         for (const cacheValue of cache.peopleCache.values()) {
@@ -54,7 +56,10 @@ const People = () => {
                 const cacheValueIndex = newSuggestions.findIndex(
                     (element) => element.data.id === cacheValue.data.id,
                 );
-                newSuggestions[cacheValueIndex].degree -= 2;
+                newSuggestions[cacheValueIndex] = {
+                    ...newSuggestions[cacheValueIndex],
+                    degree: newSuggestions[cacheValueIndex].degree - 2,
+                };
             }
         }
 
@@ -64,22 +69,15 @@ const People = () => {
     // when profile button is clicked, try to send friend request
     const handleFriendClick = async (id: number) => {
         const success = await sendFriendRequest(id);
-        setAlertText(
-            success
-                ? "Friend request sent."
-                : "A friend request between you already exists.",
-        );
+        setAlertText(getFriendRequestAlert(success));
         boostConnectionsOf(id);
     };
 
-    // when profile button is clicked, block user
+    // when profile button is clicked, block user and reload suggestions
     const handleBlockClick = async (id: number) => {
         const success = await blockUser(id);
-        setAlertText(
-            success
-                ? "Successfully blocked user."
-                : "An error occurred while trying to block this user. Please try again later.",
-        );
+        loadSuggestedPeople();
+        setAlertText(getBlockAlert(success));
     };
 
     // check validity of cache and return a reference to the updated cache that should be used for loading
@@ -104,28 +102,23 @@ const People = () => {
         cache.setFriends(friends);
         cache.setBlockedUsers(blockedUsers);
 
-        // if the cache is empty (initial state), the user has unblocked anyone, the user has lost friends,
-        // or the last refetch was over 10 minutes ago, completely refetch and calculate suggestions and add to cache
+        // check if the cache needs to be completely refetched
         if (
-            cache.peopleCache.size === 0 ||
-            lostBlocked.size > 0 ||
-            lostFriends.size > 0 ||
-            new Date().valueOf() - cache.lastRefetch.valueOf() >
-                10 * MS_IN_MINUTE
+            isCacheInvalid(
+                cache.peopleCache.size,
+                lostBlocked.size,
+                cache.lastRefetch,
+            )
         ) {
+            // get most up-to-date data
             const data = await getSuggestedPeople(user.id);
+
+            // initialize and fill new cache
             const newCache = new Map();
-            for (const suggestion of data) {
-                newCache.set(suggestion.data.id, {
-                    data: suggestion.data,
-                    degree: suggestion.degree,
-                    parent: suggestion.friendPath[
-                        suggestion.friendPath.length - 1
-                    ],
-                });
-            }
+            addSuggestionsToCache(newCache, ...data);
             cache.setPeopleCache(newCache);
             cache.setLastRefetch(new Date());
+
             // update display since we have all the data and signal to loadSuggestedPeople that
             // no more work is needed
             setSuggestions(data);
@@ -135,52 +128,19 @@ const People = () => {
         // prepare to update based on current cache
         const updatedCache = new Map(cache.peopleCache);
 
-        // if the user has gained friends, remove them from cache and add/update their connections
+        // if the user has gained friends, update the cache with their connections
         if (gainedFriends.size > 0) {
-            for (const newFriend of gainedFriends) {
-                updatedCache.delete(newFriend);
-
-                // get suggested people connected to this new friend
-                const data = await getSuggestedPeople(user.id, newFriend);
-
-                for (const suggestion of data) {
-                    // if the suggestion is not cached or has a closer connection through the new friend,
-                    // update the cache
-                    const existing = updatedCache.get(suggestion.data.id);
-                    if (!existing || suggestion.degree < existing.degree) {
-                        updatedCache.set(suggestion.data.id, {
-                            data: suggestion.data,
-                            degree: suggestion.degree,
-                            parent: suggestion.friendPath[
-                                suggestion.friendPath.length - 1
-                            ],
-                        });
-                    }
-                }
-            }
+            await addConnectionsToCache(updatedCache, user.id, gainedFriends);
 
             cache.setPeopleCache(updatedCache);
         }
 
-        // if the user has blocked anyone, remove them and anyone connected to them from cache
-        // (this is imperfect because a removed user could have had another connection that would allow them
-        // to remain in the suggestions)
-        if (gainedBlocked.size > 0) {
-            for (const newBlocked of gainedBlocked) {
-                updatedCache.delete(newBlocked);
-            }
-
-            for (const cacheValue of updatedCache.values()) {
-                let parentCache: FriendPathNode | undefined = cacheValue.parent;
-
-                while (parentCache) {
-                    if (gainedBlocked.has(parentCache.userId)) {
-                        updatedCache.delete(cacheValue.data.id);
-                        break;
-                    }
-                    parentCache = updatedCache.get(parentCache.userId)?.parent;
-                }
-            }
+        // if the user has blocked or unfriended anyone, remove them and anyone connected to them from cache
+        if (gainedBlocked.size > 0 || lostFriends.size > 0) {
+            removeConnectionsFromCache(
+                updatedCache,
+                gainedBlocked.union(lostFriends),
+            );
 
             cache.setPeopleCache(updatedCache);
         }
@@ -198,20 +158,9 @@ const People = () => {
 
         // once cache has been checked/updated, load suggestions display from cache if necessary
         if (updatedCache) {
-            const newSuggestions = Array() as SuggestedProfile[];
+            const newSuggestions: SuggestedProfile[] = [];
             for (const cacheValue of updatedCache.values()) {
-                // reconstruct friend path by traversing parents of nodes in cache
-                // (not necessarily shortest paths, but valid ones)
-                const friendPath = Array() as FriendPathNode[];
-
-                let parentCache: FriendPathNode | undefined = cacheValue.parent;
-                while (parentCache) {
-                    friendPath.splice(0, 0, {
-                        userId: parentCache.userId,
-                        userName: parentCache.userName,
-                    });
-                    parentCache = updatedCache.get(parentCache.userId)?.parent;
-                }
+                const friendPath = findFriendPath(updatedCache, cacheValue);
 
                 newSuggestions.push({
                     data: cacheValue.data,
@@ -228,89 +177,6 @@ const People = () => {
         loadSuggestedPeople();
     }, [user]);
 
-    // shows summary of path taken from the current user to this suggestion and provides detailed popup on hover
-    const PathComponent = ({
-        path,
-        endName,
-    }: {
-        path: FriendPathNode[];
-        endName: string;
-    }) => (
-        <div className={styles.friendInfo}>
-            {path.length === 1 ? (
-                <>
-                    <FontAwesomeIcon icon={faUserCheck}></FontAwesomeIcon>{" "}
-                    Friends with {path[0].userName}
-                </>
-            ) : (
-                <>
-                    <div className={styles.pathPopup}>
-                        <p className={styles.pathEnd}>You</p>
-                        <FontAwesomeIcon
-                            icon={faArrowsLeftRight}></FontAwesomeIcon>
-                        {path.map((node: FriendPathNode) => (
-                            <Fragment key={node.userId}>
-                                <p className={styles.pathNode}>
-                                    {node.userName}
-                                </p>
-                                <FontAwesomeIcon
-                                    icon={faArrowsLeftRight}></FontAwesomeIcon>
-                            </Fragment>
-                        ))}
-                        <p className={styles.pathEnd}>{endName}</p>
-                    </div>
-                    <FontAwesomeIcon icon={faDiagramProject}></FontAwesomeIcon>{" "}
-                    Acquaintance of {path[0].userName} and {path.length - 1}{" "}
-                    more
-                </>
-            )}
-        </div>
-    );
-
-    const SuggestedCardComponent = ({ user }: { user: SuggestedProfile }) => (
-        <div
-            className={styles.profile}
-            key={user.data.id}>
-            <PathComponent
-                path={user.friendPath}
-                endName={user.data.firstName}></PathComponent>
-            <h3 className={styles.name}>
-                {user.data.firstName} {user.data.lastName}{" "}
-                <span className={styles.pronouns}>{user.data.pronouns}</span>
-            </h3>
-            <p className={styles.major}>{user.data.major ?? "(No major)"}</p>
-            <div className={styles.interestsContainer}>
-                {user.data.interests.map((value: number, index) => {
-                    if (value === 1) {
-                        return (
-                            <p
-                                className={styles.interest}
-                                key={index}>
-                                {getInterestName(index)}
-                            </p>
-                        );
-                    } else {
-                        return <Fragment key={index}></Fragment>;
-                    }
-                })}
-            </div>
-            <p className={styles.bio}>{user.data.bio ?? "(No bio)"}</p>
-            <hr className={styles.bar}></hr>
-            <div className={styles.buttonsContainer}>
-                <button
-                    className={styles.button}
-                    onClick={() => handleFriendClick(user.data.id)}>
-                    Send friend request
-                </button>
-                <button
-                    className={styles.button}
-                    onClick={() => handleBlockClick(user.data.id)}>
-                    Block
-                </button>
-            </div>
-        </div>
-    );
-
     // profile cards for each suggested user
     const suggestedUsersDisplay =
         suggestions.length === 0 ? (
@@ -322,9 +188,11 @@ const People = () => {
                 {suggestions
                     .sort((a, b) => a.degree - b.degree)
                     .map((user) => (
-                        <SuggestedCardComponent
+                        <PeopleCard
                             key={user.data.id}
-                            user={user}></SuggestedCardComponent>
+                            user={user}
+                            handleFriendClick={handleFriendClick}
+                            handleBlockClick={handleBlockClick}></PeopleCard>
                     ))}
             </>
         );

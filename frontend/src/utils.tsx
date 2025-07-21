@@ -352,6 +352,17 @@ export const sendFriendRequest = async (to: number) => {
 
 /**
  *
+ * @param success the boolean returned from sendFriendRequest
+ * @returns a string success or error message that can be displayed to the user
+ */
+export const getFriendRequestAlert = (success: boolean) => {
+    return success
+        ? "Friend request sent."
+        : "A friend request between you already exists.";
+};
+
+/**
+ *
  * @returns all active friend requests to the logged-in user
  */
 export const getIncomingFriendRequests = async () => {
@@ -414,6 +425,17 @@ export const blockUser = async (id: number) => {
     );
 
     return response.ok;
+};
+
+/**
+ *
+ * @param success the boolean returned from blockUser
+ * @returns a string success or error message that can be displayed to the user
+ */
+export const getBlockAlert = (success: boolean) => {
+    return success
+        ? "Successfully blocked user."
+        : "An error occurred while trying to block this user. Please try again later.";
 };
 
 /**
