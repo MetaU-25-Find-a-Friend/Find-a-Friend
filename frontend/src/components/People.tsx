@@ -47,7 +47,7 @@ const People = () => {
 
     // boost profiles connected to the specified user
     const boostConnectionsOf = (id: number) => {
-        const newSuggestions = suggestions;
+        const newSuggestions = [...suggestions];
 
         // iterate over cache, looking for immediate children of specified user
         for (const cacheValue of cache.peopleCache.values()) {
@@ -56,7 +56,10 @@ const People = () => {
                 const cacheValueIndex = newSuggestions.findIndex(
                     (element) => element.data.id === cacheValue.data.id,
                 );
-                newSuggestions[cacheValueIndex].degree -= 2;
+                newSuggestions[cacheValueIndex] = {
+                    ...newSuggestions[cacheValueIndex],
+                    degree: newSuggestions[cacheValueIndex].degree - 2,
+                };
             }
         }
 
