@@ -221,7 +221,7 @@ const getPlaceRecUserData = async (
     currentUser: number,
     activeUsers: UserGeohash[],
 ) => {
-    const result = Array() as PlaceRecUserData[];
+    const result: PlaceRecUserData[] = [];
 
     // get the current user's friends and interests arrays
     const { friends: currentUserFriends, interests: currentUserInterests } =
