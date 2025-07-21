@@ -1,14 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import styles from "../css/People.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-    faArrowLeftLong,
-    faArrowsLeftRight,
-    faDiagramProject,
-    faUserCheck,
-} from "@fortawesome/free-solid-svg-icons";
-import { Fragment, useEffect, useState } from "react";
-import type { FriendPathNode, SuggestedProfile } from "../types";
+import { faArrowLeftLong } from "@fortawesome/free-solid-svg-icons";
+import { useEffect, useState } from "react";
+import type { SuggestedProfile } from "../types";
 import { useUser } from "../contexts/UserContext";
 import {
     addConnectionsToCache,
@@ -19,16 +14,12 @@ import {
     isCacheInvalid,
     removeConnectionsFromCache,
 } from "../people-utils";
-import {
-    getAllData,
-    blockUser,
-    getInterestName,
-    sendFriendRequest,
-} from "../utils";
+import { getAllData, blockUser, sendFriendRequest } from "../utils";
 import LoggedOut from "./LoggedOut";
 import Alert from "./Alert";
 import Loading from "./Loading";
 import { usePeople } from "../contexts/PeopleContext";
+import PeopleCard from "./PeopleCard";
 
 /**
  *
@@ -186,89 +177,6 @@ const People = () => {
         loadSuggestedPeople();
     }, [user]);
 
-    // shows summary of path taken from the current user to this suggestion and provides detailed popup on hover
-    const PathComponent = ({
-        path,
-        endName,
-    }: {
-        path: FriendPathNode[];
-        endName: string;
-    }) => (
-        <div className={styles.friendInfo}>
-            {path.length === 1 ? (
-                <>
-                    <FontAwesomeIcon icon={faUserCheck}></FontAwesomeIcon>{" "}
-                    Friends with {path[0].userName}
-                </>
-            ) : (
-                <>
-                    <div className={styles.pathPopup}>
-                        <p className={styles.pathEnd}>You</p>
-                        <FontAwesomeIcon
-                            icon={faArrowsLeftRight}></FontAwesomeIcon>
-                        {path.map((node: FriendPathNode) => (
-                            <Fragment key={node.userId}>
-                                <p className={styles.pathNode}>
-                                    {node.userName}
-                                </p>
-                                <FontAwesomeIcon
-                                    icon={faArrowsLeftRight}></FontAwesomeIcon>
-                            </Fragment>
-                        ))}
-                        <p className={styles.pathEnd}>{endName}</p>
-                    </div>
-                    <FontAwesomeIcon icon={faDiagramProject}></FontAwesomeIcon>{" "}
-                    Acquaintance of {path[0].userName} and {path.length - 1}{" "}
-                    more
-                </>
-            )}
-        </div>
-    );
-
-    const SuggestedCardComponent = ({ user }: { user: SuggestedProfile }) => (
-        <div
-            className={styles.profile}
-            key={user.data.id}>
-            <PathComponent
-                path={user.friendPath}
-                endName={user.data.firstName}></PathComponent>
-            <h3 className={styles.name}>
-                {user.data.firstName} {user.data.lastName}{" "}
-                <span className={styles.pronouns}>{user.data.pronouns}</span>
-            </h3>
-            <p className={styles.major}>{user.data.major ?? "(No major)"}</p>
-            <div className={styles.interestsContainer}>
-                {user.data.interests.map((value: number, index) => {
-                    if (value === 1) {
-                        return (
-                            <p
-                                className={styles.interest}
-                                key={index}>
-                                {getInterestName(index)}
-                            </p>
-                        );
-                    } else {
-                        return <Fragment key={index}></Fragment>;
-                    }
-                })}
-            </div>
-            <p className={styles.bio}>{user.data.bio ?? "(No bio)"}</p>
-            <hr className={styles.bar}></hr>
-            <div className={styles.buttonsContainer}>
-                <button
-                    className={styles.button}
-                    onClick={() => handleFriendClick(user.data.id)}>
-                    Send friend request
-                </button>
-                <button
-                    className={styles.button}
-                    onClick={() => handleBlockClick(user.data.id)}>
-                    Block
-                </button>
-            </div>
-        </div>
-    );
-
     // profile cards for each suggested user
     const suggestedUsersDisplay =
         suggestions.length === 0 ? (
@@ -280,9 +188,11 @@ const People = () => {
                 {suggestions
                     .sort((a, b) => a.degree - b.degree)
                     .map((user) => (
-                        <SuggestedCardComponent
+                        <PeopleCard
                             key={user.data.id}
-                            user={user}></SuggestedCardComponent>
+                            user={user}
+                            handleFriendClick={handleFriendClick}
+                            handleBlockClick={handleBlockClick}></PeopleCard>
                     ))}
             </>
         );
