@@ -22,10 +22,10 @@ import {
     faArrowDown,
     faArrowUp,
     faClock,
-    faThumbsUp,
     faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import { LIKED_WEIGHT_INCREASE } from "../constants";
+import RecommendationPlace from "./RecommendationPlace";
 
 interface RecommendationListProps {
     myLocation: string;
@@ -135,32 +135,6 @@ const RecommendationList = ({
         }
     };
 
-    // information on 1 recommended place
-    const PlaceComponent = ({ place }: { place: PlaceRecData }) => (
-        <div className={styles.place}>
-            <div className={styles.nameContainer}>
-                <h6 className={styles.placeName}>
-                    {place.place.displayName.text}
-                </h6>
-                <button
-                    className={styles.likeButton}
-                    onClick={() => handleLikeClick(place)}>
-                    <FontAwesomeIcon icon={faThumbsUp}></FontAwesomeIcon>
-                </button>
-            </div>
-
-            <p className={styles.placeAddress}>
-                {place.place.formattedAddress}
-            </p>
-            <p className={styles.userList}>
-                {place.userData.count}{" "}
-                {place.userData.count === 1 ? "user is" : "users are"} here.
-                You've been here {place.numVisits}{" "}
-                {place.numVisits === 1 ? "time" : "times"} before.
-            </p>
-        </div>
-    );
-
     // container for feedback buttons
     const feedbackBox = (
         <div className={styles.feedbackContainer}>
@@ -212,9 +186,12 @@ const RecommendationList = ({
                                 nearby:
                             </p>
                             {nearbyPlaces.map((place) => (
-                                <PlaceComponent
+                                <RecommendationPlace
                                     key={place.geohash}
-                                    place={place}></PlaceComponent>
+                                    place={place}
+                                    handleLikeClick={
+                                        handleLikeClick
+                                    }></RecommendationPlace>
                             ))}
                         </>
                     )}

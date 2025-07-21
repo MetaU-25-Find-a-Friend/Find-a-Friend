@@ -64,58 +64,24 @@ export const recommendPlaces = async (
 
     // iterate over all given nearby places
     for (const place of places) {
-        // geohash the place's location and calculate its similarity (by characters) to the current user's location
-        const [placeGeohash, geohashDistance] = getDistanceData(
+        // calculate place's stats and score
+        const placeData = compilePlaceData(
+            place,
             currentLocation,
-            place.location,
-        );
-
-        // create an array of only the active users at this place
-        const userDataAtPlace = allUsersData.filter((element) =>
-            areHashesClose(element.geohash, placeGeohash),
-        );
-
-        // get the average similarity of those users to the current user,
-        // and the number of them who are the current user's friends
-        const [avgSimilarity, friendCount] = getUsersStats(userDataAtPlace);
-
-        // calculate this place's past visit score based on the recency and duration of
-        // each visit the current user has made here
-        const [numVisits, visitScore] = getPastVisitsStats(
-            placeGeohash,
+            allUsersData,
             userLocationHistory,
+            weights,
         );
 
-        // determine whether this place's primary type is one the user has liked in the past
-        const isLikedType = weights.likedTypes.includes(place.primaryType);
-
-        // calculate place's recommendation score given this data and push the final data object to result
-        result.push(
-            calculateScore(
-                {
-                    place: place,
-                    geohash: placeGeohash,
-                    geohashDistance: geohashDistance,
-                    numVisits: numVisits,
-                    visitScore: visitScore,
-                    isLikedType: isLikedType,
-                    userData: {
-                        count: userDataAtPlace.length,
-                        avgSimilarity: avgSimilarity,
-                        friendCount: friendCount,
-                    },
-                    score: 0,
-                },
-                weights,
-            ),
-        );
+        // add place and its data to result
+        result.push(placeData);
 
         // increment running totals
-        stats.avgFriendCount += friendCount;
-        stats.avgVisitScore += visitScore;
-        stats.avgCount += userDataAtPlace.length;
-        stats.avgUserSimilarity += avgSimilarity;
-        stats.avgDistance += geohashDistance;
+        stats.avgFriendCount += placeData.userData.friendCount;
+        stats.avgVisitScore += placeData.visitScore;
+        stats.avgCount += placeData.userData.count;
+        stats.avgUserSimilarity += placeData.userData.avgSimilarity;
+        stats.avgDistance += placeData.geohashDistance;
     }
 
     // complete average calculation by dividing sums by the number of places
@@ -129,6 +95,67 @@ export const recommendPlaces = async (
 
     // sort results by score
     return [stats, result.sort((a, b) => b.score - a.score)];
+};
+
+/**
+ *
+ * @param place the place as returned from the Google Maps Places API
+ * @param currentLocation the geohash of the user's current location
+ * @param allUsers data on all active users on the map
+ * @param locationHistory all places the user has previously visited
+ * @param weights the user's personalized weights and place types they've previously liked
+ * @returns relevant recommendation data on the place complete with its final score
+ */
+const compilePlaceData = (
+    place: Place,
+    currentLocation: string,
+    allUsers: PlaceRecUserData[],
+    locationHistory: PlaceHistory[],
+    weights: Weights,
+) => {
+    // geohash the place's location and calculate its similarity (by characters) to the current user's location
+    const [placeGeohash, geohashDistance] = getDistanceData(
+        currentLocation,
+        place.location,
+    );
+
+    // create an array of only the active users at this place
+    const userDataAtPlace = allUsers.filter((element) =>
+        areHashesClose(element.geohash, placeGeohash),
+    );
+
+    // get the average similarity of those users to the current user,
+    // and the number of them who are the current user's friends
+    const [avgSimilarity, friendCount] = getUsersStats(userDataAtPlace);
+
+    // calculate this place's past visit score based on the recency and duration of
+    // each visit the current user has made here
+    const [numVisits, visitScore] = getPastVisitsStats(
+        placeGeohash,
+        locationHistory,
+    );
+
+    // determine whether this place's primary type is one the user has liked in the past
+    const isLikedType = weights.likedTypes.includes(place.primaryType);
+
+    // calculate place's recommendation score given this data
+    return calculateScore(
+        {
+            place: place,
+            geohash: placeGeohash,
+            geohashDistance: geohashDistance,
+            numVisits: numVisits,
+            visitScore: visitScore,
+            isLikedType: isLikedType,
+            userData: {
+                count: userDataAtPlace.length,
+                avgSimilarity: avgSimilarity,
+                friendCount: friendCount,
+            },
+            score: 0,
+        },
+        weights,
+    );
 };
 
 /**
@@ -221,7 +248,7 @@ const getPlaceRecUserData = async (
     currentUser: number,
     activeUsers: UserGeohash[],
 ) => {
-    const result = Array() as PlaceRecUserData[];
+    const result: PlaceRecUserData[] = [];
 
     // get the current user's friends and interests arrays
     const { friends: currentUserFriends, interests: currentUserInterests } =
