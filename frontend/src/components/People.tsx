@@ -14,7 +14,13 @@ import {
     isCacheInvalid,
     removeConnectionsFromCache,
 } from "../people-utils";
-import { getAllData, blockUser, sendFriendRequest } from "../utils";
+import {
+    getAllData,
+    blockUser,
+    sendFriendRequest,
+    getFriendRequestAlert,
+    getBlockAlert,
+} from "../utils";
 import LoggedOut from "./LoggedOut";
 import Alert from "./Alert";
 import Loading from "./Loading";
@@ -60,11 +66,7 @@ const People = () => {
     // when profile button is clicked, try to send friend request
     const handleFriendClick = async (id: number) => {
         const success = await sendFriendRequest(id);
-        setAlertText(
-            success
-                ? "Friend request sent."
-                : "A friend request between you already exists.",
-        );
+        setAlertText(getFriendRequestAlert(success));
         boostConnectionsOf(id);
     };
 
@@ -72,11 +74,7 @@ const People = () => {
     const handleBlockClick = async (id: number) => {
         const success = await blockUser(id);
         loadSuggestedPeople();
-        setAlertText(
-            success
-                ? "Successfully blocked user."
-                : "An error occurred while trying to block this user. Please try again later.",
-        );
+        setAlertText(getBlockAlert(success));
     };
 
     // check validity of cache and return a reference to the updated cache that should be used for loading
