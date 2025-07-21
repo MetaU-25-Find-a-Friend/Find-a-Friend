@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
 import Slider from "../src/components/Slider";
 
 describe("Slider", () => {
@@ -20,5 +20,24 @@ describe("Slider", () => {
         // test that the options are 0 and 1
         expect(options[0]).toHaveTextContent(/^0$/);
         expect(options[1]).toHaveTextContent(/^1$/);
+    });
+
+    it("calls setValue on click", () => {
+        const mockSetValue = vi.fn();
+
+        render(
+            <Slider
+                value={0}
+                setValue={mockSetValue}
+                options={[0, 1]}
+                optionsDisplay={["0", "1"]}></Slider>,
+        );
+
+        // click on the option "1"
+        const option1 = screen.getByText(/^1$/);
+        fireEvent.click(option1);
+
+        // setValue should be called once as setValue(1)
+        expect(mockSetValue).toHaveBeenCalledExactlyOnceWith(1);
     });
 });
