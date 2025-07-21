@@ -70,9 +70,10 @@ const People = () => {
         boostConnectionsOf(id);
     };
 
-    // when profile button is clicked, block user
+    // when profile button is clicked, block user and reload suggestions
     const handleBlockClick = async (id: number) => {
         const success = await blockUser(id);
+        loadSuggestedPeople();
         setAlertText(
             success
                 ? "Successfully blocked user."
