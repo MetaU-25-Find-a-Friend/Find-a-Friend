@@ -195,35 +195,8 @@ app.post("/logout", authenticate, (req, res) => {
 const userRouter = require("./routes/userRoutes");
 app.use("/user", authenticate, userRouter);
 
-// gets ids and locations of active users other than the logged-in user
-app.get("/users/otherGeolocations", authenticate, async (req, res) => {
-    const userId = req.session.userId;
-
-    const locations = await prisma.userGeohash.findMany({
-        where: {
-            NOT: {
-                userId: userId,
-            },
-        },
-    });
-
-    const result = Array();
-
-    // if the user at a location has blocked the current user, don't include them
-    for (const location of locations) {
-        const { blockedUsers } = await prisma.user.findUnique({
-            where: {
-                id: location.userId,
-            },
-        });
-
-        if (!blockedUsers.includes(userId)) {
-            result.push(location);
-        }
-    }
-
-    res.json(result);
-});
+const geolocationRouter = require("./routes/geolocationRoutes");
+app.use("/geolocation", authenticate, geolocationRouter);
 
 // get the user's saved recommendation weights or create a new record with the default weights
 app.get("/weights", authenticate, async (req, res) => {

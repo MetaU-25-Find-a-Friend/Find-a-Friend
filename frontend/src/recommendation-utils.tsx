@@ -336,7 +336,7 @@ const numSameCharacters = (string1: string, string2: string) => {
  */
 const getUserLocationHistory = async () => {
     const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/user/geolocation/history`,
+        `${import.meta.env.VITE_SERVER_URL}/geolocation/history`,
         {
             credentials: "include",
         },
@@ -538,7 +538,7 @@ export const getNearbyPOIs = async (hash: string) => {
  */
 export const addPastGeohash = async (hash: string) => {
     const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/user/geolocation/history`,
+        `${import.meta.env.VITE_SERVER_URL}/geolocation/history`,
         {
             method: "post",
             mode: "cors",
