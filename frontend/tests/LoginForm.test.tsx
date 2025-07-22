@@ -101,7 +101,7 @@ describe("Login page", () => {
     it("navigates to signup", () => {
         render(<LoginForm></LoginForm>);
 
-        // click on "Create an account" button
+        // click on "Create new account" button
         const createAccount = screen.getByText(/^Create new account$/);
         fireEvent.click(createAccount);
 
@@ -112,7 +112,7 @@ describe("Login page", () => {
     it("shows error alert", () => {
         render(<LoginForm></LoginForm>);
 
-        // click on "Login button"
+        // click on "Login" button
         const submitButton = screen.getByText(/^Login$/);
         fireEvent.click(submitButton);
 
