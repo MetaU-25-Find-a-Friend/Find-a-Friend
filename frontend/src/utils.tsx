@@ -163,7 +163,7 @@ export const getAllData = async (id: number) => {
  */
 export const updateGeohash = async (hash: string) => {
     const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/user/geolocation`,
+        `${import.meta.env.VITE_SERVER_URL}/geolocation`,
         {
             method: "post",
             mode: "cors",
@@ -186,7 +186,7 @@ export const updateGeohash = async (hash: string) => {
  */
 export const deleteGeohash = async () => {
     const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/user/geolocation`,
+        `${import.meta.env.VITE_SERVER_URL}/geolocation`,
         {
             method: "delete",
             credentials: "include",
@@ -202,7 +202,7 @@ export const deleteGeohash = async () => {
  */
 export const getOtherUserGeohashes = async () => {
     const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/users/otherGeolocations`,
+        `${import.meta.env.VITE_SERVER_URL}/geolocation/active/other`,
         {
             credentials: "include",
         },
