@@ -24,10 +24,7 @@ const {
     RATE_LIMIT_INTERVAL,
     MAX_LOGIN_ATTEMPTS,
     SESSION_TIMEOUT,
-    GEOHASH_DUP_RES,
     MESSAGES_PER_PAGE,
-    TIME_STILL_AT_LOCATION,
-    INITIAL_DURATION,
 } = require("./constants");
 
 const loginLimiter = rateLimit({

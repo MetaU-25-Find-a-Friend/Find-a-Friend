@@ -6,6 +6,12 @@ const router = express.Router({ mergeParams: true });
 const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
 
+const {
+    GEOHASH_DUP_RES,
+    TIME_STILL_AT_LOCATION,
+    INITIAL_DURATION,
+} = require("../constants");
+
 // update the logged-in user's location
 router.post("/", async (req, res) => {
     const userId = req.session.userId;
