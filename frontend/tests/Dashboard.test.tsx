@@ -1,7 +1,11 @@
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import Dashboard from "../src/components/Dashboard";
-import { logout } from "../src/utils";
+import {
+    getIncomingFriendRequests,
+    getMessagesPreviews,
+    logout,
+} from "../src/utils";
 import {
     AllUserData,
     FriendRequest,
@@ -20,8 +24,8 @@ vi.mock("../src/utils", async (importOriginal) => {
         getAllData: vi.fn((id: number): AllUserData => {
             return {
                 id: id,
-                firstName: "",
-                lastName: "",
+                firstName: "Test",
+                lastName: "Requester",
                 interests: [],
                 friends: [],
                 blockedUsers: [],
@@ -157,5 +161,38 @@ describe("Dashboard", () => {
         // logout and navigate should be called
         expect(logout).toHaveBeenCalledOnce();
         expect(mockNavigate).toHaveBeenCalledExactlyOnceWith("/login");
+    });
+
+    it("tries to load friend requests", () => {
+        render(<Dashboard></Dashboard>);
+
+        expect(getIncomingFriendRequests).toHaveBeenCalledOnce();
+    });
+
+    it("tries to load unread messages", () => {
+        render(<Dashboard></Dashboard>);
+
+        expect(getMessagesPreviews).toHaveBeenCalledOnce();
+    });
+
+    it("renders friend requests", () => {
+        render(<Dashboard></Dashboard>);
+
+        // should call getAllData() and show request from mocked name
+        waitFor(() => {
+            screen.getByText(/^From Test Requester$/);
+            screen.getByText(/^Accept$/);
+            screen.getByText(/^Decline$/);
+        });
+    });
+
+    it("renders unread messages", () => {
+        render(<Dashboard></Dashboard>);
+
+        // should show message text and sender
+        waitFor(() => {
+            screen.getByText(/^Hello!$/);
+            screen.getByText(/^from Test Friend$/);
+        });
     });
 });
