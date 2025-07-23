@@ -198,6 +198,9 @@ app.use("/geolocation", authenticate, geolocationRouter);
 const weightsRouter = require("./routes/weightsRoutes");
 app.use("/weights", authenticate, weightsRouter);
 
+const messagesRouter = require("./routes/messagesRoutes");
+app.use("/messages", authenticate, messagesRouter);
+
 // create a friend request from the logged-in user to another user
 app.post("/friend/:to", authenticate, async (req, res) => {
     const from = req.session.userId;
@@ -513,92 +516,6 @@ app.post("/unblock/:id", authenticate, async (req, res) => {
     res.send("User unblocked");
 });
 
-// get messages between the logged-in user and the specified user
-app.get("/messages/:other/:cursor", authenticate, async (req, res) => {
-    const userId = req.session.userId;
-
-    const otherId = parseInt(req.params.other);
-
-    const cursor = parseInt(req.params.cursor);
-
-    if (cursor === -1) {
-        const messages = await prisma.message.findMany({
-            take: MESSAGES_PER_PAGE,
-            where: {
-                OR: [
-                    {
-                        fromUser: userId,
-                        toUser: otherId,
-                    },
-                    {
-                        fromUser: otherId,
-                        toUser: userId,
-                    },
-                ],
-            },
-            orderBy: {
-                timestamp: "desc",
-            },
-        });
-
-        // mark messages sent to the current user as read
-        for (const id of messages
-            .filter((element) => element.toUser === userId)
-            .map((element) => element.id)) {
-            await prisma.message.update({
-                where: {
-                    id: id,
-                },
-                data: {
-                    read: true,
-                },
-            });
-        }
-
-        res.json(messages);
-    } else {
-        // if the id of the oldest already fetched message is given, take the first 10 messages before that
-        const messages = await prisma.message.findMany({
-            skip: 1,
-            cursor: {
-                id: cursor,
-            },
-            take: MESSAGES_PER_PAGE,
-            where: {
-                OR: [
-                    {
-                        fromUser: userId,
-                        toUser: otherId,
-                    },
-                    {
-                        fromUser: otherId,
-                        toUser: userId,
-                    },
-                ],
-            },
-            orderBy: {
-                timestamp: "desc",
-            },
-        });
-
-        // mark messages sent to the current user as read
-        for (const id of messages
-            .filter((element) => element.toUser === userId)
-            .map((element) => element.id)) {
-            await prisma.message.update({
-                where: {
-                    id: id,
-                },
-                data: {
-                    read: true,
-                },
-            });
-        }
-
-        res.json(messages);
-    }
-});
-
 // get the number of unread messages from the other user and the latest unread message if one exists
 app.get("/unreadMessages/:other", authenticate, async (req, res) => {
     const userId = req.session.userId;
@@ -661,28 +578,4 @@ app.get("/numMessages/:one/:other", authenticate, async (req, res) => {
     res.json({
         count: num,
     });
-});
-
-// send a message to the specified user
-app.post("/messages/:to", authenticate, async (req, res) => {
-    const from = req.session.userId;
-
-    const to = parseInt(req.params.to);
-
-    const { text } = req.body;
-
-    if (!text) {
-        return res.status(400).send("Message text is required");
-    }
-
-    const newMessage = await prisma.message.create({
-        data: {
-            fromUser: from,
-            toUser: to,
-            text: text,
-            timestamp: new Date(),
-        },
-    });
-
-    res.json(newMessage);
 });
