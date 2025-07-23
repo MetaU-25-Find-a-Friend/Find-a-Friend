@@ -24,7 +24,6 @@ const {
     RATE_LIMIT_INTERVAL,
     MAX_LOGIN_ATTEMPTS,
     SESSION_TIMEOUT,
-    MESSAGES_PER_PAGE,
 } = require("./constants");
 
 const loginLimiter = rateLimit({
