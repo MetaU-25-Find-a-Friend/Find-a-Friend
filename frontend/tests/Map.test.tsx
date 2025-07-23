@@ -1,9 +1,8 @@
-import { vi, describe, it, expect, afterAll, afterEach } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { vi, describe, it, afterAll, afterEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
 import MapPage from "../src/components/MapPage";
 import { AllUserData, SavedUser, UserGeohash } from "../src/types";
 import { ReactNode } from "react";
-import { encodeBase32 } from "geohashing";
 
 // mock utils to prevent backend fetches and get call data
 vi.mock("../src/utils", async (importOriginal) => {
