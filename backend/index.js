@@ -69,6 +69,8 @@ const authenticate = (req, res, next) => {
     next();
 };
 
+// AUTHENTICATION ENDPOINTS
+
 // create a new user with the given username and password
 app.post("/signup", async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
@@ -188,6 +190,8 @@ app.post("/logout", authenticate, (req, res) => {
     });
 });
 
+// OTHER ENDPOINT CATEGORIES
+
 const userRouter = require("./routes/userRoutes");
 app.use("/user", authenticate, userRouter);
 
@@ -202,6 +206,8 @@ app.use("/messages", authenticate, messagesRouter);
 
 const friendRouter = require("./routes/friendRoutes");
 app.use("/friend", authenticate, friendRouter);
+
+// MISC. UNIQUE ENDPOINTS
 
 // block the specified user
 app.post("/block/:id", authenticate, async (req, res) => {
