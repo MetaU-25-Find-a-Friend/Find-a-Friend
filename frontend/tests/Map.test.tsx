@@ -16,7 +16,7 @@ vi.mock("../src/utils", async (importOriginal) => {
                     {
                         id: 1,
                         userId: 4,
-                        geohash: "9h9j49872",
+                        geohash: "9h9j5bbbb",
                     },
                 ]),
         ),
@@ -37,10 +37,12 @@ vi.mock("../src/utils", async (importOriginal) => {
 
 vi.mock("../src/recommendation-utils", async (importOriginal) => {
     return {
-        ...(await importOriginal<typeof import("../src/recommendation-utils")>()),
+        ...(await importOriginal<
+            typeof import("../src/recommendation-utils")
+        >()),
         addPastGeohash: vi.fn(),
-    }
-})
+    };
+});
 
 const mockNavigate = vi.fn((path: string) => {});
 
@@ -85,7 +87,21 @@ vi.mock("@vis.gl/react-google-maps", async (importOriginal) => {
     return {
         ...(await importOriginal<typeof import("@vis.gl/react-google-maps")>()),
         Map: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-        AdvancedMarker: ({ position, children }: { position: google.maps.LatLngLiteral, children: ReactNode}) => <div><p>Position: {Math.round(position.lat)}, {Math.round(position.lng)}</p><p>Geohash: {encodeBase32(position.lat, position.lng)}</p>{children}</div>,
+        AdvancedMarker: ({
+            position,
+            children,
+        }: {
+            position: google.maps.LatLngLiteral;
+            children: ReactNode;
+        }) => (
+            <div>
+                <p>
+                    Position: {Math.round(position.lat)},{" "}
+                    {Math.round(position.lng)}
+                </p>
+                {children}
+            </div>
+        ),
         useMapsLibrary: (name: string) => {
             return {
                 spherical: {
@@ -115,8 +131,8 @@ describe("Map", () => {
 
         // once markers render, test that the user's marker and (hidden) profile popup render
         await waitFor(() => {
-            screen.getByText(/^Position: 30, 30$/)
+            screen.getByText(/^Position: 30, 30$/);
             screen.getByText(/^Test Data$/);
-        })
-    })
+        });
+    });
 });
