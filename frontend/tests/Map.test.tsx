@@ -1,8 +1,9 @@
 import { vi, describe, it, expect, afterAll, afterEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import MapPage from "../src/components/MapPage";
 import { AllUserData, SavedUser, UserGeohash } from "../src/types";
 import { ReactNode } from "react";
+import { encodeBase32 } from "geohashing";
 
 // mock utils to prevent backend fetches and get call data
 vi.mock("../src/utils", async (importOriginal) => {
@@ -23,7 +24,7 @@ vi.mock("../src/utils", async (importOriginal) => {
         getAllData: vi.fn(
             async (id: number): Promise<AllUserData> =>
                 await Promise.resolve({
-                    id: 1,
+                    id: id,
                     firstName: "Test",
                     lastName: "Data",
                     interests: [0, 0, 0, 0, 0, 0],
@@ -33,6 +34,13 @@ vi.mock("../src/utils", async (importOriginal) => {
         ),
     };
 });
+
+vi.mock("../src/recommendation-utils", async (importOriginal) => {
+    return {
+        ...(await importOriginal<typeof import("../src/recommendation-utils")>()),
+        addPastGeohash: vi.fn(),
+    }
+})
 
 const mockNavigate = vi.fn((path: string) => {});
 
@@ -77,6 +85,7 @@ vi.mock("@vis.gl/react-google-maps", async (importOriginal) => {
     return {
         ...(await importOriginal<typeof import("@vis.gl/react-google-maps")>()),
         Map: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+        AdvancedMarker: ({ position, children }: { position: google.maps.LatLngLiteral, children: ReactNode}) => <div><p>Position: {Math.round(position.lat)}, {Math.round(position.lng)}</p><p>Geohash: {encodeBase32(position.lat, position.lng)}</p>{children}</div>,
         useMapsLibrary: (name: string) => {
             return {
                 spherical: {
@@ -100,4 +109,14 @@ describe("Map", () => {
         screen.getByText(/^Nearby radius$/);
         screen.getByText(/^Load places$/);
     });
+
+    it("shows the user's marker", async () => {
+        render(<MapPage></MapPage>);
+
+        // once markers render, test that the user's marker and (hidden) profile popup render
+        await waitFor(() => {
+            screen.getByText(/^Position: 30, 30$/)
+            screen.getByText(/^Test Data$/);
+        })
+    })
 });
