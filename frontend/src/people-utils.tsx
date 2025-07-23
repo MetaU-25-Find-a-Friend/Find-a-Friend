@@ -250,7 +250,7 @@ const getNumMessagesBetween = async (id1: number, id2: number) => {
  */
 const getFriendshipDuration = async (id1: number, id2: number) => {
     const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/friends/duration/${id1}/${id2}`,
+        `${import.meta.env.VITE_SERVER_URL}/friend/duration/${id1}/${id2}`,
         {
             credentials: "include",
         },
