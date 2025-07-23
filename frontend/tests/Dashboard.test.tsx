@@ -175,24 +175,26 @@ describe("Dashboard", () => {
         expect(getMessagesPreviews).toHaveBeenCalledOnce();
     });
 
-    it("renders friend requests", () => {
+    it("renders friend requests", async () => {
         render(<Dashboard></Dashboard>);
 
         // should call getAllData() and show request from mocked name
-        waitFor(() => {
-            screen.getByText(/^From Test Requester$/);
+        await waitFor(() => {
+            screen.getByText(/^From$/);
+            screen.getByText(/^Test Requester$/);
             screen.getByText(/^Accept$/);
             screen.getByText(/^Decline$/);
         });
     });
 
-    it("renders unread messages", () => {
+    it("renders unread messages", async () => {
         render(<Dashboard></Dashboard>);
 
         // should show message text and sender
-        waitFor(() => {
+        await waitFor(() => {
             screen.getByText(/^Hello!$/);
-            screen.getByText(/^from Test Friend$/);
+            screen.getByText(/^from$/);
+            screen.getByText(/^Test Friend$/);
         });
     });
 });
