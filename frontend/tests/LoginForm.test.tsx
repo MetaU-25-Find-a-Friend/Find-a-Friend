@@ -109,12 +109,8 @@ describe("Login page", () => {
         expect(mockNavigate).toHaveBeenCalledExactlyOnceWith("/signup");
     });
 
-    it("shows error alert", () => {
+    it("shows error alert", async () => {
         render(<LoginForm></LoginForm>);
-
-        // click on "Login" button
-        const submitButton = screen.getByText(/^Login$/);
-        fireEvent.click(submitButton);
 
         const testErrorMessage = "Error";
 
@@ -125,11 +121,15 @@ describe("Login page", () => {
             { error: testErrorMessage },
         ]);
 
+        // click on "Login" button
+        const submitButton = screen.getByText(/^Login$/);
+        fireEvent.click(submitButton);
+
         // login should be called
         expect(login).toHaveBeenCalledOnce();
 
         // alert should show once login completes
-        waitFor(() => {
+        await waitFor(() => {
             screen.getByText(testErrorMessage);
         });
     });

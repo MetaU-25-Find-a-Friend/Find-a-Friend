@@ -125,12 +125,8 @@ describe("Create account page", () => {
         expect(mockNavigate).toHaveBeenCalledExactlyOnceWith("/login");
     });
 
-    it("shows error alert", () => {
+    it("shows error alert", async () => {
         render(<SignupForm></SignupForm>);
-
-        // click on "Create account" button
-        const submitButton = screen.getByText(/^Create Account$/);
-        fireEvent.click(submitButton);
 
         const testErrorMessage = "Error";
 
@@ -138,11 +134,15 @@ describe("Create account page", () => {
         // @ts-ignore since TS doesn't recognize createAccount as a mock
         createAccount.mockImplementationOnce(() => [false, testErrorMessage]);
 
+        // click on "Create account" button
+        const submitButton = screen.getByText(/^Create Account$/);
+        fireEvent.click(submitButton);
+
         // createAccount should be called
         expect(createAccount).toHaveBeenCalledOnce();
 
         // alert should show once createAccount completes
-        waitFor(() => {
+        await waitFor(() => {
             screen.getByText(testErrorMessage);
         });
     });
