@@ -232,16 +232,7 @@ describe("People page", () => {
             expect(getSuggestedPeople).toHaveBeenCalledOnce();
         });
 
-        // mock the user having unblocked the other user
-        // @ts-ignore
-        getAllData.mockImplementationOnce(
-            async (id: number): Promise<AllUserData> =>
-                await Promise.resolve({
-                    id: id,
-                    ...mockUserData,
-                    blockedUsers: [],
-                }),
-        );
+        // now runs the default getAllData mock with empty friends and blockedUsers
 
         rerender(<People></People>);
 
@@ -307,6 +298,8 @@ describe("People page", () => {
         await waitFor(() => {
             expect(getSuggestedPeople).toHaveBeenCalledOnce();
         });
+
+        // now runs the default getAllData mock with empty friends and blockedUsers
 
         rerender(<People></People>);
 
