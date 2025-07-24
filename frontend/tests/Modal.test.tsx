@@ -103,4 +103,38 @@ describe("Modal", () => {
             screen.getByText(/^Block user$/);
         });
     });
+
+    it("correctly displays a friend", async () => {
+        // mock the logged-in user being friends with the user in the modal
+        mockCurrentUserData.friends.push(mockUserData.id);
+
+        render(
+            <Modal
+                userData={mockUserData}
+                setUserData={mockSetUserData}></Modal>,
+        );
+
+        // should show message textbox
+        await waitFor(() => {
+            screen.getByText(/^You are friends\.$/);
+            screen.getByPlaceholderText(/^New message$/);
+        });
+
+        // restore current user data
+        mockCurrentUserData.friends = [];
+    });
+
+    it("correctly displays a non-friend", async () => {
+        render(
+            <Modal
+                userData={mockUserData}
+                setUserData={mockSetUserData}></Modal>,
+        );
+
+        // should show "Send friend request" button
+        await waitFor(() => {
+            screen.getByText(/^You are not friends\.$/);
+            screen.getByText(/^Send friend request$/);
+        });
+    });
 });
