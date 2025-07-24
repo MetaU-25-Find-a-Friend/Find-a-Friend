@@ -7,6 +7,7 @@ import {
     sendFriendRequest,
     blockUser,
     unblockUser,
+    sendMessage,
 } from "../src/utils";
 
 // mock useUser to pretend the user is authenticated
@@ -52,6 +53,10 @@ vi.mock("../src/utils", async (importOriginal) => {
         ),
         blockUser: vi.fn(async (id: number) => await Promise.resolve(true)),
         unblockUser: vi.fn(async (id: number) => await Promise.resolve(true)),
+        sendMessage: vi.fn(
+            async (to: number, text: string) =>
+                await Promise.resolve([true, "ok"]),
+        ),
     };
 });
 
@@ -205,5 +210,37 @@ describe("Modal", () => {
 
         // restore current user data
         mockCurrentUserData.blockedUsers = [];
+    });
+
+    it("tries to send a message", async () => {
+        // mock the logged-in user being friends with the user in the modal
+        mockCurrentUserData.friends.push(mockUserData.id);
+
+        render(
+            <Modal
+                userData={mockUserData}
+                setUserData={mockSetUserData}></Modal>,
+        );
+
+        const testMessage = "Hello!";
+
+        // enter text in message textbox
+        const textbox = await waitFor(() => {
+            return screen.getByPlaceholderText(/^New message$/);
+        });
+        fireEvent.change(textbox, { target: { value: testMessage } });
+
+        // click send button
+        const send = textbox.nextElementSibling!;
+        fireEvent.click(send);
+
+        // should try to call sendMessage() with entered text
+        expect(sendMessage).toHaveBeenCalledExactlyOnceWith(
+            mockUserData.id,
+            testMessage,
+        );
+
+        // restore current user data
+        mockCurrentUserData.friends = [];
     });
 });
