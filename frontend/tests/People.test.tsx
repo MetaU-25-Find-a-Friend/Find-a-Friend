@@ -1,9 +1,15 @@
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import People from "../src/components/People";
 import PeopleProvider from "../src/contexts/PeopleContext";
-import { AllUserData, SavedUser, SuggestedProfile } from "../src/types";
+import {
+    AllUserData,
+    CachedSuggestedProfile,
+    SavedUser,
+    SuggestedProfile,
+} from "../src/types";
 import { render, screen, waitFor } from "@testing-library/react";
-import { getSuggestedPeople } from "../src/people-utils";
+import { addConnectionsToCache, getSuggestedPeople } from "../src/people-utils";
+import { getAllData } from "../src/utils";
 
 const mockNavigate = vi.fn((path: string) => {});
 
@@ -85,6 +91,13 @@ vi.mock("../src/people-utils", async (importOriginal) => {
                     },
                 ]),
         ),
+        addConnectionsToCache: vi.fn(
+            (
+                cache: Map<number, CachedSuggestedProfile>,
+                currentUser: number,
+                newFriends: Set<number>,
+            ) => {},
+        ),
     };
 });
 
@@ -153,4 +166,114 @@ describe("People page", () => {
         // should have used cache, and not tried to fetch again
         expect(getSuggestedPeople).toHaveBeenCalledOnce();
     });
+
+    it("fetches when the user gains a friend", async () => {
+        // prepare to rerender People within the same cache context provider
+        const { rerender } = render(<People></People>, {
+            wrapper: PeopleProvider,
+        });
+
+        // should try to fetch on first render
+        await waitFor(() => {
+            expect(getSuggestedPeople).toHaveBeenCalledOnce();
+        });
+
+        // mock the user's friends having changed
+        // @ts-ignore
+        getAllData.mockImplementationOnce(
+            async (id: number): Promise<AllUserData> =>
+                await Promise.resolve({
+                    id: id,
+                    ...mockUserData,
+                    friends: [10],
+                }),
+        );
+
+        rerender(<People></People>);
+
+        // wait for rerender
+        await waitFor(() => {
+            screen.getAllByText(/^Test Data$/);
+        });
+
+        // should have tried to add the new friend's connections
+        expect(addConnectionsToCache).toHaveBeenCalledOnce();
+    });
+
+    it("fetches when the user unblocks someone", async () => {
+        // mock the user having blocked someone
+        // @ts-ignore
+        getAllData.mockImplementationOnce(
+            async (id: number): Promise<AllUserData> =>
+                await Promise.resolve({
+                    id: id,
+                    ...mockUserData,
+                    blockedUsers: [10],
+                }),
+        );
+
+        // prepare to rerender People within the same cache context provider
+        const { rerender } = render(<People></People>, {
+            wrapper: PeopleProvider,
+        });
+
+        // should try to fetch on first render
+        await waitFor(() => {
+            expect(getSuggestedPeople).toHaveBeenCalledOnce();
+        });
+
+        // mock the user having unblocked the other user
+        // @ts-ignore
+        getAllData.mockImplementationOnce(
+            async (id: number): Promise<AllUserData> =>
+                await Promise.resolve({
+                    id: id,
+                    ...mockUserData,
+                    blockedUsers: [],
+                }),
+        );
+
+        rerender(<People></People>);
+
+        // wait for rerender
+        await waitFor(() => {
+            screen.getAllByText(/^Test Data$/);
+        });
+
+        // should have tried to fetch again
+        expect(getSuggestedPeople).toHaveBeenCalledTimes(2);
+    });
+
+    it("fetches after 10 minutes", async () => {
+
+        const start = new Date(2025, 6, 24, 0, 0, 0, 0);
+        const startPlus11Minutes = new Date(2025, 6, 24, 0, 11, 0, 0)
+
+        vi.setSystemTime(start);
+
+        // prepare to rerender People within the same cache context provider
+        const { rerender } = render(<People></People>, {
+            wrapper: PeopleProvider,
+        });
+        
+        // wait for render
+        await waitFor(() => {
+            screen.getAllByText(/^Test Data$/);
+        });
+
+        // should have tried to fetch data
+        expect(getSuggestedPeople).toHaveBeenCalledTimes(1)
+
+        vi.setSystemTime(startPlus11Minutes);
+
+        rerender(<People></People>)
+        
+        // wait for rerender
+        await waitFor(() => {
+            screen.getAllByText(/^Test Data$/);
+        });
+
+        // should have tried to fetch data again
+        expect(getSuggestedPeople).toHaveBeenCalledTimes(3);
+    })
 });
