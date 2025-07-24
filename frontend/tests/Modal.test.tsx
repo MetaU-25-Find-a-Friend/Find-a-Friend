@@ -1,8 +1,13 @@
-import { vi, describe, it, afterAll, afterEach } from "vitest";
+import { vi, describe, it, afterAll, afterEach, expect } from "vitest";
 import { SavedUser, AllUserData } from "../src/types";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import Modal from "../src/components/Modal";
-import { getInterestName } from "../src/utils";
+import {
+    getInterestName,
+    sendFriendRequest,
+    blockUser,
+    unblockUser,
+} from "../src/utils";
 
 // mock useUser to pretend the user is authenticated
 vi.mock("../src/contexts/UserContext", async (importOriginal) => {
@@ -42,6 +47,11 @@ vi.mock("../src/utils", async (importOriginal) => {
             async (id: number): Promise<AllUserData> =>
                 await Promise.resolve(mockCurrentUserData),
         ),
+        sendFriendRequest: vi.fn(
+            async (id: number) => await Promise.resolve(true),
+        ),
+        blockUser: vi.fn(async (id: number) => await Promise.resolve(true)),
+        unblockUser: vi.fn(async (id: number) => await Promise.resolve(true)),
     };
 });
 
@@ -136,5 +146,64 @@ describe("Modal", () => {
             screen.getByText(/^You are not friends\.$/);
             screen.getByText(/^Send friend request$/);
         });
+    });
+
+    it("tries to send a friend request", async () => {
+        render(
+            <Modal
+                userData={mockUserData}
+                setUserData={mockSetUserData}></Modal>,
+        );
+
+        // click "Send friend request" button
+        const requestButton = await waitFor(() => {
+            return screen.getByText(/^Send friend request$/);
+        });
+        fireEvent.click(requestButton);
+
+        // should try to call sendFriendRequest()
+        expect(sendFriendRequest).toHaveBeenCalledExactlyOnceWith(
+            mockUserData.id,
+        );
+    });
+
+    it("tries to block the user", async () => {
+        render(
+            <Modal
+                userData={mockUserData}
+                setUserData={mockSetUserData}></Modal>,
+        );
+
+        // click "Block user" button
+        const block = await waitFor(() => {
+            return screen.getByText(/^Block user$/);
+        });
+        fireEvent.click(block);
+
+        // should try to call blockUser()
+        expect(blockUser).toHaveBeenCalledExactlyOnceWith(mockUserData.id);
+    });
+
+    it("tries to unblock the user", async () => {
+        // mock the logged-in user having blocked the user in the modal
+        mockCurrentUserData.blockedUsers.push(mockUserData.id);
+
+        render(
+            <Modal
+                userData={mockUserData}
+                setUserData={mockSetUserData}></Modal>,
+        );
+
+        // click "Unblock user" button
+        const unblock = await waitFor(() => {
+            return screen.getByText(/^Unblock user$/);
+        });
+        fireEvent.click(unblock);
+
+        // should try to call unblockUser()
+        expect(unblockUser).toHaveBeenCalledExactlyOnceWith(mockUserData.id);
+
+        // restore current user data
+        mockCurrentUserData.blockedUsers = [];
     });
 });
