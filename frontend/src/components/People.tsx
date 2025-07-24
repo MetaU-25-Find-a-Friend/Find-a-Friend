@@ -70,10 +70,14 @@ const People = () => {
     };
 
     // when profile button is clicked, try to send friend request
-    const handleFriendClick = async (id: number) => {
+    const handleFriendClick = async (id: number, event: React.MouseEvent) => {
         const success = await sendFriendRequest(id);
-        setAlertText(getFriendRequestAlert(success));
+        setAlertText(
+            `${getFriendRequestAlert(success)} Try sending a request to their friends as well!`,
+        );
         boostConnectionsOf(id);
+        // @ts-ignore
+        event.target.disabled = true;
     };
 
     // when profile button is clicked, block user and reload suggestions
