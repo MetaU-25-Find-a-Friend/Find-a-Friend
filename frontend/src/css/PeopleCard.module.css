@@ -78,3 +78,15 @@
     background-color: var(--teal-accent);
     color: white;
 }
+
+.button:disabled {
+    border: var(--light-teal-accent) 2px solid;
+    color: var(--light-teal-accent);
+}
+
+.button:disabled:hover {
+    background-color: var(--light-teal-accent);
+    border: var(--light-teal-accent) 2px solid;
+    color: white;
+    cursor: not-allowed;
+}

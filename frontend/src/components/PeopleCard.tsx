@@ -6,7 +6,7 @@ import styles from "../css/PeopleCard.module.css";
 
 interface PeopleCardProps {
     user: SuggestedProfile;
-    handleFriendClick: (id: number) => void;
+    handleFriendClick: (id: number, event: React.MouseEvent) => void;
     handleBlockClick: (id: number) => void;
 }
 
@@ -54,7 +54,7 @@ const PeopleCard = ({
         <div className={styles.buttonsContainer}>
             <button
                 className={styles.button}
-                onClick={() => handleFriendClick(user.data.id)}>
+                onClick={(event) => handleFriendClick(user.data.id, event)}>
                 Send friend request
             </button>
             <button

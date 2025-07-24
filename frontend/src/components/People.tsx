@@ -42,6 +42,9 @@ const People = () => {
     // users at some degree of separation from the current user
     const [suggestions, setSuggestions] = useState<SuggestedProfile[]>([]);
 
+    // whether the loading bar is showing
+    const [loading, setLoading] = useState(true);
+
     // text shown in alert; null when alert is not showing
     const [alertText, setAlertText] = useState<string | null>(null);
 
@@ -67,10 +70,14 @@ const People = () => {
     };
 
     // when profile button is clicked, try to send friend request
-    const handleFriendClick = async (id: number) => {
+    const handleFriendClick = async (id: number, event: React.MouseEvent) => {
         const success = await sendFriendRequest(id);
-        setAlertText(getFriendRequestAlert(success));
+        setAlertText(
+            `${getFriendRequestAlert(success)} Try sending a request to their friends as well!`,
+        );
         boostConnectionsOf(id);
+        // @ts-ignore
+        event.target.disabled = true;
     };
 
     // when profile button is clicked, block user and reload suggestions
@@ -78,6 +85,34 @@ const People = () => {
         const success = await blockUser(id);
         loadSuggestedPeople();
         setAlertText(getBlockAlert(success));
+    };
+
+    // load data on people suggestions either from database or cache
+    const loadSuggestedPeople = async () => {
+        if (!user) {
+            return;
+        }
+
+        setLoading(true);
+
+        const updatedCache = await updateCache();
+
+        // once cache has been checked/updated, load suggestions display from cache if necessary
+        if (updatedCache) {
+            const newSuggestions: SuggestedProfile[] = [];
+            for (const cacheValue of updatedCache.values()) {
+                const friendPath = findFriendPath(updatedCache, cacheValue);
+
+                newSuggestions.push({
+                    data: cacheValue.data,
+                    degree: cacheValue.degree,
+                    friendPath: friendPath,
+                });
+            }
+            setSuggestions(newSuggestions);
+        }
+
+        setLoading(false);
     };
 
     // check validity of cache and return a reference to the updated cache that should be used for loading
@@ -148,44 +183,20 @@ const People = () => {
         return updatedCache;
     };
 
-    // load data on people suggestions either from database or cache
-    const loadSuggestedPeople = async () => {
-        if (!user) {
-            return;
-        }
-
-        const updatedCache = await updateCache();
-
-        // once cache has been checked/updated, load suggestions display from cache if necessary
-        if (updatedCache) {
-            const newSuggestions: SuggestedProfile[] = [];
-            for (const cacheValue of updatedCache.values()) {
-                const friendPath = findFriendPath(updatedCache, cacheValue);
-
-                newSuggestions.push({
-                    data: cacheValue.data,
-                    degree: cacheValue.degree,
-                    friendPath: friendPath,
-                });
-            }
-            setSuggestions(newSuggestions);
-        }
-    };
-
     // once logged-in user loads, load suggestions
     useEffect(() => {
         loadSuggestedPeople();
     }, [user]);
 
     // profile cards for each suggested user
-    const suggestedUsersDisplay =
-        suggestions.length === 0 ? (
-            <div className={styles.loadingContainer}>
-                <Loading></Loading>
-            </div>
-        ) : (
-            <>
-                {suggestions
+    const suggestedUsersDisplay = loading ? (
+        <div className={styles.loadingContainer}>
+            <Loading></Loading>
+        </div>
+    ) : (
+        <>
+            {suggestions.length > 0 ? (
+                suggestions
                     .sort((a, b) => a.degree - b.degree)
                     .map((user) => (
                         <PeopleCard
@@ -193,9 +204,14 @@ const People = () => {
                             user={user}
                             handleFriendClick={handleFriendClick}
                             handleBlockClick={handleBlockClick}></PeopleCard>
-                    ))}
-            </>
-        );
+                    ))
+            ) : (
+                <p className={styles.emptyMessage}>
+                    No suggestions to display.
+                </p>
+            )}
+        </>
+    );
 
     if (!user) {
         return <LoggedOut></LoggedOut>;
