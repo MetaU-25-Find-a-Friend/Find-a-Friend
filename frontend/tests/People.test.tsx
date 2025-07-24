@@ -57,19 +57,6 @@ vi.mock("../src/people-utils", async (importOriginal) => {
                 await Promise.resolve([
                     {
                         data: {
-                            id: id + 1,
-                            ...mockUserData,
-                        },
-                        degree: 2,
-                        friendPath: [
-                            {
-                                userId: id + 2,
-                                userName: "Test Path 1",
-                            },
-                        ],
-                    },
-                    {
-                        data: {
                             id: id + 3,
                             ...mockUserData,
                         },
@@ -78,6 +65,20 @@ vi.mock("../src/people-utils", async (importOriginal) => {
                             {
                                 userId: id + 4,
                                 userName: "Test Path 2",
+                            },
+                        ],
+                    },
+
+                    {
+                        data: {
+                            id: id + 1,
+                            ...mockUserData,
+                        },
+                        degree: 2,
+                        friendPath: [
+                            {
+                                userId: id + 2,
+                                userName: "Test Path 1",
                             },
                         ],
                     },
@@ -109,5 +110,24 @@ describe("People page", () => {
         // these will render at the same time as the names
         screen.getByText(/^Friends with Test Path 1$/);
         screen.getByText(/^Friends with Test Path 2$/);
+    });
+
+    it("sorts suggestions by degree", async () => {
+        render(
+            <PeopleProvider>
+                <People></People>
+            </PeopleProvider>,
+        );
+
+        // get a reference to the two profile cards
+        const [firstCard, secondCard] = await waitFor(() => {
+            return [
+                screen.getByText(/^Friends with Test Path 1$/).parentElement!,
+                screen.getByText(/^Friends with Test Path 2$/).parentElement!,
+            ];
+        });
+
+        // the higher degree card should come immediately after the lower degree card in the DOM
+        expect(firstCard.nextElementSibling === secondCard).toBeTruthy();
     });
 });
