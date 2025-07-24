@@ -8,7 +8,11 @@ import {
     SuggestedProfile,
 } from "../src/types";
 import { render, screen, waitFor } from "@testing-library/react";
-import { addConnectionsToCache, getSuggestedPeople } from "../src/people-utils";
+import {
+    addConnectionsToCache,
+    getSuggestedPeople,
+    removeConnectionsFromCache,
+} from "../src/people-utils";
 import { getAllData } from "../src/utils";
 
 const mockNavigate = vi.fn((path: string) => {});
@@ -96,6 +100,12 @@ vi.mock("../src/people-utils", async (importOriginal) => {
                 cache: Map<number, CachedSuggestedProfile>,
                 currentUser: number,
                 newFriends: Set<number>,
+            ) => {},
+        ),
+        removeConnectionsFromCache: vi.fn(
+            (
+                cache: Map<number, CachedSuggestedProfile>,
+                users: Set<number>,
             ) => {},
         ),
     };
@@ -245,9 +255,8 @@ describe("People page", () => {
     });
 
     it("fetches after 10 minutes", async () => {
-
         const start = new Date(2025, 6, 24, 0, 0, 0, 0);
-        const startPlus11Minutes = new Date(2025, 6, 24, 0, 11, 0, 0)
+        const startPlus11Minutes = new Date(2025, 6, 24, 0, 11, 0, 0);
 
         vi.setSystemTime(start);
 
@@ -255,19 +264,19 @@ describe("People page", () => {
         const { rerender } = render(<People></People>, {
             wrapper: PeopleProvider,
         });
-        
+
         // wait for render
         await waitFor(() => {
             screen.getAllByText(/^Test Data$/);
         });
 
         // should have tried to fetch data
-        expect(getSuggestedPeople).toHaveBeenCalledTimes(1)
+        expect(getSuggestedPeople).toHaveBeenCalledTimes(1);
 
         vi.setSystemTime(startPlus11Minutes);
 
-        rerender(<People></People>)
-        
+        rerender(<People></People>);
+
         // wait for rerender
         await waitFor(() => {
             screen.getAllByText(/^Test Data$/);
@@ -275,5 +284,75 @@ describe("People page", () => {
 
         // should have tried to fetch data again
         expect(getSuggestedPeople).toHaveBeenCalledTimes(3);
-    })
+    });
+
+    it("does not fetch if the user loses a friend", async () => {
+        // mock the user having a friend
+        // @ts-ignore
+        getAllData.mockImplementationOnce(
+            async (id: number): Promise<AllUserData> =>
+                await Promise.resolve({
+                    id: id,
+                    ...mockUserData,
+                    friends: [10],
+                }),
+        );
+
+        // prepare to rerender People within the same cache context provider
+        const { rerender } = render(<People></People>, {
+            wrapper: PeopleProvider,
+        });
+
+        // should try to fetch on first render
+        await waitFor(() => {
+            expect(getSuggestedPeople).toHaveBeenCalledOnce();
+        });
+
+        rerender(<People></People>);
+
+        // wait for rerender
+        await waitFor(() => {
+            screen.getAllByText(/^Test Data$/);
+        });
+
+        // should not have tried to fetch again
+        expect(getSuggestedPeople).toHaveBeenCalledOnce();
+        // should have tried to remove the lost friend's connections
+        expect(removeConnectionsFromCache).toHaveBeenCalledOnce();
+    });
+
+    it("does not fetch if the user blocks someone", async () => {
+        // prepare to rerender People within the same cache context provider
+        const { rerender } = render(<People></People>, {
+            wrapper: PeopleProvider,
+        });
+
+        // should try to fetch on first render
+        await waitFor(() => {
+            expect(getSuggestedPeople).toHaveBeenCalledOnce();
+        });
+
+        // mock the user having blocked someone
+        // @ts-ignore
+        getAllData.mockImplementationOnce(
+            async (id: number): Promise<AllUserData> =>
+                await Promise.resolve({
+                    id: id,
+                    ...mockUserData,
+                    blockedUsers: [10],
+                }),
+        );
+
+        rerender(<People></People>);
+
+        // wait for rerender
+        await waitFor(() => {
+            screen.getAllByText(/^Test Data$/);
+        });
+
+        // should not have tried to fetch again
+        expect(getSuggestedPeople).toHaveBeenCalledOnce();
+        // should have tried to remove the blocked user's connections
+        expect(removeConnectionsFromCache).toHaveBeenCalledOnce();
+    });
 });
