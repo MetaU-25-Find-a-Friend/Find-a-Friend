@@ -3,6 +3,7 @@ import People from "../src/components/People";
 import PeopleProvider from "../src/contexts/PeopleContext";
 import { AllUserData, SavedUser, SuggestedProfile } from "../src/types";
 import { render, screen, waitFor } from "@testing-library/react";
+import { getSuggestedPeople } from "../src/people-utils";
 
 const mockNavigate = vi.fn((path: string) => {});
 
@@ -129,5 +130,27 @@ describe("People page", () => {
 
         // the higher degree card should come immediately after the lower degree card in the DOM
         expect(firstCard.nextElementSibling === secondCard).toBeTruthy();
+    });
+
+    it("loads suggestions from cache", async () => {
+        // prepare to rerender People within the same cache context provider
+        const { rerender } = render(<People></People>, {
+            wrapper: PeopleProvider,
+        });
+
+        // should try to fetch on first render
+        await waitFor(() => {
+            expect(getSuggestedPeople).toHaveBeenCalledOnce();
+        });
+
+        rerender(<People></People>);
+
+        // wait for rerender
+        await waitFor(() => {
+            screen.getAllByText(/^Test Data$/);
+        });
+
+        // should have used cache, and not tried to fetch again
+        expect(getSuggestedPeople).toHaveBeenCalledOnce();
     });
 });
