@@ -197,4 +197,53 @@ describe("Messages", () => {
         // shouldn't call sendMessage
         expect(sendMessage).not.toHaveBeenCalled();
     });
+
+    it("tries to fetch new messages", async () => {
+        render(<Messages></Messages>);
+
+        // wait for friends list to render
+        const friends = await waitFor(() => {
+            return screen.getAllByText(/^Friend Data$/);
+        });
+
+        // click on first friend box
+        fireEvent.click(friends[0].parentElement!);
+
+        // should load messages
+        expect(getMessagesBetween).toHaveBeenCalledOnce();
+
+        const newMessage = "I just sent this!";
+
+        // mock a new message having been sent
+        // @ts-ignore
+        getMessagesBetween.mockImplementationOnce(
+            async (id: number, cursor: number): Promise<Message[]> =>
+                await Promise.resolve([
+                    {
+                        id: 2,
+                        fromUser: id,
+                        toUser: 1,
+                        text: newMessage,
+                        timestamp: new Date(2025, 6, 25, 1),
+                        read: true,
+                    },
+                    {
+                        id: 1,
+                        fromUser: id,
+                        toUser: 1,
+                        text: "Hello",
+                        timestamp: new Date(2025, 6, 25),
+                        read: true,
+                    },
+                ]),
+        );
+
+        // should refetch messages and load new message
+        await waitFor(
+            () => {
+                screen.getByText(newMessage);
+            },
+            { timeout: 4000 },
+        );
+    });
 });
