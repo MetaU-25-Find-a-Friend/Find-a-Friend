@@ -245,4 +245,33 @@ describe("Map", () => {
         // @ts-ignore
         getOtherUserGeohashes.mockReset();
     });
+
+    it("only shows users within the 5mi radius", async () => {
+        // mock the other user being very far away
+        // @ts-ignore
+        getOtherUserGeohashes.mockImplementation(
+            async (): Promise<UserGeohash[]> =>
+                await Promise.resolve([
+                    {
+                        id: 1,
+                        userId: 4,
+                        geohash: "999999999",
+                    },
+                ]),
+        );
+
+        render(<MapPage></MapPage>);
+
+        // click the "5mi" slider option
+        const fiveMi = await waitFor(() => {
+            return screen.getByText(/^5mi$/);
+        });
+        fireEvent.click(fiveMi);
+
+        // the other user should fail the geohash distance check and not be shown
+        expect(screen.queryByText(/^Other Data$/)).toBe(null);
+
+        // @ts-ignore
+        getOtherUserGeohashes.mockReset();
+    });
 });
