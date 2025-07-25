@@ -359,14 +359,20 @@ describe("People page", () => {
             </PeopleProvider>,
         );
 
-        // click the first "Send friend request" button
+        // click a "Send friend request" button
         const requestButtons = await waitFor(() => {
             return screen.getAllByText(/^Send friend request$/);
         });
-        fireEvent.click(requestButtons[0]);
+        const toClick = requestButtons[0];
+        fireEvent.click(toClick);
 
         // should call sendFriendRequest
         expect(sendFriendRequest).toHaveBeenCalledOnce();
+
+        // should disable the button
+        await waitFor(() => {
+            expect((toClick as HTMLButtonElement).disabled).toBe(true);
+        });
     });
 
     it("tries to block user", async () => {
