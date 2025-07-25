@@ -1,9 +1,9 @@
-import { vi, describe, it, afterAll, afterEach } from "vitest";
+import { vi, describe, it, afterAll, afterEach, expect } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import MapPage from "../src/components/MapPage";
 import { AllUserData, SavedUser, UserGeohash } from "../src/types";
 import { ReactNode } from "react";
-import { getOtherUserGeohashes } from "../src/utils";
+import { deleteGeohash, getOtherUserGeohashes } from "../src/utils";
 
 // mock utils to prevent backend fetches and get call data
 vi.mock("../src/utils", async (importOriginal) => {
@@ -190,8 +190,59 @@ describe("Map", () => {
         await waitFor(() => {
             screen.getByText(/^Choose which user's profile to view:$/);
         });
+
+        // @ts-ignore
+        getOtherUserGeohashes.mockReset();
     });
 
-    // @ts-ignore
-    getOtherUserGeohashes.mockReset();
+    it("tries to hide user's location", async () => {
+        render(<MapPage></MapPage>);
+
+        // click "Hide" slider option
+        const hide = await waitFor(() => {
+            return screen.getByText(/^Hide$/);
+        });
+        fireEvent.click(hide);
+
+        // should try to delete user's location from database
+        await waitFor(() => {
+            expect(deleteGeohash).toHaveBeenCalledOnce();
+        });
+    });
+
+    it("updates other user locations", async () => {
+        render(<MapPage></MapPage>);
+
+        // wait for initial render
+        await waitFor(() => {
+            screen.getByText(/^Current Data$/);
+        });
+
+        // there shouldn't be a cluster since the two users are somewhat far apart
+        expect(screen.queryByText(/^2$/)).toBe(null);
+
+        // mock the other user having moved closer
+        // @ts-ignore
+        getOtherUserGeohashes.mockImplementation(
+            async (): Promise<UserGeohash[]> =>
+                await Promise.resolve([
+                    {
+                        id: 1,
+                        userId: 4,
+                        geohash: "9h9j5byjj",
+                    },
+                ]),
+        );
+
+        // after the next update, the two users should cluster
+        await waitFor(
+            () => {
+                screen.getByText(/^2$/);
+            },
+            { timeout: 5000 },
+        );
+
+        // @ts-ignore
+        getOtherUserGeohashes.mockReset();
+    });
 });
