@@ -7,13 +7,13 @@ import {
     SavedUser,
     SuggestedProfile,
 } from "../src/types";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
     addConnectionsToCache,
     getSuggestedPeople,
     removeConnectionsFromCache,
 } from "../src/people-utils";
-import { getAllData } from "../src/utils";
+import { blockUser, getAllData, sendFriendRequest } from "../src/utils";
 
 const mockNavigate = vi.fn((path: string) => {});
 
@@ -56,6 +56,10 @@ vi.mock("../src/utils", async (importOriginal) => {
                     ...mockUserData,
                 }),
         ),
+        sendFriendRequest: vi.fn(
+            async (id: number) => await Promise.resolve(true),
+        ),
+        blockUser: vi.fn(async (id: number) => await Promise.resolve(true)),
     };
 });
 
@@ -79,7 +83,6 @@ vi.mock("../src/people-utils", async (importOriginal) => {
                             },
                         ],
                     },
-
                     {
                         data: {
                             id: id + 1,
@@ -347,5 +350,45 @@ describe("People page", () => {
         expect(getSuggestedPeople).toHaveBeenCalledOnce();
         // should have tried to remove the blocked user's connections
         expect(removeConnectionsFromCache).toHaveBeenCalledOnce();
+    });
+
+    it("tries to send a friend request", async () => {
+        render(
+            <PeopleProvider>
+                <People></People>
+            </PeopleProvider>,
+        );
+
+        // click a "Send friend request" button
+        const requestButtons = await waitFor(() => {
+            return screen.getAllByText(/^Send friend request$/);
+        });
+        const toClick = requestButtons[0];
+        fireEvent.click(toClick);
+
+        // should call sendFriendRequest
+        expect(sendFriendRequest).toHaveBeenCalledOnce();
+
+        // should disable the button
+        await waitFor(() => {
+            expect((toClick as HTMLButtonElement).disabled).toBe(true);
+        });
+    });
+
+    it("tries to block user", async () => {
+        render(
+            <PeopleProvider>
+                <People></People>
+            </PeopleProvider>,
+        );
+
+        // click the first "Block user" button
+        const blockButtons = await waitFor(() => {
+            return screen.getAllByText(/^Block$/);
+        });
+        fireEvent.click(blockButtons[0]);
+
+        // should call blockUser
+        expect(blockUser).toHaveBeenCalledOnce();
     });
 });
