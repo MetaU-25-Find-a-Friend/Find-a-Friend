@@ -131,30 +131,55 @@ export interface PlaceHistory {
 }
 
 /**
- * Represents data on a place and the users at that place in relation to the current user
- * @property place the place itself as returned from the Places API
- * @property geohash the place's location
- * @property geohashDistance the number of characters this place's geohash has in common with the current user's;
- * increases with closeness to the user
- * @property numVisits the number of times the user has visited this place in the past
- * @property visitScore a weighted score based on the recency and duration of past visits;
- * increases with higher relevance to the user
- * @property isLikedType true if the place's primary type is one the user has liked in the past
- * @property userData holds information on the number of other users at this place
- * @property score the final weighted score combining all of this information
+ * Represents data on a place and the users there in relation to the current user
  */
 export interface PlaceRecData {
+    /**
+     * The place itself as returned from the Places API
+     */
     place: Place;
+    /**
+     * The place's location
+     */
     geohash: string;
+    /**
+     * The number of characters this place's geohash has in common with the current user's;
+     * increases with closeness to the user
+     */
     geohashDistance: number;
+    /**
+     * The number of times the user has visited this place in the past
+     */
     numVisits: number;
+    /**
+     * A weighted score based on the recency and duration of past visits to this place;
+     * increases with higher relevance to the user
+     */
     visitScore: number;
+    /**
+     * True if this place's primary type is one the user has liked in the past
+     */
     isLikedType: boolean;
+    /**
+     * Information on the active users at this place
+     */
     userData: {
+        /**
+         * Number of active users at this place
+         */
         count: number;
+        /**
+         * Average similarity (based on interests) of active users at this place to the current user
+         */
         avgSimilarity: number;
+        /**
+         * Number of the current user's friends at this place
+         */
         friendCount: number;
     };
+    /**
+     * The final weighted score; increases with relevance to the user
+     */
     score: number;
 }
 
