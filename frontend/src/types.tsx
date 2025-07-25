@@ -324,7 +324,8 @@ export interface CachedSuggestedProfile {
 }
 
 /**
- * Represents a friend in a suggested user's friendPath who connects two users
+ * Represents a user in a suggested user's friendPath (i.e. through whom the user is
+ * connected to the current user)
  */
 export interface FriendPathNode {
     userId: number;
