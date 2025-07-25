@@ -1,4 +1,4 @@
-import { vi, describe, it, afterAll, afterEach, expect } from "vitest";
+import { vi, describe, it, afterAll, afterEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import MapPage from "../src/components/MapPage";
 import { AllUserData, SavedUser, UserGeohash } from "../src/types";
@@ -144,6 +144,23 @@ describe("Map", () => {
         await waitFor(() => {
             screen.getByText(/^Current Data$/);
             screen.getByText(/^Other Data$/);
+        });
+    });
+
+    it("shows modal on marker click", async () => {
+        render(<MapPage></MapPage>);
+
+        // click on marker itself (should have an accessibility label in future that we can use here)
+        const marker = await waitFor(() => {
+            return screen.getByText(/^Other Data$/).parentElement!
+                .parentElement!.parentElement!;
+        });
+        fireEvent.click(marker);
+
+        // modal buttons should render
+        await waitFor(() => {
+            screen.getByText(/^Send friend request$/);
+            screen.getByText(/^Block user$/);
         });
     });
 
