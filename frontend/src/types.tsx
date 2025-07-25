@@ -1,6 +1,10 @@
 import type React from "react";
 
 /**
+ ** AUTHENTICATION + USER DATA
+ */
+
+/**
  * Represents user-entered data to create an account
  */
 export interface SignupData {
@@ -65,6 +69,10 @@ export interface SavedUserContext {
 }
 
 /**
+ ** LOCATION DATA
+ */
+
+/**
  * Represents the user's current location
  */
 export interface UserLocation {
@@ -82,6 +90,18 @@ export interface UserGeohash {
     userId: number;
     geohash: string;
 }
+
+/**
+ * Represents 1 or more users at a certain location
+ */
+export interface ClusterData {
+    geohash: string;
+    userIds: number[];
+}
+
+/**
+ ** PLACE RECOMMENDATION DATA
+ */
 
 /**
  * Represents data on a point of interest returned from a Google Maps Places API (New) Nearby Places search
@@ -149,6 +169,19 @@ export interface PlaceRecUserData {
 }
 
 /**
+ * Represents the weights and liked place types saved for a user for use in calculating their recommended places
+ */
+export interface Weights {
+    friendWeight: number;
+    pastVisitWeight: number;
+    countWeight: number;
+    similarityWeight: number;
+    distanceWeight: number;
+    typeWeight: number;
+    likedTypes: string[];
+}
+
+/**
  * Represents adjustments, prompted by user input, made to the weights of
  * certain factors in a place's recommendation score
  */
@@ -173,17 +206,8 @@ export interface PlaceRecStats {
 }
 
 /**
- * Represents the weights and liked place types saved for a user for use in calculating their recommended places
+ ** FRIEND REQUEST DATA
  */
-export interface Weights {
-    friendWeight: number;
-    pastVisitWeight: number;
-    countWeight: number;
-    similarityWeight: number;
-    distanceWeight: number;
-    typeWeight: number;
-    likedTypes: string[];
-}
 
 /**
  * Represents a friend request
@@ -205,6 +229,10 @@ export interface FriendRequestWithProfile {
 }
 
 /**
+ ** MESSAGING DATA
+ */
+
+/**
  * Represents a message
  */
 export interface Message {
@@ -217,13 +245,19 @@ export interface Message {
 }
 
 /**
- * @property userId the user's id
- * @property userName the user's full name
+ * Represents data on unread messages from a certain friend
  */
-export interface FriendPathNode {
-    userId: number;
-    userName: string;
+export interface MessagesPreview {
+    friendId: number;
+    friendName: string;
+    unreadCount: number;
+    latestUnread: string;
 }
+
+/**
+ ** PEOPLE SUGGESTIONS DATA
+ */
+
 /**
  * @property data the suggested user's data
  * @property degree a measure of the suggested user's closeness to the current user
@@ -247,6 +281,15 @@ export interface CachedSuggestedProfile {
 }
 
 /**
+ * @property userId the user's id
+ * @property userName the user's full name
+ */
+export interface FriendPathNode {
+    userId: number;
+    userName: string;
+}
+
+/**
  * @property peopleCache maps the ids of suggested users to data about them
  * @property setPeopleCache a function to update peopleCache
  * @property friends the ids of the current user's friends at the time peopleCache was last updated
@@ -265,22 +308,4 @@ export interface PeopleCacheContext {
     setBlockedUsers: React.Dispatch<React.SetStateAction<number[]>>;
     lastRefetch: Date;
     setLastRefetch: React.Dispatch<React.SetStateAction<Date>>;
-}
-
-/**
- * Represents 1 or more users at a certain location
- */
-export interface ClusterData {
-    geohash: string;
-    userIds: number[];
-}
-
-/**
- * Represents data on unread messages from a certain friend
- */
-export interface MessagesPreview {
-    friendId: number;
-    friendName: string;
-    unreadCount: number;
-    latestUnread: string;
 }
