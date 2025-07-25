@@ -1,8 +1,9 @@
-import { vi, describe, it, afterAll, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { vi, describe, it, afterAll, afterEach, expect } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import MapPage from "../src/components/MapPage";
 import { AllUserData, SavedUser, UserGeohash } from "../src/types";
 import { ReactNode } from "react";
+import { getOtherUserGeohashes } from "../src/utils";
 
 // mock utils to prevent backend fetches and get call data
 vi.mock("../src/utils", async (importOriginal) => {
@@ -24,7 +25,7 @@ vi.mock("../src/utils", async (importOriginal) => {
             async (id: number): Promise<AllUserData> =>
                 await Promise.resolve({
                     id: id,
-                    firstName: "Test",
+                    firstName: id === 1 ? "Current" : "Other",
                     lastName: "Data",
                     interests: [0, 0, 0, 0, 0, 0],
                     friends: [],
@@ -66,12 +67,13 @@ vi.mock("../src/contexts/UserContext", async (importOriginal) => {
 });
 
 // mock navigator.geolocation.getCurrentPosition()
+// this location corresponds to a geohash of 9h9j5byyy
 const mockGeolocation = {
     getCurrentPosition: vi.fn((successCallback: any) => {
         successCallback({
             coords: {
-                latitude: 30,
-                longitude: 30,
+                latitude: 26.1967,
+                longitude: -133.4194,
             },
         });
     }),
@@ -104,7 +106,7 @@ vi.mock("@vis.gl/react-google-maps", async (importOriginal) => {
         useMapsLibrary: (name: string) => {
             return {
                 spherical: {
-                    computeDistanceBetween: () => {},
+                    computeDistanceBetween: () => 1,
                 },
             };
         },
@@ -130,8 +132,49 @@ describe("Map", () => {
 
         // once markers render, test that the user's marker and (hidden) profile popup render
         await waitFor(() => {
-            screen.getByText(/^Position: 30, 30$/);
-            screen.getByText(/^Test Data$/);
+            screen.getByText(/^Position: 26, -133$/);
+            screen.getByText(/^Current Data$/);
         });
     });
+
+    it("shows other users' markers", async () => {
+        render(<MapPage></MapPage>);
+
+        // both users' names in their profile popups should render
+        await waitFor(() => {
+            screen.getByText(/^Current Data$/);
+            screen.getByText(/^Other Data$/);
+        });
+    });
+
+    it("clusters close markers", async () => {
+        // mock other user being even closer to current user
+        // @ts-ignore
+        getOtherUserGeohashes.mockImplementation(
+            async (): Promise<UserGeohash[]> =>
+                await Promise.resolve([
+                    {
+                        id: 1,
+                        userId: 4,
+                        geohash: "9h9j5byjj",
+                    },
+                ]),
+        );
+
+        render(<MapPage></MapPage>);
+
+        // wait for the cluster to render, then click it
+        const cluster = await waitFor(() => {
+            return screen.getByText(/^2$/);
+        });
+        fireEvent.click(cluster);
+
+        // picker should show (confirming that this is a working cluster)
+        await waitFor(() => {
+            screen.getByText(/^Choose which user's profile to view:$/);
+        });
+    });
+
+    // @ts-ignore
+    getOtherUserGeohashes.mockReset();
 });
