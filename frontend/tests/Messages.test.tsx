@@ -1,8 +1,8 @@
-import { vi, describe, it, expect } from "vitest";
+import { vi, describe, it, expect, afterEach, afterAll } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { AllUserData, SavedUser, Message } from "../src/types";
 import Messages from "../src/components/Messages";
-import { getMessagesBetween } from "../src/utils";
+import { getMessagesBetween, sendMessage } from "../src/utils";
 
 // mock utils to prevent backend fetches and get call data
 vi.mock("../src/utils", async (importOriginal) => {
@@ -82,6 +82,10 @@ vi.mock("react-router-dom", async (importOriginal) => {
 });
 
 describe("Messages", () => {
+    afterEach(() => vi.clearAllMocks());
+
+    afterAll(() => vi.restoreAllMocks());
+
     it("renders friends", async () => {
         render(<Messages></Messages>);
 
@@ -111,5 +115,86 @@ describe("Messages", () => {
         });
 
         screen.getByText(/^Hello$/);
+    });
+
+    it("sends a message", async () => {
+        render(<Messages></Messages>);
+
+        // wait for friends list to render
+        const friends = await waitFor(() => {
+            return screen.getAllByText(/^Friend Data$/);
+        });
+
+        // click on first friend box
+        fireEvent.click(friends[0].parentElement!);
+
+        const testMessage = "Test";
+
+        // type in message textbox and click send
+        const textbox = await waitFor(() => {
+            return screen.getByPlaceholderText(/^New message$/);
+        });
+        fireEvent.change(textbox, { target: { value: testMessage } });
+
+        const send = textbox.nextElementSibling!;
+        fireEvent.click(send);
+
+        // should call sendMessage
+        expect(sendMessage).toHaveBeenCalledExactlyOnceWith(2, testMessage);
+    });
+
+    it("sends a message on enter key press", async () => {
+        render(<Messages></Messages>);
+
+        // wait for friends list to render
+        const friends = await waitFor(() => {
+            return screen.getAllByText(/^Friend Data$/);
+        });
+
+        // click on first friend box
+        fireEvent.click(friends[0].parentElement!);
+
+        const testMessage = "Test";
+
+        // type in message textbox and press enter
+        const textbox = await waitFor(() => {
+            return screen.getByPlaceholderText(/^New message$/);
+        });
+        fireEvent.change(textbox, { target: { value: testMessage } });
+
+        fireEvent.keyDown(textbox, { key: "Enter" });
+
+        // should call sendMessage
+        expect(sendMessage).toHaveBeenCalledExactlyOnceWith(2, testMessage);
+    });
+
+    it("doesn't send an empty message", async () => {
+        render(<Messages></Messages>);
+
+        // wait for friends list to render
+        const friends = await waitFor(() => {
+            return screen.getAllByText(/^Friend Data$/);
+        });
+
+        // click on first friend box
+        fireEvent.click(friends[0].parentElement!);
+
+        // click send without typing in textbox
+        const textbox = await waitFor(() => {
+            return screen.getByPlaceholderText(/^New message$/);
+        });
+
+        const send = textbox.nextElementSibling!;
+        fireEvent.click(send);
+
+        // shouldn't call sendMessage
+        expect(sendMessage).not.toHaveBeenCalled();
+
+        // type spaces in textbox
+        fireEvent.change(textbox, { target: { value: "     " } });
+        fireEvent.click(send);
+
+        // shouldn't call sendMessage
+        expect(sendMessage).not.toHaveBeenCalled();
     });
 });
