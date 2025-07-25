@@ -284,30 +284,47 @@ export interface MessagesPreview {
  */
 
 /**
- * @property data the suggested user's data
- * @property degree a measure of the suggested user's closeness to the current user
- * @property friendPath an array of all users through whom this suggestion was found from the current user
+ * Represents a user shown on the People You May Know page
  */
 export interface SuggestedProfile {
+    /**
+     * The suggested user's data
+     */
     data: AllUserData;
+    /**
+     * A measure of the suggested user's distance from the current user; decreases with
+     * a shorter path and increased closeness of friends in the path
+     */
     degree: number;
+    /**
+     * An array of friends through which this suggestion was found from the current user,
+     * starting with a friend of the current user
+     */
     friendPath: FriendPathNode[];
 }
 
 /**
- * @property data the suggested user's data
- * @property degree a measure of the suggested user's closeness to the current user
- * @property parent the immediate user through whom this suggestion was found
+ * Represents a user loaded on the People You May Know page and cached for later retrieval
  */
 export interface CachedSuggestedProfile {
+    /**
+     * The suggested user's data
+     */
     data: AllUserData;
+    /**
+     * A measure of the suggested user's distance from the current user; decreases with
+     * a shorter path and increased closeness of friends in the path
+     */
     degree: number;
+    /**
+     * A friend of the suggested user through whom they are connected to the current user;
+     * the last element of their friendPath
+     */
     parent: FriendPathNode;
 }
 
 /**
- * @property userId the user's id
- * @property userName the user's full name
+ * Represents a friend in a suggested user's friendPath who connects two users
  */
 export interface FriendPathNode {
     userId: number;
@@ -315,22 +332,29 @@ export interface FriendPathNode {
 }
 
 /**
- * @property peopleCache maps the ids of suggested users to data about them
- * @property setPeopleCache a function to update peopleCache
- * @property friends the ids of the current user's friends at the time peopleCache was last updated
- * @property setFriends a function to update friends
- * @property blockedUsers the ids of users the current user had blocked at the time peopleCache was last updated
- * @property setBlockedUsers a function to update blockedUsers
+ * Represents the cache of suggested people and data used to determine its validity
  */
 export interface PeopleCacheContext {
+    /**
+     * Maps the IDs of suggested users to their data; can reconstruct into an array of SuggestedProfiles
+     */
     peopleCache: Map<number, CachedSuggestedProfile>;
     setPeopleCache: React.Dispatch<
         React.SetStateAction<Map<number, CachedSuggestedProfile>>
     >;
+    /**
+     * The IDs of the current user's friends as of the time peopleCache was last updated
+     */
     friends: number[];
     setFriends: React.Dispatch<React.SetStateAction<number[]>>;
+    /**
+     * The IDs of users whom the current user had blocked as of the time peopleCache was last updated
+     */
     blockedUsers: number[];
     setBlockedUsers: React.Dispatch<React.SetStateAction<number[]>>;
+    /**
+     * The last time that peopleCache was fully invalidated and refetched
+     */
     lastRefetch: Date;
     setLastRefetch: React.Dispatch<React.SetStateAction<Date>>;
 }
