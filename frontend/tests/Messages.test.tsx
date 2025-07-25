@@ -1,7 +1,8 @@
 import { vi, describe, it, expect } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { AllUserData, SavedUser, Message } from "../src/types";
 import Messages from "../src/components/Messages";
+import { getMessagesBetween } from "../src/utils";
 
 // mock utils to prevent backend fetches and get call data
 vi.mock("../src/utils", async (importOriginal) => {
@@ -29,12 +30,12 @@ vi.mock("../src/utils", async (importOriginal) => {
             }
         }),
         getMessagesBetween: vi.fn(
-            async (id1: number, id2: number): Promise<Message[]> =>
+            async (id: number, cursor: number): Promise<Message[]> =>
                 await Promise.resolve([
                     {
                         id: 1,
-                        fromUser: id1,
-                        toUser: id2,
+                        fromUser: id,
+                        toUser: 1,
                         text: "Hello",
                         timestamp: new Date(2025, 6, 25),
                         read: true,
@@ -91,5 +92,24 @@ describe("Messages", () => {
 
         // there should be 3 friends shown
         expect(friends.length).toBe(3);
+    });
+
+    it("renders messages", async () => {
+        render(<Messages></Messages>);
+
+        // wait for friends list to render
+        const friends = await waitFor(() => {
+            return screen.getAllByText(/^Friend Data$/);
+        });
+
+        // click on first friend
+        fireEvent.click(friends[0]);
+
+        // should call getMessagesBetween and render mock message
+        await waitFor(() => {
+            expect(getMessagesBetween).toHaveBeenCalledExactlyOnceWith(2, -1);
+        });
+
+        screen.getByText(/^Hello$/);
     });
 });
