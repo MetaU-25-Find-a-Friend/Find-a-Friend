@@ -7,6 +7,7 @@ import type {
     UserGeohash,
     ClusterData,
     MessagesPreview,
+    LoginData,
 } from "./types";
 import { GEOHASH_RADII } from "./constants";
 import { areHashesClose } from "./recommendation-utils";
@@ -46,10 +47,9 @@ export const createAccount = async (accountData: {
  * @param enteredData user-entered email and password for login attempt
  * @returns true and success message if login succeeded; false and error message if validation failed
  */
-export const login = async (enteredData: {
-    email: string;
-    password: string;
-}): Promise<[boolean, any]> => {
+export const login = async (
+    enteredData: LoginData,
+): Promise<[boolean, any]> => {
     const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/login`, {
         method: "post",
         mode: "cors",
