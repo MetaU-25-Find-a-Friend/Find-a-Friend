@@ -13,7 +13,7 @@ import {
     getSuggestedPeople,
     removeConnectionsFromCache,
 } from "../src/people-utils";
-import { getAllData, sendFriendRequest } from "../src/utils";
+import { blockUser, getAllData, sendFriendRequest } from "../src/utils";
 
 const mockNavigate = vi.fn((path: string) => {});
 
@@ -367,5 +367,22 @@ describe("People page", () => {
 
         // should call sendFriendRequest
         expect(sendFriendRequest).toHaveBeenCalledOnce();
+    });
+
+    it("tries to block user", async () => {
+        render(
+            <PeopleProvider>
+                <People></People>
+            </PeopleProvider>,
+        );
+
+        // click the first "Block user" button
+        const blockButtons = await waitFor(() => {
+            return screen.getAllByText(/^Block$/);
+        });
+        fireEvent.click(blockButtons[0]);
+
+        // should call blockUser
+        expect(blockUser).toHaveBeenCalledOnce();
     });
 });
