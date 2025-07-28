@@ -212,7 +212,8 @@ const MapPage = () => {
                     mapId={"Users Map"}
                     defaultZoom={DEFAULT_MAP_ZOOM}
                     gestureHandling={"greedy"}
-                    disableDefaultUI={true}>
+                    disableDefaultUI={true}
+                    colorScheme="FOLLOW_SYSTEM">
                     <ClusteredMarkers
                         users={[
                             { userId: user.id, geohash: myLocation },
