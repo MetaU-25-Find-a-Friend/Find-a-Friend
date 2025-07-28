@@ -147,7 +147,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                     onClick={handleSendClick}>
                     <FontAwesomeIcon
                         icon={faArrowRight}
-                        color="white"
+                        color="var(--alt-text-color)"
                         size="2x"></FontAwesomeIcon>
                 </button>
             </div>

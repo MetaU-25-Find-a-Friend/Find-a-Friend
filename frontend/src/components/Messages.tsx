@@ -239,7 +239,7 @@ const Messages = () => {
                 disabled={!newMessage.trim()}>
                 <FontAwesomeIcon
                     icon={faArrowRight}
-                    color="white"
+                    color="var(--alt-text-color)"
                     size="2x"></FontAwesomeIcon>
             </button>
         </div>
