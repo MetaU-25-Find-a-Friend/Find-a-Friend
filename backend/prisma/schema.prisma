@@ -21,7 +21,7 @@ model User {
   firstName String
   lastName String
   pronouns String?
-  age Int?
+  year Int?
   major String?
   interests Int[]
   bio String?
