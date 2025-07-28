@@ -6,8 +6,8 @@ interface DashboardMessagePreviewProps {
 }
 
 /**
- * 
- * @param preview data on unread messages and the friend who sent them 
+ *
+ * @param preview data on unread messages and the friend who sent them
  * @returns A card displaying the latest unread message from a certain friend
  */
 const DashboardMessagePreview = ({ preview }: DashboardMessagePreviewProps) => (
