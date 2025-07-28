@@ -191,3 +191,38 @@
     width: fit-content;
     align-self: center;
 }
+
+@media (max-width: 800px) {
+    .message {
+        max-width: 90%;
+        flex-flow: column nowrap;
+    }
+
+    .message.fromMe {
+        align-items: flex-end;
+    }
+
+    .message.fromOther {
+        align-items: flex-start;
+    }
+
+    .messageText {
+        width: fit-content;
+        max-width: 100%;
+    }
+
+    .messageTime {
+        width: 100%;
+        display: flex;
+        flex-flow: row nowrap;
+        gap: 0.5rem;
+    }
+
+    .fromMe .messageTime {
+        justify-content: flex-end;
+    }
+
+    .fromOther .messageTime {
+        justify-content: flex-start;
+    }
+}
