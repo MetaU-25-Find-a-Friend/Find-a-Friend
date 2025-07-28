@@ -28,7 +28,7 @@
     align-items: center;
     gap: 0.5rem;
     background-color: var(--teal-accent);
-    color: white;
+    color: var(--alt-text-color);
     padding: 1rem;
     box-sizing: border-box;
     border-radius: 2rem;

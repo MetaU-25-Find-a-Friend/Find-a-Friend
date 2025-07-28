@@ -26,6 +26,7 @@
     font-size: inherit;
     width: 100%;
     box-sizing: border-box;
+    background-color: var(--alt-background);
 }
 
 .input:focus-visible {
@@ -45,7 +46,7 @@
 }
 
 .button:hover {
-    color: white;
+    color: var(--alt-text-color);
     background-color: var(--teal-accent);
 }
 

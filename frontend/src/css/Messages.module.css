@@ -153,13 +153,14 @@
 
 .input {
     font-family: inherit;
+    color: inherit;
     font-size: 20px;
     border: var(--teal-accent) 2px solid;
     padding: 0.75rem 2rem;
     box-sizing: border-box;
-    background-color: white;
     border-radius: 2rem;
     flex-grow: 2;
+    background-color: var(--alt-background);
 }
 
 .input:focus-visible {
