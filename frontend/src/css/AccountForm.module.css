@@ -46,7 +46,7 @@
 }
 
 .button:hover {
-    color: white;
+    color: var(--alt-text-color);
     background-color: var(--teal-accent);
 }
 

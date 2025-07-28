@@ -67,7 +67,7 @@ textarea.input {
 
 .interestsContainer {
     padding: 0.75rem 1.25rem;
-    background-color: white;
+    background-color: var(--alt-background);
     border: var(--teal-accent) 2px solid;
     border-radius: 2rem;
     width: 100%;
@@ -105,6 +105,6 @@ textarea.input {
 }
 
 .button:hover {
-    color: white;
+    color: var(--alt-text-color);
     background-color: var(--teal-accent);
 }

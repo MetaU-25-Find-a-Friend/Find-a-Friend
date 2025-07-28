@@ -32,7 +32,7 @@
 }
 
 .alertText {
-    color: white;
+    color: var(--alt-text-color);
     font-size: 20px;
     text-align: center;
     margin: 0;
