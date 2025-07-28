@@ -85,7 +85,7 @@
 
 .button:hover {
     background-color: var(--teal-accent);
-    color: white;
+    color: var(--alt-text-color);
 }
 
 .button:disabled {
@@ -96,6 +96,6 @@
 .button:disabled:hover {
     background-color: var(--light-teal-accent);
     border: var(--light-teal-accent) 2px solid;
-    color: white;
+    color: var(--alt-text-color);
     cursor: not-allowed;
 }

@@ -24,7 +24,7 @@
 
 .placesButton {
     background-color: var(--teal-accent);
-    color: white;
+    color: var(--alt-text-color);
     border: none;
     font-family: inherit;
     font-size: 18px;
@@ -55,7 +55,7 @@
     column-gap: 1rem;
     row-gap: 1rem;
     width: 100%;
-    background-color: white;
+    background-color: var(--alt-background);
     border-radius: 2rem;
     animation-name: slide-up;
     animation-duration: 1s;
@@ -74,7 +74,7 @@
     font-family: inherit;
     border: none;
     background-color: var(--teal-accent);
-    color: white;
+    color: var(--alt-text-color);
     border-radius: 2rem;
     padding: 1rem;
     box-sizing: border-box;

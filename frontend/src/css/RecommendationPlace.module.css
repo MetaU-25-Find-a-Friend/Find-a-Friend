@@ -24,7 +24,7 @@
 
 .likeButton {
     background-color: var(--teal-accent);
-    color: white;
+    color: var(--alt-text-color);
     border: none;
     padding: 0.75rem 0.8rem;
     box-sizing: border-box;
