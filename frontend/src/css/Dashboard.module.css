@@ -208,28 +208,6 @@
     box-sizing: border-box;
 }
 
-.messagesPreview {
-    width: 100%;
-    padding: 1.5rem;
-    box-sizing: border-box;
-    background-color: var(--tan-background);
-    border-radius: 2rem;
-}
-
-.previewText {
-    margin: 0 0 1rem;
-    font-size: 18px;
-}
-
-.previewName {
-    margin: 0;
-    font-size: 18px;
-}
-
-.tealText {
-    color: var(--teal-accent);
-}
-
 .navButton {
     background-color: var(--tan-background);
     border: none;

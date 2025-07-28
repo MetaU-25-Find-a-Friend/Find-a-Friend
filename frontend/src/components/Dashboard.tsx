@@ -25,6 +25,7 @@ import type {
 } from "../types";
 import Modal from "./Modal";
 import DashboardFriendRequest from "./DashboardFriendRequest";
+import DashboardMessagePreview from "./DashboardMessagePreview";
 
 /**
  *
@@ -129,35 +130,15 @@ const Dashboard = () => {
         </div>
     );
 
-    const MessageComponent = ({ preview }: { preview: MessagesPreview }) => (
-        <div
-            key={preview.friendId}
-            className={styles.messagesPreview}>
-            <p className={styles.previewText}>
-                {preview.latestUnread}
-                {preview.unreadCount > 1 && (
-                    <span className={styles.tealText}>
-                        {" "}
-                        and {preview.unreadCount - 1} more
-                    </span>
-                )}
-            </p>
-            <p className={styles.previewName}>
-                from{" "}
-                <span className={styles.tealText}>{preview.friendName}</span>
-            </p>
-        </div>
-    );
-
     const messagesSection = (
         <div className={styles.messagesContainer}>
             <h2 className={styles.sectionHeader}>Messages</h2>
             <div className={styles.previews}>
                 {unreadMessages.length > 0 ? (
                     unreadMessages.map((preview) => (
-                        <MessageComponent
+                        <DashboardMessagePreview
                             key={preview.friendId}
-                            preview={preview}></MessageComponent>
+                            preview={preview}></DashboardMessagePreview>
                     ))
                 ) : (
                     <p className={styles.emptyMessage}>No unread messages.</p>
