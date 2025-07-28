@@ -204,7 +204,6 @@
     display: flex;
     flex-flow: column nowrap;
     gap: 1rem;
-    padding: 0 1rem;
     box-sizing: border-box;
 }
 
@@ -241,4 +240,54 @@
     align-items: flex-start;
     padding: 1rem;
     box-sizing: border-box;
+}
+
+@media (max-width: 800px) {
+    .backgroundContainer {
+        display: none;
+    }
+
+    .grid {
+        overflow-x: hidden;
+        overflow-y: scroll;
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(5, fit-content);
+        row-gap: 2rem;
+        height: fit-content;
+    }
+
+    .titleContainer,
+    .mapButton,
+    .messagesContainer,
+    .friendContainer,
+    .peopleContainer {
+        grid-column: 1 / 2;
+    }
+
+    .titleContainer {
+        grid-row: 1 / 2;
+    }
+
+    .mapButton {
+        grid-row: 2 / 3;
+        margin-top: 180px;
+    }
+
+    .messagesContainer {
+        grid-row: 3 / 4;
+        align-items: flex-start;
+    }
+
+    .previews {
+        height: fit-content;
+        align-items: flex-start;
+    }
+
+    .friendContainer {
+        grid-row: 4 / 5;
+    }
+
+    .peopleContainer {
+        grid-row: 5 / 6;
+    }
 }
