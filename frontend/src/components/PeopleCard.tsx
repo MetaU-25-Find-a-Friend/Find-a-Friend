@@ -3,6 +3,8 @@ import type { SuggestedProfile } from "../types";
 import { getInterestName } from "../utils";
 import PeoplePath from "./PeoplePath";
 import styles from "../css/PeopleCard.module.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircle } from "@fortawesome/free-solid-svg-icons";
 
 interface PeopleCardProps {
     user: SuggestedProfile;
@@ -33,7 +35,19 @@ const PeopleCard = ({
             {user.data.firstName} {user.data.lastName}{" "}
             <span className={styles.pronouns}>{user.data.pronouns}</span>
         </h3>
-        <p className={styles.major}>{user.data.major ?? "(No major)"}</p>
+        <div className={styles.academicInfo}>
+            <p className={styles.major}>{user.data.major ?? "(No major)"}</p>
+            {user.data.year ? (
+                <>
+                    <FontAwesomeIcon
+                        icon={faCircle}
+                        size="2xs"></FontAwesomeIcon>
+                    <p className={styles.year}>Class of {user.data.year}</p>
+                </>
+            ) : (
+                <></>
+            )}
+        </div>
         <div className={styles.interestsContainer}>
             {user.data.interests.map((value: number, index) => {
                 if (value === 1) {
