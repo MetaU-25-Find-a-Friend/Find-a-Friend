@@ -2,6 +2,8 @@ import { Fragment } from "react";
 import styles from "../css/ProfilePopup.module.css";
 import type { AllUserData } from "../types";
 import { getInterestName } from "../utils";
+import { faCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface ProfilePopupProps {
     userData: AllUserData;
@@ -21,9 +23,23 @@ const ProfilePopup = ({ userData }: ProfilePopupProps) => {
                     {userData.pronouns}
                 </span>
             </h3>
-            <p className={styles.profileMajor}>
-                {userData.major ?? "(No major)"}
-            </p>
+            <div className={styles.academicInfo}>
+                <p className={styles.profileMajor}>
+                    {userData.major ?? "(No major)"}
+                </p>
+                {userData.year ? (
+                    <>
+                        <FontAwesomeIcon
+                            icon={faCircle}
+                            size="2xs"></FontAwesomeIcon>
+                        <p className={styles.profileYear}>
+                            Class of {userData.year}
+                        </p>
+                    </>
+                ) : (
+                    <></>
+                )}
+            </div>
             <div className={styles.interestsContainer}>
                 {userData.interests.map((value, index) => {
                     if (value === 1) {

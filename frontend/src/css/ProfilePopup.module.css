@@ -25,7 +25,16 @@
     margin: 0;
 }
 
-.profileMajor {
+.academicInfo {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.profileMajor,
+.profileYear {
     font-size: 16px;
     margin: 0;
 }
