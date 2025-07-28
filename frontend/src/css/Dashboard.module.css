@@ -23,7 +23,6 @@
     grid-column: 3 / 4;
     width: 100%;
     height: 100vh;
-    background-color: #c8f0f4;
     animation-name: slide-left;
     animation-duration: 1s;
     animation-timing-function: ease;
@@ -31,17 +30,40 @@
     animation-fill-mode: both;
 }
 
+@media (prefers-color-scheme: light) {
+    .rightPanel {
+        background-color: #c8f0f4;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .rightPanel {
+        background-color: #1a5b61;
+    }
+}
+
 .centerPanel {
     grid-column: 2 / 3;
     width: 100%;
     height: 100vh;
-    background-color: #e0f7f9;
     animation-name: slide-left;
     animation-duration: 1s;
     animation-delay: 0.5s;
     animation-timing-function: ease;
     animation-iteration-count: 1;
     animation-fill-mode: both;
+}
+
+@media (prefers-color-scheme: light) {
+    .centerPanel {
+        background-color: #e0f7f9;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .centerPanel {
+        background-color: #203134;
+    }
 }
 
 .grid {
