@@ -129,6 +129,7 @@
     width: 100%;
     box-sizing: border-box;
     font-size: 20px;
+    background-color: var(--alt-background);
 }
 
 .input:focus-visible {

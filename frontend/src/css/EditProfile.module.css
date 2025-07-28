@@ -54,6 +54,7 @@
     font-size: inherit;
     width: 100%;
     box-sizing: border-box;
+    background-color: var(--alt-background);
 }
 
 .input:focus-visible {
