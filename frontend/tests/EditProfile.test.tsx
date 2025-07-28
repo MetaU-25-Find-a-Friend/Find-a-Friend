@@ -56,7 +56,7 @@ describe("Edit Profile", () => {
         screen.getByLabelText(/^First name$/);
         screen.getByLabelText(/^Last name$/);
         screen.getByLabelText(/^Pronouns$/);
-        screen.getByLabelText(/^Age$/);
+        screen.getByLabelText(/^Graduation\/class year$/);
         screen.getByLabelText(/^Major$/);
         screen.getByText(/^Interests$/);
         screen.getByLabelText(/^Bio$/);

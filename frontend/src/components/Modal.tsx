@@ -18,6 +18,7 @@ import {
     faArrowRight,
     faUserShield,
     faShieldHalved,
+    faCircle,
 } from "@fortawesome/free-solid-svg-icons";
 
 interface ModalProps {
@@ -236,6 +237,32 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
             </>
         );
 
+        const profileText = (
+            <>
+                <h2 className={styles.title}>
+                    {userData.firstName} {userData.lastName}{" "}
+                    <span className={styles.pronouns}>{userData.pronouns}</span>
+                </h2>
+                <div className={styles.academicInfo}>
+                    <p className={styles.major}>
+                        {userData.major ?? "(No major)"}
+                    </p>
+                    {userData.year ? (
+                        <>
+                            <FontAwesomeIcon
+                                icon={faCircle}
+                                size="2xs"></FontAwesomeIcon>
+                            <p className={styles.year}>
+                                Class of {userData.year}
+                            </p>
+                        </>
+                    ) : (
+                        <></>
+                    )}
+                </div>
+            </>
+        );
+
         return (
             <div
                 ref={overlayRef}
@@ -245,15 +272,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                     alertText={alertText}
                     setAlertText={setAlertText}></Alert>
                 <div className={styles.modal}>
-                    <h2 className={styles.title}>
-                        {userData.firstName} {userData.lastName}{" "}
-                        <span className={styles.pronouns}>
-                            {userData.pronouns}
-                        </span>
-                    </h2>
-                    <p className={styles.major}>
-                        {userData.major ?? "(No major)"}
-                    </p>
+                    {profileText}
                     <div className={styles.interestsContainer}>
                         {userData.interests.map((value, index) => {
                             if (value === 1) {

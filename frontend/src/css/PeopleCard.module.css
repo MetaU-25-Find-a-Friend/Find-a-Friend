@@ -24,7 +24,16 @@
     font-weight: bold;
 }
 
-.major {
+.academicInfo {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.major,
+.year {
     margin: 0;
     font-size: 18px;
 }

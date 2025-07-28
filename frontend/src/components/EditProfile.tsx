@@ -26,7 +26,7 @@ const EditProfile = () => {
     const [formData, setFormData] = useState<UserProfile>({
         firstName: "",
         lastName: "",
-        interests: Array() as number[],
+        interests: [],
     });
 
     // update form data when value of any field changes
@@ -35,7 +35,7 @@ const EditProfile = () => {
     ) => {
         const { name, value } = event.target;
 
-        if (name === "age") {
+        if (name === "year") {
             setFormData({
                 ...formData,
                 [name]: parseInt(value),
@@ -112,13 +112,13 @@ const EditProfile = () => {
                     onChange={handleInputChange}></input>
             </label>
             <label className={`${styles.label} ${styles.lastHalf}`}>
-                Age
+                Graduation/class year
                 <input
                     className={styles.input}
-                    name="age"
+                    name="year"
                     type="number"
-                    placeholder="18"
-                    defaultValue={formData.age}
+                    placeholder="2028"
+                    defaultValue={formData.year}
                     onChange={handleInputChange}></input>
             </label>
             <label className={styles.label}>

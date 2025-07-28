@@ -18,7 +18,7 @@ router.get("/:id", async (req, res) => {
             firstName: true,
             lastName: true,
             pronouns: true,
-            age: true,
+            year: true,
             major: true,
             interests: true,
             bio: true,
@@ -39,19 +39,6 @@ router.get("/details/:id", async (req, res) => {
     const user = await prisma.user.findUnique({
         where: {
             id: userId,
-        },
-        select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            pronouns: true,
-            age: true,
-            major: true,
-            interests: true,
-            bio: true,
-            friends: true,
-            blockedUsers: true,
-            interests: true,
         },
     });
 

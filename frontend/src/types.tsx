@@ -30,7 +30,7 @@ export interface UserProfile {
     firstName: string;
     lastName: string;
     pronouns?: string;
-    age?: number;
+    year?: number;
     major?: string;
     interests: number[];
     bio?: string;
@@ -44,7 +44,7 @@ export interface AllUserData {
     firstName: string;
     lastName: string;
     pronouns?: string;
-    age?: number;
+    year?: number;
     major?: string;
     interests: number[];
     bio?: string;
