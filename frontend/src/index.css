@@ -8,10 +8,31 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
 
-    --tan-background: #fff8e8;
-    --teal-accent: #007681;
-    --light-teal-accent: #9cd3d8;
+@media (prefers-color-scheme: light) {
+    :root {
+        color: black;
+        
+        --alt-text-color: white;
+        --alt-background: white;
+        --tan-background: #fff8e8;
+        --teal-accent: #007681;
+        --light-teal-accent: #9cd3d8;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        color: white;
+        background-color: #222220;
+
+        --alt-text-color: black;
+        --alt-background: #32322f;
+        --tan-background: #454541;
+        --teal-accent: #7fd1d9;
+        --light-teal-accent: #4b6365;
+    }
 }
 
 body {
