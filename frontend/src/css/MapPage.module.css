@@ -85,3 +85,29 @@
 .loadingContainer {
     margin: 2rem 5rem;
 }
+
+@media (max-width: 1040px) {
+    .leftContainer {
+        width: 50vw;
+    }
+
+    .navButton {
+        font-size: 20px;
+    }
+
+    .hideLocationContainer {
+        width: 10rem;
+    }
+
+    .radiusContainer {
+        width: 18rem;
+    }
+
+    .sliderTitle {
+        font-size: 18px;
+    }
+
+    .sliderLabelText {
+        font-size: 14px;
+    }
+}
