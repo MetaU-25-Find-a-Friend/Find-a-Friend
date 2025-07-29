@@ -88,3 +88,13 @@
 .rightButton {
     grid-column: 2 / 3;
 }
+
+@media (max-width: 640px) {
+    .placesListContainer {
+        max-height: 35vh;
+    }
+
+    .feedbackContainer {
+        display: none;
+    }
+}
