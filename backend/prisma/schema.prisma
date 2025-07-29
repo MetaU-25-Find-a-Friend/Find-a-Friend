@@ -77,3 +77,10 @@ model PlaceRecommendationWeights {
   typeWeight Decimal @default(1)
   likedTypes String[] @default([])
 }
+
+model PasswordResetToken {
+  id Int @id @default(autoincrement())
+  userId Int @unique
+  token String
+  expiresAt DateTime
+}
