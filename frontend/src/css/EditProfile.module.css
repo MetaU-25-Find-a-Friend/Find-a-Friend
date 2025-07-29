@@ -108,3 +108,15 @@ textarea.input {
     color: var(--alt-text-color);
     background-color: var(--teal-accent);
 }
+
+@media (max-width: 640px) {
+    .form {
+        grid-template-columns: 1fr;
+        padding: 2rem;
+        column-gap: 0;
+    }
+
+    .lastHalf {
+        grid-column: 1 / 2;
+    }
+}
