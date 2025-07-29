@@ -38,3 +38,23 @@
     font-size: 24px;
     text-align: center;
 }
+
+@media (max-width: 1050px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .title {
+        grid-column: 2 / 3;
+    }
+}
+
+@media (max-width: 660px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .title {
+        grid-column: 1 / 2;
+    }
+}
