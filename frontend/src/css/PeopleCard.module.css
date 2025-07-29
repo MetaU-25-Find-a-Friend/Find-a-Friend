@@ -70,6 +70,7 @@
     grid-template-columns: 1fr 1fr;
     width: 100%;
     column-gap: 1rem;
+    row-gap: 1rem;
 }
 
 .button {
@@ -98,4 +99,10 @@
     border: var(--light-teal-accent) 2px solid;
     color: var(--alt-text-color);
     cursor: not-allowed;
+}
+
+@media (max-width: 1360px) {
+    .buttonsContainer {
+        grid-template-columns: 1fr;
+    }
 }
