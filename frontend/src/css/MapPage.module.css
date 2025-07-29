@@ -102,7 +102,7 @@
     }
 
     .radiusContainer {
-        width: 20rem;
+        width: 22rem;
     }
 
     .sliderTitle {
@@ -122,8 +122,17 @@
         justify-content: flex-end;
     }
 
+    .sliderLabel {
+        width: fit-content;
+        text-wrap-mode: nowrap;
+    }
+
     .sliderLabelText {
         display: none;
+    }
+
+    .sliderContainer {
+        height: 3rem;
     }
 
     .hideLocationContainer {
@@ -133,7 +142,7 @@
     }
 
     .radiusContainer {
-        top: 90px;
+        top: 70px;
         bottom: auto;
         width: 100vw;
         flex-flow: row-reverse nowrap;
@@ -145,5 +154,10 @@
     .hideLocationContainer p,
     .radiusContainer p {
         font-size: 16px !important;
+    }
+
+    .hideLocationContainer,
+    .radiusContainer {
+        gap: 0.5rem;
     }
 }
