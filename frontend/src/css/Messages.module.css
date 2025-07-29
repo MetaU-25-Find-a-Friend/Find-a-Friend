@@ -226,3 +226,16 @@
         justify-content: flex-start;
     }
 }
+
+@media (max-width: 620px) {
+    .grid {
+        width: 200vw;
+        grid-template-columns: 1fr 1fr;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+
+    .friendsContainer {
+        width: calc(100vw - 1.5rem);
+    }
+}
