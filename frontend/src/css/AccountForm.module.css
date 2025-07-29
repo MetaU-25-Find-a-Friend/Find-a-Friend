@@ -54,3 +54,10 @@
     width: 100%;
     border: var(--teal-accent) 0.5px inset;
 }
+
+@media (max-width: 700px) {
+    .form {
+        width: 90vw;
+        padding: 2rem;
+    }
+}
