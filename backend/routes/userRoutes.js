@@ -82,7 +82,7 @@ router.post("/", async (req, res) => {
 });
 
 // send email with code to reset user's password
-router.post("/resetPassword", async (req, res) => {
+router.post("/resetPassword/generate", async (req, res) => {
     const userId = req.session.userId;
 
     // verify email connection
@@ -98,11 +98,12 @@ router.post("/resetPassword", async (req, res) => {
     const token = crypto.randomBytes(32).toString("hex");
     const encryptedToken = await bcrypt.hash(token, 10);
     const expiresAt = new Date(Date.now() + 10 * 60 * 60 * 1000);
-    prisma.passwordResetToken.upsert({
+    await prisma.passwordResetToken.upsert({
         where: {
             userId: userId,
         },
         create: {
+            userId: userId,
             token: encryptedToken,
             expiresAt: expiresAt,
         },
@@ -134,13 +135,79 @@ router.post("/resetPassword", async (req, res) => {
             to: email,
             subject: "Reset your Find a Friend account password",
             text: `Click to enter a new password for your Find a Friend account: ${link}`,
-            html: `<h6>Click below to enter a new password for your Find a Friend account:</h6><b><a href=${link}>Reset Password</a></b><p>- the Find a Friend team</p>`,
+            html: `<h4>Click below to enter a new password for your Find a Friend account:</h4><b><a href=${link}>Reset Password</a></b><p>- the Find a Friend team</p>`,
         });
     } catch (error) {
         return res.status(500).send(`Error sending mail: ${error}`);
     }
 
     res.send("Email sent");
+});
+
+// given a valid reset token, update the user's password
+router.post("/resetPassword/verify", async (req, res) => {
+    const userId = req.session.userId;
+
+    // check that new password and reset token are provided
+    const { newPassword, token } = req.body;
+    if (!newPassword || !token) {
+        return res
+            .status(400)
+            .send("New password and reset token are required");
+    }
+
+    // verify reset token
+    const existingTokenData = await prisma.passwordResetToken.findUnique({
+        where: {
+            userId: userId,
+        },
+    });
+    if (!existingTokenData) {
+        return res
+            .status(404)
+            .send("No active reset token found for this user");
+    }
+
+    // if token is present but expired, delete from database and send error status
+    if (existingTokenData.expiresAt < new Date()) {
+        await prisma.passwordResetToken.delete({
+            where: {
+                userId: userId,
+            },
+        });
+
+        return res.status(401).send("Token expired");
+    }
+
+    const isValidToken = bcrypt.compare(token, existingTokenData.token);
+
+    if (!isValidToken) {
+        return res.status(401).send("Invalid token");
+    }
+
+    // validate password
+    if (newPassword.length < 12) {
+        return res.status(400).send("Password must be 12 characters or longer");
+    }
+
+    // change user's password
+    await prisma.user.update({
+        where: {
+            id: userId,
+        },
+        data: {
+            password: await bcrypt.hash(newPassword, 10),
+        },
+    });
+
+    // delete token from database
+    await prisma.passwordResetToken.delete({
+        where: {
+            userId: userId,
+        },
+    });
+
+    res.send("Password updated");
 });
 
 module.exports = router;
