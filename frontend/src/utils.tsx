@@ -81,6 +81,65 @@ export const logout = async () => {
 
 /**
  *
+ * @param email the user's email
+ * @returns true if the email was successfully sent, false otherwise; and the error message if present
+ */
+export const sendResetPasswordEmail = async (
+    email: string,
+): Promise<[boolean, string]> => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/resetPassword/generate`,
+        {
+            method: "post",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                email: email,
+            }),
+        },
+    );
+
+    return [response.ok, await response.text()];
+};
+
+/**
+ *
+ * @param email the user's email
+ * @param newPassword the new password the user entered
+ * @param token the token the reset password page received as a parameter
+ * @returns true if token is valid and password was successfully changed,
+ * false otherwise; and the error message if present
+ */
+export const changePassword = async (
+    email: string,
+    newPassword: string,
+    token: string,
+): Promise<[boolean, string]> => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/resetPassword/verify`,
+        {
+            method: "post",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                newPassword: newPassword,
+                token: token,
+                email: email,
+            }),
+        },
+    );
+
+    return [response.ok, await response.text()];
+};
+
+/**
+ *
  * @param id id of the user whose profile to fetch
  * @returns UserProfile object representing user's profile, or null if user was not found
  */

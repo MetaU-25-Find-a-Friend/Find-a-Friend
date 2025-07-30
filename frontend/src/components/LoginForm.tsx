@@ -92,6 +92,17 @@ const LoginForm = () => {
         </>
     );
 
+    const linkToResetPassword = (
+        <>
+            <button
+                className={styles.button}
+                type="button"
+                onClick={() => navigate("/resetpassword")}>
+                Forgot password?
+            </button>
+        </>
+    );
+
     return (
         <>
             <Alert
@@ -102,6 +113,7 @@ const LoginForm = () => {
                 {inputs}
                 {submitButton}
                 {linkToSignup}
+                {linkToResetPassword}
             </form>
         </>
     );

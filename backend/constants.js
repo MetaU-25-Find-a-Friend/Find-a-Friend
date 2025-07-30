@@ -32,3 +32,13 @@ export const TIME_STILL_AT_LOCATION = 5 * 60 * 1000;
  * Initial time in ms with which all past locations start (what we consider a significant time at a location)
  */
 export const INITIAL_DURATION = 60 * 1000;
+
+/**
+ * Number of milliseconds for which a reset password token stays active and valid
+ */
+export const TOKEN_ALIVE_TIME = 10 * 60 * 1000;
+
+/**
+ * Number of bcrypt salt rounds used for passwords and tokens
+ */
+export const PASSWORD_SALT_ROUNDS = 10;
