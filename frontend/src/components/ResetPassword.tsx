@@ -1,11 +1,13 @@
 import { useState } from "react";
 import styles from "../css/AccountForm.module.css";
 import Alert from "./Alert";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { changePassword, sendResetPasswordEmail } from "../utils";
 
 const ResetPassword = () => {
     const [searchParams, _] = useSearchParams();
+
+    const navigate = useNavigate();
 
     const [alertText, setAlertText] = useState<string | null>(null);
 
@@ -110,6 +112,18 @@ const ResetPassword = () => {
         </button>
     );
 
+    const linkToLogin = (
+        <>
+            <hr className={styles.bar}></hr>
+            <button
+                className={styles.button}
+                type="button"
+                onClick={() => navigate("/login")}>
+                Back to login
+            </button>
+        </>
+    );
+
     return (
         <>
             <Alert
@@ -122,6 +136,7 @@ const ResetPassword = () => {
                         {emailInput}
                         {passwordInputs}
                         {submitButton}
+                        {linkToLogin}
                     </form>
                 </>
             ) : (
@@ -133,6 +148,7 @@ const ResetPassword = () => {
                     <form className={styles.form}>
                         {emailInput}
                         {sendButton}
+                        {linkToLogin}
                     </form>
                 </>
             )}
