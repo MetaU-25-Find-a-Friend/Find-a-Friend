@@ -11,6 +11,7 @@ import { APIProvider } from "@vis.gl/react-google-maps";
 import Messages from "./components/Messages";
 import People from "./components/People";
 import PeopleProvider from "./contexts/PeopleContext";
+import ResetPassword from "./components/ResetPassword";
 
 createRoot(document.getElementById("root")!).render(
     <UserProvider>
@@ -26,6 +27,9 @@ createRoot(document.getElementById("root")!).render(
                     <Route
                         path="/login"
                         element={<LoginForm></LoginForm>}></Route>
+                    <Route
+                        path="/resetpassword"
+                        element={<ResetPassword></ResetPassword>}></Route>
                     <Route
                         path="/editprofile"
                         element={<EditProfile></EditProfile>}></Route>
