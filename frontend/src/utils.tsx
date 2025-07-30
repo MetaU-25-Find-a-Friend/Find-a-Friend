@@ -79,6 +79,52 @@ export const logout = async () => {
     return response.ok;
 };
 
+export const sendResetPasswordEmail = async (
+    email: string,
+): Promise<[boolean, string]> => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/resetPassword/generate`,
+        {
+            method: "post",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                email: email,
+            }),
+        },
+    );
+
+    return [response.ok, await response.text()];
+};
+
+export const changePassword = async (
+    email: string,
+    newPassword: string,
+    token: string,
+): Promise<[boolean, string]> => {
+    const response = await fetch(
+        `${import.meta.env.VITE_SERVER_URL}/resetPassword/verify`,
+        {
+            method: "post",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                newPassword: newPassword,
+                token: token,
+                email: email,
+            }),
+        },
+    );
+
+    return [response.ok, await response.text()];
+};
+
 /**
  *
  * @param id id of the user whose profile to fetch
