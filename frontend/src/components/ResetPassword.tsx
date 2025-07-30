@@ -35,6 +35,11 @@ const ResetPassword = () => {
             return;
         }
 
+        if (formData.newPassword !== formData.confirmNewPassword) {
+            setAlertText("Passwords must match.");
+            return;
+        }
+
         const [success, error] = await changePassword(
             formData.email,
             formData.newPassword,
