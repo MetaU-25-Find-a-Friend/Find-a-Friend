@@ -207,6 +207,9 @@ app.use("/messages", authenticate, messagesRouter);
 const friendRouter = require("./routes/friendRoutes");
 app.use("/friend", authenticate, friendRouter);
 
+const resetPasswordRouter = require("./routes/resetPasswordRoutes");
+app.use("/resetPassword", resetPasswordRouter);
+
 // MISC. UNIQUE ENDPOINTS
 
 // block the specified user
