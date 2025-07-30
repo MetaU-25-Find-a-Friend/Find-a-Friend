@@ -6,6 +6,7 @@ const router = express.Router({ mergeParams: true });
 const { PrismaClient } = require("../generated/prisma");
 const prisma = new PrismaClient();
 
+// initialize mail transporter
 const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
     service: "SendGrid",
@@ -15,11 +16,14 @@ const transporter = nodemailer.createTransport({
     },
 });
 
+// initialize token generator and hasher
 const crypto = require("crypto");
 const bcrypt = require("bcrypt");
+const { TOKEN_ALIVE_TIME, PASSWORD_SALT_ROUNDS } = require("../constants");
 
-// send email with code to reset user's password
+// send email with link to reset user's password
 router.post("/generate", async (req, res) => {
+    // use email since user can't be authenticated
     const { email } = req.body;
 
     if (!email) {
@@ -39,10 +43,10 @@ router.post("/generate", async (req, res) => {
     if (!user) {
         return res
             .status(404)
-            .send("A user with the given email could not be found");
+            .send("A user with the given email could not be found.");
     }
 
-    // verify email connection
+    // check email connection
     try {
         await transporter.verify();
     } catch (error) {
@@ -51,10 +55,10 @@ router.post("/generate", async (req, res) => {
             .send(`Error connecting to SMTP server: ${error}`);
     }
 
-    // generate code and store in database
+    // generate token and store in database
     const token = crypto.randomBytes(32).toString("hex");
-    const encryptedToken = await bcrypt.hash(token, 10);
-    const expiresAt = new Date(Date.now() + 10 * 60 * 60 * 1000);
+    const encryptedToken = await bcrypt.hash(token, PASSWORD_SALT_ROUNDS);
+    const expiresAt = new Date(Date.now() + TOKEN_ALIVE_TIME);
     await prisma.passwordResetToken.upsert({
         where: {
             userId: user.id,
@@ -70,9 +74,10 @@ router.post("/generate", async (req, res) => {
         },
     });
 
-    // build link using code
+    // build link using token
     const link = `${process.env.FRONTEND_URL}/resetpassword?token=${token}`;
 
+    // send email
     try {
         await transporter.sendMail({
             from: {
@@ -88,18 +93,16 @@ router.post("/generate", async (req, res) => {
         return res.status(500).send(`Error sending mail: ${error}`);
     }
 
-    res.send("Email sent");
+    res.send("Successfully sent email.");
 });
 
-// given a valid reset token, update the user's password
+// check reset token validity and update the user's password
 router.post("/verify", async (req, res) => {
     // check that all data is provided
     const { newPassword, token, email } = req.body;
 
     if (!newPassword || !token || !email) {
-        return res
-            .status(400)
-            .send("New password, reset token, and email are required");
+        return res.status(400).send("All fields are required.");
     }
 
     // get user's id
@@ -112,22 +115,20 @@ router.post("/verify", async (req, res) => {
         },
     });
 
+    const invalidMessage = "Invalid email or reset password link.";
+
     if (!user) {
-        return res
-            .status(404)
-            .send("A user with the given email could not be found");
+        return res.status(401).send(invalidMessage);
     }
 
-    // verify reset token
+    // verify that the user has requested to reset their password
     const existingTokenData = await prisma.passwordResetToken.findUnique({
         where: {
             userId: user.id,
         },
     });
     if (!existingTokenData) {
-        return res
-            .status(404)
-            .send("No active reset token found for this user");
+        return res.status(401).send(invalidMessage);
     }
 
     // if token is present but expired, delete from database and send error status
@@ -138,18 +139,21 @@ router.post("/verify", async (req, res) => {
             },
         });
 
-        return res.status(401).send("Token expired");
+        return res.status(401).send(invalidMessage);
     }
 
+    // verify that given token and active token match
     const isValidToken = bcrypt.compare(token, existingTokenData.token);
 
     if (!isValidToken) {
-        return res.status(401).send("Invalid token");
+        return res.status(401).send(invalidMessage);
     }
 
     // validate password
     if (newPassword.length < 12) {
-        return res.status(400).send("Password must be 12 characters or longer");
+        return res
+            .status(400)
+            .send("Password must be 12 characters or longer.");
     }
 
     // change user's password
@@ -158,7 +162,7 @@ router.post("/verify", async (req, res) => {
             id: user.id,
         },
         data: {
-            password: await bcrypt.hash(newPassword, 10),
+            password: await bcrypt.hash(newPassword, PASSWORD_SALT_ROUNDS),
         },
     });
 

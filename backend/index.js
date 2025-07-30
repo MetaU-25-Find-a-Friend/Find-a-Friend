@@ -24,6 +24,7 @@ const {
     RATE_LIMIT_INTERVAL,
     MAX_LOGIN_ATTEMPTS,
     SESSION_TIMEOUT,
+    PASSWORD_SALT_ROUNDS,
 } = require("./constants");
 
 const loginLimiter = rateLimit({
@@ -98,7 +99,7 @@ app.post("/signup", async (req, res) => {
     }
 
     // hash password and add to database
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, PASSWORD_SALT_ROUNDS);
 
     await prisma.user.create({
         data: {
