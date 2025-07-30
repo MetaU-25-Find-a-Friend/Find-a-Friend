@@ -79,6 +79,11 @@ export const logout = async () => {
     return response.ok;
 };
 
+/**
+ *
+ * @param email the user's email
+ * @returns true if the email was successfully sent, false otherwise; and the error message if present
+ */
 export const sendResetPasswordEmail = async (
     email: string,
 ): Promise<[boolean, string]> => {
@@ -100,6 +105,14 @@ export const sendResetPasswordEmail = async (
     return [response.ok, await response.text()];
 };
 
+/**
+ *
+ * @param email the user's email
+ * @param newPassword the new password the user entered
+ * @param token the token the reset password page received as a parameter
+ * @returns true if token is valid and password was successfully changed,
+ * false otherwise; and the error message if present
+ */
 export const changePassword = async (
     email: string,
     newPassword: string,
