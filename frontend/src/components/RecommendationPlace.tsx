@@ -23,7 +23,8 @@ const RecommendationPlace = ({
             <h6 className={styles.placeName}>{place.place.displayName.text}</h6>
             <button
                 className={styles.likeButton}
-                onClick={() => handleLikeClick(place)}>
+                onClick={() => handleLikeClick(place)}
+                aria-label="Like">
                 <FontAwesomeIcon icon={faThumbsUp}></FontAwesomeIcon>
             </button>
         </div>
