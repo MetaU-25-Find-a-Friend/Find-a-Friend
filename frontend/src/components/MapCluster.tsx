@@ -81,7 +81,8 @@ const MapCluster = ({ cluster, setModalData }: MapClusterProps) => {
                         onClick={() => {
                             setModalData(user);
                             setShowingPicker(false);
-                        }}>
+                        }}
+                        aria-label={`Show profile for ${user.firstName} ${user.lastName}`}>
                         {user.firstName} {user.lastName}
                     </div>
                 ))}
@@ -95,7 +96,8 @@ const MapCluster = ({ cluster, setModalData }: MapClusterProps) => {
             <AdvancedMarker position={geoHashToLatLng(cluster.geohash)}>
                 <div
                     className={styles.cluster}
-                    onClick={handleClusterClick}>
+                    onClick={handleClusterClick}
+                    aria-label={`Cluster of ${cluster.userIds.length} users. Click for more details`}>
                     <p className={styles.number}>{cluster.userIds.length}</p>
                     {popupsDisplay}
                 </div>
