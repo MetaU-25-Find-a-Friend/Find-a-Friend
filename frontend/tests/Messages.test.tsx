@@ -107,7 +107,7 @@ describe("Messages", () => {
         });
 
         // click on first friend
-        fireEvent.click(friends[0]);
+        fireEvent.click(friends[0].parentElement!);
 
         // should call getMessagesBetween and render mock message
         await waitFor(() => {
