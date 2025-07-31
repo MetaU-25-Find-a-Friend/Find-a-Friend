@@ -168,10 +168,16 @@ const Messages = () => {
                     className={`${styles.friend} ${friend.id === selectedFriendId ? styles.selected : ""}`}
                     onClick={() => {
                         setSelectedFriendId(friend.id);
-                    }}>
+                    }}
+                    aria-label={`${friend.id === selectedFriendId ? "Selected." : ""} View messages with ${friend.firstName} ${friend.lastName}`}
+                    tabIndex={0}>
                     <h6
                         className={styles.friendName}
-                        onClick={() => setModalData(friend)}>
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            setModalData(friend);
+                        }}
+                        aria-label={`View profile for ${friend.firstName} ${friend.lastName}`}>
                         {friend.firstName} {friend.lastName}
                     </h6>
                 </div>
