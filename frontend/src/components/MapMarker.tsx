@@ -48,7 +48,8 @@ const MapMarker = ({ id, location, setModalData }: MapMarkerProps) => {
             <AdvancedMarker position={geoHashToLatLng(location)}>
                 <div
                     className={styles.marker}
-                    onClick={handleMarkerClick}>
+                    onClick={handleMarkerClick}
+                    aria-label={`Click to view profile for ${userData.firstName} ${userData.lastName}`}>
                     <FontAwesomeIcon
                         className={styles.markerIcon}
                         icon={faUser}></FontAwesomeIcon>

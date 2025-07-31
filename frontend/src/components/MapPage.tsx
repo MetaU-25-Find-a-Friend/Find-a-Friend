@@ -145,14 +145,18 @@ const MapPage = () => {
     // label and slider to toggle whether the user's location is hidden from others
     const hideSlider = (
         <div className={styles.hideLocationContainer}>
-            <div className={styles.sliderLabel}>
+            <div
+                className={styles.sliderLabel}
+                id="hideLabel">
                 <h6 className={styles.sliderTitle}>Hide location?</h6>
                 <p className={styles.sliderLabelText}>
                     This will prevent any other users from seeing your location
                     on the map.
                 </p>
             </div>
-            <div className={styles.sliderContainer}>
+            <div
+                className={styles.sliderContainer}
+                aria-labelledby="hideLabel">
                 <Slider
                     value={hideLocation}
                     setValue={setHideLocation}
@@ -165,14 +169,18 @@ const MapPage = () => {
     // label and slider to pick radius in which to show other users
     const radiusSlider = (
         <div className={styles.radiusContainer}>
-            <div className={styles.sliderContainer}>
+            <div
+                className={styles.sliderContainer}
+                aria-labelledby="radiusLabel">
                 <Slider
                     value={radius}
                     setValue={setRadius}
                     options={[0.5, 1, 2, 5]}
                     optionsDisplay={["0.5mi", "1mi", "2mi", "5mi"]}></Slider>
             </div>
-            <div className={styles.sliderLabel}>
+            <div
+                className={styles.sliderLabel}
+                id="radiusLabel">
                 <h6 className={styles.sliderTitle}>Nearby radius</h6>
                 <p className={styles.sliderLabelText}>
                     Choose a radius around you in which to show other users.

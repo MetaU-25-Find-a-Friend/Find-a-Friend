@@ -138,6 +138,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
             <div className={styles.actionsContainer}>
                 <input
                     type="text"
+                    name="message"
                     className={styles.input}
                     value={messageText}
                     onChange={(event) => setMessageText(event.target.value)}

@@ -50,6 +50,7 @@
     font-weight: bold;
     color: var(--teal-accent);
     margin: 0;
+    width: fit-content;
 }
 
 .friendName:hover {

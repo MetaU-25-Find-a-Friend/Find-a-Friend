@@ -135,9 +135,13 @@ const EditProfile = () => {
     );
 
     const interestsInput = (
-        <label className={styles.label}>
+        <div
+            className={styles.label}
+            id="interestsLabel">
             Interests
-            <section className={styles.interestsContainer}>
+            <section
+                className={styles.interestsContainer}
+                aria-labelledby="interestsLabel">
                 {formData.interests.map((value, index, array) => (
                     <div
                         key={index}
@@ -151,7 +155,8 @@ const EditProfile = () => {
                                     array[index] === 1 ? 0 : 1,
                                 ),
                             });
-                        }}>
+                        }}
+                        aria-label={value === 1 ? "Deselect" : "Select"}>
                         <FontAwesomeIcon
                             icon={
                                 value === 1 ? faCheckCircle : faPlus
@@ -160,7 +165,7 @@ const EditProfile = () => {
                     </div>
                 ))}
             </section>
-        </label>
+        </div>
     );
 
     const bioInput = (
