@@ -143,7 +143,7 @@ router.post("/verify", async (req, res) => {
     }
 
     // verify that given token and active token match
-    const isValidToken = bcrypt.compare(token, existingTokenData.token);
+    const isValidToken = await bcrypt.compare(token, existingTokenData.token);
 
     if (!isValidToken) {
         return res.status(401).send(invalidMessage);
