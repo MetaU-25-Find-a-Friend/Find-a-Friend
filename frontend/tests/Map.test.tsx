@@ -12,7 +12,7 @@ vi.mock("../src/utils", async (importOriginal) => {
         deleteGeohash: vi.fn(),
         getOtherUserGeohashes: vi.fn(
             async (): Promise<UserGeohash[]> =>
-                await Promise.resolve([
+                Promise.resolve([
                     {
                         id: 1,
                         userId: 4,
@@ -20,10 +20,10 @@ vi.mock("../src/utils", async (importOriginal) => {
                     },
                 ]),
         ),
-        updateGeohash: vi.fn((geohash: string) => {}),
+        updateGeohash: vi.fn(() => {}),
         getAllData: vi.fn(
             async (id: number): Promise<AllUserData> =>
-                await Promise.resolve({
+                Promise.resolve({
                     id: id,
                     firstName: id === 1 ? "Current" : "Other",
                     lastName: "Data",
@@ -44,7 +44,7 @@ vi.mock("../src/recommendation-utils", async (importOriginal) => {
     };
 });
 
-const mockNavigate = vi.fn((path: string) => {});
+const mockNavigate = vi.fn(() => {});
 
 // mock useNavigate since its real implementation can only be called from inside a Router
 vi.mock("react-router-dom", async (importOriginal) => {
@@ -103,7 +103,7 @@ vi.mock("@vis.gl/react-google-maps", async (importOriginal) => {
                 {children}
             </div>
         ),
-        useMapsLibrary: (name: string) => {
+        useMapsLibrary: () => {
             return {
                 spherical: {
                     computeDistanceBetween: () => 1,
@@ -166,10 +166,9 @@ describe("Map", () => {
 
     it("clusters close markers", async () => {
         // mock other user being even closer to current user
-        // @ts-ignore
-        getOtherUserGeohashes.mockImplementation(
+        vi.mocked(getOtherUserGeohashes).mockImplementation(
             async (): Promise<UserGeohash[]> =>
-                await Promise.resolve([
+                Promise.resolve([
                     {
                         id: 1,
                         userId: 4,
@@ -191,8 +190,7 @@ describe("Map", () => {
             screen.getByText(/^Choose which user's profile to view:$/);
         });
 
-        // @ts-ignore
-        getOtherUserGeohashes.mockReset();
+        vi.mocked(getOtherUserGeohashes).mockReset();
     });
 
     it("tries to hide user's location", async () => {
@@ -222,10 +220,9 @@ describe("Map", () => {
         expect(screen.queryByText(/^2$/)).toBe(null);
 
         // mock the other user having moved closer
-        // @ts-ignore
-        getOtherUserGeohashes.mockImplementation(
+        vi.mocked(getOtherUserGeohashes).mockImplementation(
             async (): Promise<UserGeohash[]> =>
-                await Promise.resolve([
+                Promise.resolve([
                     {
                         id: 1,
                         userId: 4,
@@ -242,16 +239,14 @@ describe("Map", () => {
             { timeout: 5000 },
         );
 
-        // @ts-ignore
-        getOtherUserGeohashes.mockReset();
+        vi.mocked(getOtherUserGeohashes).mockReset();
     });
 
     it("only shows users within the 5mi radius", async () => {
         // mock the other user being very far away
-        // @ts-ignore
-        getOtherUserGeohashes.mockImplementation(
+        vi.mocked(getOtherUserGeohashes).mockImplementation(
             async (): Promise<UserGeohash[]> =>
-                await Promise.resolve([
+                Promise.resolve([
                     {
                         id: 1,
                         userId: 4,
@@ -271,7 +266,6 @@ describe("Map", () => {
         // the other user should fail the geohash distance check and not be shown
         expect(screen.queryByText(/^Other Data$/)).toBe(null);
 
-        // @ts-ignore
-        getOtherUserGeohashes.mockReset();
+        vi.mocked(getOtherUserGeohashes).mockReset();
     });
 });
