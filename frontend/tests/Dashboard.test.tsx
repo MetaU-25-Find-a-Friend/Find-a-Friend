@@ -8,7 +8,6 @@ import {
 } from "../src/utils";
 import {
     AllUserData,
-    FriendRequest,
     MessagesPreview,
     SavedUser,
 } from "../src/types";
