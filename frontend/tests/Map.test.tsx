@@ -150,10 +150,11 @@ describe("Map", () => {
     it("shows modal on marker click", async () => {
         render(<MapPage></MapPage>);
 
-        // click on marker itself (should have an accessibility label in future that we can use here)
+        // click on marker itself
         const marker = await waitFor(() => {
-            return screen.getByText(/^Other Data$/).parentElement!
-                .parentElement!.parentElement!;
+            return screen.getByLabelText(
+                /^Click to view profile for Other Data$/,
+            );
         });
         fireEvent.click(marker);
 
