@@ -10,7 +10,7 @@ vi.mock("../src/utils", async (importOriginal) => {
         ...(await importOriginal<typeof import("../src/utils")>()),
         getAllData: vi.fn(async (id: number): Promise<AllUserData> => {
             if (id === 1) {
-                return await Promise.resolve({
+                return Promise.resolve({
                     id: 1,
                     firstName: "Current",
                     lastName: "Data",
@@ -19,7 +19,7 @@ vi.mock("../src/utils", async (importOriginal) => {
                     blockedUsers: [],
                 });
             } else {
-                return await Promise.resolve({
+                return Promise.resolve({
                     id: id,
                     firstName: "Friend",
                     lastName: "Data",
@@ -30,8 +30,8 @@ vi.mock("../src/utils", async (importOriginal) => {
             }
         }),
         getMessagesBetween: vi.fn(
-            async (id: number, cursor: number): Promise<Message[]> =>
-                await Promise.resolve([
+            async (id: number): Promise<Message[]> =>
+                Promise.resolve([
                     {
                         id: 1,
                         fromUser: id,
@@ -44,7 +44,7 @@ vi.mock("../src/utils", async (importOriginal) => {
         ),
         sendMessage: vi.fn(
             async (to: number, text: string): Promise<[boolean, any]> =>
-                await Promise.resolve([
+                Promise.resolve([
                     true,
                     {
                         id: 2,
@@ -71,7 +71,7 @@ vi.mock("../src/contexts/UserContext", async (importOriginal) => {
     };
 });
 
-const mockNavigate = vi.fn((path: string) => {});
+const mockNavigate = vi.fn(() => {});
 
 // mock useNavigate since its real implementation can only be called from inside a Router
 vi.mock("react-router-dom", async (importOriginal) => {
@@ -215,10 +215,9 @@ describe("Messages", () => {
         const newMessage = "I just sent this!";
 
         // mock a new message having been sent
-        // @ts-ignore
-        getMessagesBetween.mockImplementationOnce(
-            async (id: number, cursor: number): Promise<Message[]> =>
-                await Promise.resolve([
+        vi.mocked(getMessagesBetween).mockImplementationOnce(
+            async (id: number): Promise<Message[]> =>
+                Promise.resolve([
                     {
                         id: 2,
                         fromUser: id,
