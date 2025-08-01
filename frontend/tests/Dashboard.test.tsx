@@ -95,9 +95,8 @@ describe("Dashboard", () => {
 
     it("shows LoggedOut when logged out", () => {
         // mock failed authentication in UserContext
-        // @ts-ignore
-        useUser.mockImplementationOnce(() => {
-            return { user: null };
+        vi.mocked(useUser).mockImplementationOnce(() => {
+            return { user: null, setUser: () => {} };
         });
 
         render(<Dashboard></Dashboard>);
