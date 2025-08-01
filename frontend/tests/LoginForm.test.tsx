@@ -115,11 +115,10 @@ describe("Login page", () => {
         const testErrorMessage = "Error";
 
         // mock a failed login
-        // @ts-ignore since TS doesn't recognize login as a mock
-        login.mockImplementationOnce(() => [
-            false,
-            { error: testErrorMessage },
-        ]);
+        vi.mocked(login).mockImplementationOnce(
+            (): Promise<[boolean, any]> =>
+                Promise.resolve([false, { error: testErrorMessage }]),
+        );
 
         // click on "Login" button
         const submitButton = screen.getByText(/^Login$/);

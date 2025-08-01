@@ -131,8 +131,10 @@ describe("Create account page", () => {
         const testErrorMessage = "Error";
 
         // mock a failed signup
-        // @ts-ignore since TS doesn't recognize createAccount as a mock
-        createAccount.mockImplementationOnce(() => [false, testErrorMessage]);
+        vi.mocked(createAccount).mockImplementationOnce(
+            (): Promise<[boolean, string]> =>
+                Promise.resolve([false, testErrorMessage]),
+        );
 
         // click on "Create account" button
         const submitButton = screen.getByText(/^Create Account$/);
