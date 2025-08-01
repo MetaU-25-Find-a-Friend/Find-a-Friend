@@ -7,18 +7,11 @@ import SignupForm from "../src/components/SignupForm";
 vi.mock("../src/utils", async (importOriginal) => {
     return {
         ...(await importOriginal<typeof import("../src/utils")>()),
-        createAccount: vi.fn(
-            (accountData: {
-                firstName: string;
-                lastName: string;
-                email: string;
-                password: string;
-            }) => [true, "ok"],
-        ),
+        createAccount: vi.fn(() => Promise.resolve([true, "ok"])),
     };
 });
 
-const mockNavigate = vi.fn((path: string) => {});
+const mockNavigate = vi.fn(() => {});
 
 // mock useNavigate since its real implementation can only be called from inside a Router
 vi.mock("react-router-dom", async (importOriginal) => {
@@ -131,8 +124,10 @@ describe("Create account page", () => {
         const testErrorMessage = "Error";
 
         // mock a failed signup
-        // @ts-ignore since TS doesn't recognize createAccount as a mock
-        createAccount.mockImplementationOnce(() => [false, testErrorMessage]);
+        vi.mocked(createAccount).mockImplementationOnce(
+            (): Promise<[boolean, string]> =>
+                Promise.resolve([false, testErrorMessage]),
+        );
 
         // click on "Create account" button
         const submitButton = screen.getByText(/^Create Account$/);

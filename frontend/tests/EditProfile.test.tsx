@@ -9,20 +9,18 @@ vi.mock("../src/utils", async (importOriginal) => {
     return {
         ...(await importOriginal<typeof import("../src/utils")>()),
         getProfile: vi.fn(
-            async (id: number): Promise<UserProfile | null> =>
-                await Promise.resolve({
+            async (): Promise<UserProfile | null> =>
+                Promise.resolve({
                     firstName: "Test",
                     lastName: "Profile",
                     interests: [0, 0, 0, 0, 0, 0],
                 }),
         ),
-        updateProfile: vi.fn(
-            async (data: UserProfile) => await Promise.resolve(true),
-        ),
+        updateProfile: vi.fn(async () => Promise.resolve(true)),
     };
 });
 
-const mockNavigate = vi.fn((path: string) => {});
+const mockNavigate = vi.fn(() => {});
 
 // mock useNavigate to get navigate's call data
 vi.mock("react-router-dom", async (importOriginal) => {

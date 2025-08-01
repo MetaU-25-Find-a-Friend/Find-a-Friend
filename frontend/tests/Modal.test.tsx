@@ -45,18 +45,13 @@ vi.mock("../src/utils", async (importOriginal) => {
     return {
         ...(await importOriginal<typeof import("../src/utils")>()),
         getAllData: vi.fn(
-            async (id: number): Promise<AllUserData> =>
-                await Promise.resolve(mockCurrentUserData),
+            async (): Promise<AllUserData> =>
+                Promise.resolve(mockCurrentUserData),
         ),
-        sendFriendRequest: vi.fn(
-            async (id: number) => await Promise.resolve(true),
-        ),
-        blockUser: vi.fn(async (id: number) => await Promise.resolve(true)),
-        unblockUser: vi.fn(async (id: number) => await Promise.resolve(true)),
-        sendMessage: vi.fn(
-            async (to: number, text: string) =>
-                await Promise.resolve([true, "ok"]),
-        ),
+        sendFriendRequest: vi.fn(async () => Promise.resolve(true)),
+        blockUser: vi.fn(async () => Promise.resolve(true)),
+        unblockUser: vi.fn(async () => Promise.resolve(true)),
+        sendMessage: vi.fn(async () => Promise.resolve([true, "ok"])),
     };
 });
 
@@ -231,7 +226,7 @@ describe("Modal", () => {
         fireEvent.change(textbox, { target: { value: testMessage } });
 
         // click send button
-        const send = textbox.nextElementSibling!;
+        const send = screen.getByLabelText(/^Send$/);
         fireEvent.click(send);
 
         // should try to call sendMessage() with entered text

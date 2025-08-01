@@ -8,7 +8,6 @@ import {
 } from "../src/utils";
 import {
     AllUserData,
-    FriendRequest,
     MessagesPreview,
     SavedUser,
 } from "../src/types";
@@ -18,9 +17,9 @@ import { useUser } from "../src/contexts/UserContext";
 vi.mock("../src/utils", async (importOriginal) => {
     return {
         ...(await importOriginal<typeof import("../src/utils")>()),
-        getIncomingFriendRequests: vi.fn((): FriendRequest[] => [
-            { id: 1, fromUser: 2, toUser: 1 },
-        ]),
+        getIncomingFriendRequests: vi.fn(() =>
+            Promise.resolve([{ id: 1, fromUser: 2, toUser: 1 }]),
+        ),
         getAllData: vi.fn((id: number): AllUserData => {
             return {
                 id: id,
@@ -31,18 +30,16 @@ vi.mock("../src/utils", async (importOriginal) => {
                 blockedUsers: [],
             };
         }),
-        getMessagesPreviews: vi.fn(
-            async (id: number): Promise<MessagesPreview[]> => {
-                return await Promise.resolve([
-                    {
-                        friendId: 3,
-                        friendName: "Test Friend",
-                        unreadCount: 1,
-                        latestUnread: "Hello!",
-                    },
-                ]);
-            },
-        ),
+        getMessagesPreviews: vi.fn(async (): Promise<MessagesPreview[]> => {
+            return Promise.resolve([
+                {
+                    friendId: 3,
+                    friendName: "Test Friend",
+                    unreadCount: 1,
+                    latestUnread: "Hello!",
+                },
+            ]);
+        }),
         logout: vi.fn(),
     };
 });
@@ -95,9 +92,8 @@ describe("Dashboard", () => {
 
     it("shows LoggedOut when logged out", () => {
         // mock failed authentication in UserContext
-        // @ts-ignore
-        useUser.mockImplementationOnce(() => {
-            return { user: null };
+        vi.mocked(useUser).mockImplementationOnce(() => {
+            return { user: null, setUser: () => {} };
         });
 
         render(<Dashboard></Dashboard>);

@@ -1,12 +1,5 @@
 import { vi, describe, it, afterAll, afterEach, expect } from "vitest";
-import {
-    Place,
-    PlaceRecData,
-    PlaceRecStats,
-    SavedUser,
-    UserGeohash,
-    WeightAdjustments,
-} from "../src/types";
+import { Place, PlaceRecData, PlaceRecStats, SavedUser } from "../src/types";
 import RecommendationList from "../src/components/RecommendationList";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { addLikedType, updateWeights } from "../src/recommendation-utils";
@@ -18,31 +11,25 @@ vi.mock("../src/recommendation-utils", async (importOriginal) => {
         ...(await importOriginal<
             typeof import("../src/recommendation-utils")
         >()),
-        getNearbyPOIs: vi.fn(
-            async (hash: string) =>
-                await Promise.resolve([
-                    {
-                        displayName: {
-                            text: "Test Place",
-                            languageCode: "en",
-                        },
-                        formattedAddress: "100 Test Dr",
-                        location: {
-                            latitude: 30,
-                            longitude: 30,
-                        },
-                        primaryType: "type",
+        getNearbyPOIs: vi.fn(async () =>
+            Promise.resolve([
+                {
+                    displayName: {
+                        text: "Test Place",
+                        languageCode: "en",
                     },
-                ]),
+                    formattedAddress: "100 Test Dr",
+                    location: {
+                        latitude: 30,
+                        longitude: 30,
+                    },
+                    primaryType: "type",
+                },
+            ]),
         ),
         recommendPlaces: vi.fn(
-            async (
-                places: Place[],
-                currentUser: number,
-                currentLocation: string,
-                activeUsers: UserGeohash[],
-            ): Promise<[PlaceRecStats, PlaceRecData[]]> =>
-                await Promise.resolve([
+            async (places: Place[]): Promise<[PlaceRecStats, PlaceRecData[]]> =>
+                Promise.resolve([
                     {
                         avgFriendCount: 0,
                         avgVisitScore: 0,
@@ -68,13 +55,8 @@ vi.mock("../src/recommendation-utils", async (importOriginal) => {
                     ],
                 ]),
         ),
-        updateWeights: vi.fn(
-            async (adjustments: WeightAdjustments) =>
-                await Promise.resolve(true),
-        ),
-        addLikedType: vi.fn(
-            async (type: string) => await Promise.resolve(true),
-        ),
+        updateWeights: vi.fn(async () => Promise.resolve(true)),
+        addLikedType: vi.fn(async () => Promise.resolve(true)),
     };
 });
 
@@ -181,10 +163,9 @@ describe("Recommendation list", () => {
         const load = screen.getByText(/^Load places$/);
         fireEvent.click(load);
 
-        // click like button (sibling of the place name)
+        // click like button
         const like = await waitFor(() => {
-            const element =
-                screen.getByText(/^Test Place$/).nextElementSibling!;
+            const element = screen.getByLabelText(/^Like$/);
             return element;
         });
 

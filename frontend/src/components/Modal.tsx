@@ -145,6 +145,7 @@ const Modal = ({ userData, setUserData }: ModalProps) => {
                     placeholder="New message"></input>
                 <button
                     className={styles.sendButton}
+                    aria-label="Send"
                     onClick={handleSendClick}>
                     <FontAwesomeIcon
                         icon={faArrowRight}

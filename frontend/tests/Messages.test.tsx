@@ -10,7 +10,7 @@ vi.mock("../src/utils", async (importOriginal) => {
         ...(await importOriginal<typeof import("../src/utils")>()),
         getAllData: vi.fn(async (id: number): Promise<AllUserData> => {
             if (id === 1) {
-                return await Promise.resolve({
+                return Promise.resolve({
                     id: 1,
                     firstName: "Current",
                     lastName: "Data",
@@ -19,7 +19,7 @@ vi.mock("../src/utils", async (importOriginal) => {
                     blockedUsers: [],
                 });
             } else {
-                return await Promise.resolve({
+                return Promise.resolve({
                     id: id,
                     firstName: "Friend",
                     lastName: "Data",
@@ -30,8 +30,8 @@ vi.mock("../src/utils", async (importOriginal) => {
             }
         }),
         getMessagesBetween: vi.fn(
-            async (id: number, cursor: number): Promise<Message[]> =>
-                await Promise.resolve([
+            async (id: number): Promise<Message[]> =>
+                Promise.resolve([
                     {
                         id: 1,
                         fromUser: id,
@@ -44,7 +44,7 @@ vi.mock("../src/utils", async (importOriginal) => {
         ),
         sendMessage: vi.fn(
             async (to: number, text: string): Promise<[boolean, any]> =>
-                await Promise.resolve([
+                Promise.resolve([
                     true,
                     {
                         id: 2,
@@ -71,7 +71,7 @@ vi.mock("../src/contexts/UserContext", async (importOriginal) => {
     };
 });
 
-const mockNavigate = vi.fn((path: string) => {});
+const mockNavigate = vi.fn(() => {});
 
 // mock useNavigate since its real implementation can only be called from inside a Router
 vi.mock("react-router-dom", async (importOriginal) => {
@@ -103,11 +103,11 @@ describe("Messages", () => {
 
         // wait for friends list to render
         const friends = await waitFor(() => {
-            return screen.getAllByText(/^Friend Data$/);
+            return screen.getAllByLabelText(/^View messages with Friend Data$/);
         });
 
         // click on first friend
-        fireEvent.click(friends[0].parentElement!);
+        fireEvent.click(friends[0]);
 
         // should call getMessagesBetween and render mock message
         await waitFor(() => {
@@ -122,11 +122,11 @@ describe("Messages", () => {
 
         // wait for friends list to render
         const friends = await waitFor(() => {
-            return screen.getAllByText(/^Friend Data$/);
+            return screen.getAllByLabelText(/^View messages with Friend Data$/);
         });
 
         // click on first friend box
-        fireEvent.click(friends[0].parentElement!);
+        fireEvent.click(friends[0]);
 
         const testMessage = "Test";
 
@@ -136,7 +136,7 @@ describe("Messages", () => {
         });
         fireEvent.change(textbox, { target: { value: testMessage } });
 
-        const send = textbox.nextElementSibling!;
+        const send = screen.getByLabelText(/^Send$/);
         fireEvent.click(send);
 
         // should call sendMessage
@@ -148,11 +148,11 @@ describe("Messages", () => {
 
         // wait for friends list to render
         const friends = await waitFor(() => {
-            return screen.getAllByText(/^Friend Data$/);
+            return screen.getAllByLabelText(/^View messages with Friend Data$/);
         });
 
         // click on first friend box
-        fireEvent.click(friends[0].parentElement!);
+        fireEvent.click(friends[0]);
 
         const testMessage = "Test";
 
@@ -173,18 +173,18 @@ describe("Messages", () => {
 
         // wait for friends list to render
         const friends = await waitFor(() => {
-            return screen.getAllByText(/^Friend Data$/);
+            return screen.getAllByLabelText(/^View messages with Friend Data$/);
         });
 
         // click on first friend box
-        fireEvent.click(friends[0].parentElement!);
+        fireEvent.click(friends[0]);
 
         // click send without typing in textbox
         const textbox = await waitFor(() => {
             return screen.getByPlaceholderText(/^New message$/);
         });
 
-        const send = textbox.nextElementSibling!;
+        const send = screen.getByLabelText(/^Send$/);
         fireEvent.click(send);
 
         // shouldn't call sendMessage
@@ -203,11 +203,11 @@ describe("Messages", () => {
 
         // wait for friends list to render
         const friends = await waitFor(() => {
-            return screen.getAllByText(/^Friend Data$/);
+            return screen.getAllByLabelText(/^View messages with Friend Data$/);
         });
 
         // click on first friend box
-        fireEvent.click(friends[0].parentElement!);
+        fireEvent.click(friends[0]);
 
         // should load messages
         expect(getMessagesBetween).toHaveBeenCalledOnce();
@@ -215,10 +215,9 @@ describe("Messages", () => {
         const newMessage = "I just sent this!";
 
         // mock a new message having been sent
-        // @ts-ignore
-        getMessagesBetween.mockImplementationOnce(
-            async (id: number, cursor: number): Promise<Message[]> =>
-                await Promise.resolve([
+        vi.mocked(getMessagesBetween).mockImplementationOnce(
+            async (id: number): Promise<Message[]> =>
+                Promise.resolve([
                     {
                         id: 2,
                         fromUser: id,
