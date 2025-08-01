@@ -103,11 +103,11 @@ describe("Messages", () => {
 
         // wait for friends list to render
         const friends = await waitFor(() => {
-            return screen.getAllByText(/^Friend Data$/);
+            return screen.getAllByLabelText(/^View messages with Friend Data$/);
         });
 
         // click on first friend
-        fireEvent.click(friends[0].parentElement!);
+        fireEvent.click(friends[0]);
 
         // should call getMessagesBetween and render mock message
         await waitFor(() => {
@@ -122,11 +122,11 @@ describe("Messages", () => {
 
         // wait for friends list to render
         const friends = await waitFor(() => {
-            return screen.getAllByText(/^Friend Data$/);
+            return screen.getAllByLabelText(/^View messages with Friend Data$/);
         });
 
         // click on first friend box
-        fireEvent.click(friends[0].parentElement!);
+        fireEvent.click(friends[0]);
 
         const testMessage = "Test";
 
@@ -136,7 +136,7 @@ describe("Messages", () => {
         });
         fireEvent.change(textbox, { target: { value: testMessage } });
 
-        const send = textbox.nextElementSibling!;
+        const send = screen.getByLabelText(/^Send$/);
         fireEvent.click(send);
 
         // should call sendMessage
@@ -148,11 +148,11 @@ describe("Messages", () => {
 
         // wait for friends list to render
         const friends = await waitFor(() => {
-            return screen.getAllByText(/^Friend Data$/);
+            return screen.getAllByLabelText(/^View messages with Friend Data$/);
         });
 
         // click on first friend box
-        fireEvent.click(friends[0].parentElement!);
+        fireEvent.click(friends[0]);
 
         const testMessage = "Test";
 
@@ -173,18 +173,18 @@ describe("Messages", () => {
 
         // wait for friends list to render
         const friends = await waitFor(() => {
-            return screen.getAllByText(/^Friend Data$/);
+            return screen.getAllByLabelText(/^View messages with Friend Data$/);
         });
 
         // click on first friend box
-        fireEvent.click(friends[0].parentElement!);
+        fireEvent.click(friends[0]);
 
         // click send without typing in textbox
         const textbox = await waitFor(() => {
             return screen.getByPlaceholderText(/^New message$/);
         });
 
-        const send = textbox.nextElementSibling!;
+        const send = screen.getByLabelText(/^Send$/);
         fireEvent.click(send);
 
         // shouldn't call sendMessage
@@ -203,11 +203,11 @@ describe("Messages", () => {
 
         // wait for friends list to render
         const friends = await waitFor(() => {
-            return screen.getAllByText(/^Friend Data$/);
+            return screen.getAllByLabelText(/^View messages with Friend Data$/);
         });
 
         // click on first friend box
-        fireEvent.click(friends[0].parentElement!);
+        fireEvent.click(friends[0]);
 
         // should load messages
         expect(getMessagesBetween).toHaveBeenCalledOnce();

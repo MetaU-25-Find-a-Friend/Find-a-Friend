@@ -226,7 +226,7 @@ describe("Modal", () => {
         fireEvent.change(textbox, { target: { value: testMessage } });
 
         // click send button
-        const send = textbox.nextElementSibling!;
+        const send = screen.getByLabelText(/^Send$/);
         fireEvent.click(send);
 
         // should try to call sendMessage() with entered text

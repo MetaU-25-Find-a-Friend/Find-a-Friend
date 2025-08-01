@@ -242,6 +242,7 @@ const Messages = () => {
             <button
                 className={styles.sendButton}
                 onClick={handleSendClick}
+                aria-label="Send"
                 disabled={!newMessage.trim()}>
                 <FontAwesomeIcon
                     icon={faArrowRight}
