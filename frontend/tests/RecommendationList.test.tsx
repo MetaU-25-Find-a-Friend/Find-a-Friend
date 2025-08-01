@@ -163,10 +163,9 @@ describe("Recommendation list", () => {
         const load = screen.getByText(/^Load places$/);
         fireEvent.click(load);
 
-        // click like button (sibling of the place name)
+        // click like button
         const like = await waitFor(() => {
-            const element =
-                screen.getByText(/^Test Place$/).nextElementSibling!;
+            const element = screen.getByLabelText(/^Like$/);
             return element;
         });
 
