@@ -7,18 +7,11 @@ import SignupForm from "../src/components/SignupForm";
 vi.mock("../src/utils", async (importOriginal) => {
     return {
         ...(await importOriginal<typeof import("../src/utils")>()),
-        createAccount: vi.fn(
-            (accountData: {
-                firstName: string;
-                lastName: string;
-                email: string;
-                password: string;
-            }) => [true, "ok"],
-        ),
+        createAccount: vi.fn(() => Promise.resolve([true, "ok"])),
     };
 });
 
-const mockNavigate = vi.fn((path: string) => {});
+const mockNavigate = vi.fn(() => {});
 
 // mock useNavigate since its real implementation can only be called from inside a Router
 vi.mock("react-router-dom", async (importOriginal) => {

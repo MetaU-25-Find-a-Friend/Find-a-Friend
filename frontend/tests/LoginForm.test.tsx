@@ -2,19 +2,19 @@ import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import LoginForm from "../src/components/LoginForm";
 import { login } from "../src/utils";
+import { LoginData } from "../src/types";
 
 // mock login to prevent backend fetch and get call data
 vi.mock("../src/utils", async (importOriginal) => {
     return {
         ...(await importOriginal<typeof import("../src/utils")>()),
-        login: vi.fn((enteredData: { email: string; password: string }) => [
-            true,
-            { id: 1, email: enteredData.email },
-        ]),
+        login: vi.fn((enteredData: LoginData) =>
+            Promise.resolve([true, { id: 1, email: enteredData.email }]),
+        ),
     };
 });
 
-const mockSetUser = vi.fn((data: { id: number; email: string }) => {});
+const mockSetUser = vi.fn(() => {});
 
 // mock useUser to prevent storing fake data and get call data
 vi.mock("../src/contexts/UserContext", async (importOriginal) => {
@@ -28,7 +28,7 @@ vi.mock("../src/contexts/UserContext", async (importOriginal) => {
     };
 });
 
-const mockNavigate = vi.fn((path: string) => {});
+const mockNavigate = vi.fn(() => {});
 
 // mock useNavigate since its real implementation can only be called from inside a Router
 vi.mock("react-router-dom", async (importOriginal) => {
