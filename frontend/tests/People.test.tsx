@@ -1,12 +1,7 @@
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import People from "../src/components/People";
 import PeopleProvider from "../src/contexts/PeopleContext";
-import {
-    AllUserData,
-    CachedSuggestedProfile,
-    SavedUser,
-    SuggestedProfile,
-} from "../src/types";
+import { AllUserData, SavedUser, SuggestedProfile } from "../src/types";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
     addConnectionsToCache,
@@ -15,7 +10,7 @@ import {
 } from "../src/people-utils";
 import { blockUser, getAllData, sendFriendRequest } from "../src/utils";
 
-const mockNavigate = vi.fn((path: string) => {});
+const mockNavigate = vi.fn(() => {});
 
 // mock useNavigate since its real implementation can only be called from inside a Router
 vi.mock("react-router-dom", async (importOriginal) => {
@@ -51,15 +46,13 @@ vi.mock("../src/utils", async (importOriginal) => {
         ...(await importOriginal<typeof import("../src/utils")>()),
         getAllData: vi.fn(
             async (id: number): Promise<AllUserData> =>
-                await Promise.resolve({
+                Promise.resolve({
                     id: id,
                     ...mockUserData,
                 }),
         ),
-        sendFriendRequest: vi.fn(
-            async (id: number) => await Promise.resolve(true),
-        ),
-        blockUser: vi.fn(async (id: number) => await Promise.resolve(true)),
+        sendFriendRequest: vi.fn(async () => Promise.resolve(true)),
+        blockUser: vi.fn(async () => Promise.resolve(true)),
     };
 });
 
@@ -69,7 +62,7 @@ vi.mock("../src/people-utils", async (importOriginal) => {
         ...(await importOriginal<typeof import("../src/people-utils")>()),
         getSuggestedPeople: vi.fn(
             async (id: number): Promise<SuggestedProfile[]> =>
-                await Promise.resolve([
+                Promise.resolve([
                     {
                         data: {
                             id: id + 3,
@@ -98,19 +91,8 @@ vi.mock("../src/people-utils", async (importOriginal) => {
                     },
                 ]),
         ),
-        addConnectionsToCache: vi.fn(
-            (
-                cache: Map<number, CachedSuggestedProfile>,
-                currentUser: number,
-                newFriends: Set<number>,
-            ) => {},
-        ),
-        removeConnectionsFromCache: vi.fn(
-            (
-                cache: Map<number, CachedSuggestedProfile>,
-                users: Set<number>,
-            ) => {},
-        ),
+        addConnectionsToCache: vi.fn(() => {}),
+        removeConnectionsFromCache: vi.fn(() => {}),
     };
 });
 
@@ -192,10 +174,9 @@ describe("People page", () => {
         });
 
         // mock the user's friends having changed
-        // @ts-ignore
-        getAllData.mockImplementationOnce(
+        vi.mocked(getAllData).mockImplementationOnce(
             async (id: number): Promise<AllUserData> =>
-                await Promise.resolve({
+                Promise.resolve({
                     id: id,
                     ...mockUserData,
                     friends: [10],
@@ -215,10 +196,9 @@ describe("People page", () => {
 
     it("fetches when the user unblocks someone", async () => {
         // mock the user having blocked someone
-        // @ts-ignore
-        getAllData.mockImplementationOnce(
+        vi.mocked(getAllData).mockImplementationOnce(
             async (id: number): Promise<AllUserData> =>
-                await Promise.resolve({
+                Promise.resolve({
                     id: id,
                     ...mockUserData,
                     blockedUsers: [10],
@@ -282,10 +262,9 @@ describe("People page", () => {
 
     it("does not fetch if the user loses a friend", async () => {
         // mock the user having a friend
-        // @ts-ignore
-        getAllData.mockImplementationOnce(
+        vi.mocked(getAllData).mockImplementationOnce(
             async (id: number): Promise<AllUserData> =>
-                await Promise.resolve({
+                Promise.resolve({
                     id: id,
                     ...mockUserData,
                     friends: [10],
@@ -329,10 +308,9 @@ describe("People page", () => {
         });
 
         // mock the user having blocked someone
-        // @ts-ignore
-        getAllData.mockImplementationOnce(
+        vi.mocked(getAllData).mockImplementationOnce(
             async (id: number): Promise<AllUserData> =>
-                await Promise.resolve({
+                Promise.resolve({
                     id: id,
                     ...mockUserData,
                     blockedUsers: [10],
